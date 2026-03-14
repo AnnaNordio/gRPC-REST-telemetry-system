@@ -1,2 +1,22 @@
+syntax = "proto3";
 
+package sensor;
+
+// Specifica il percorso per il codice generato
+option go_package = "github.com/anna/iot-dual-stack/gen/sensor";
+message TelemetryData {
+  string sensor_id = 1;
+  float temperature = 2;
+  float humidity = 3;
+  int64 timestamp = 4;
+}
+
+message Reply {
+  string status = 1;
+  int64 server_time = 2;
+}
+
+service TelemetryService {
+  rpc SendData(TelemetryData) returns (Reply);
+}
 
