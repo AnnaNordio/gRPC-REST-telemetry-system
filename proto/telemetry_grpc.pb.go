@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             v3.21.12
-// source: sensor.proto
+// source: proto/telemetry.proto
 
-package sensor
+package proto
 
 import (
 	context "context"
@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TelemetryService_SendData_FullMethodName = "/sensor.TelemetryService/SendData"
+	TelemetryService_SendData_FullMethodName = "/telemetry.TelemetryService/SendData"
 )
 
 // TelemetryServiceClient is the client API for TelemetryService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TelemetryServiceClient interface {
-	SendData(ctx context.Context, in *TelemetryData, opts ...grpc.CallOption) (*Reply, error)
+	SendData(ctx context.Context, in *SensorData, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type telemetryServiceClient struct {
@@ -37,9 +37,9 @@ func NewTelemetryServiceClient(cc grpc.ClientConnInterface) TelemetryServiceClie
 	return &telemetryServiceClient{cc}
 }
 
-func (c *telemetryServiceClient) SendData(ctx context.Context, in *TelemetryData, opts ...grpc.CallOption) (*Reply, error) {
+func (c *telemetryServiceClient) SendData(ctx context.Context, in *SensorData, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Reply)
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, TelemetryService_SendData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (c *telemetryServiceClient) SendData(ctx context.Context, in *TelemetryData
 // All implementations must embed UnimplementedTelemetryServiceServer
 // for forward compatibility.
 type TelemetryServiceServer interface {
-	SendData(context.Context, *TelemetryData) (*Reply, error)
+	SendData(context.Context, *SensorData) (*Empty, error)
 	mustEmbedUnimplementedTelemetryServiceServer()
 }
 
@@ -62,7 +62,7 @@ type TelemetryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTelemetryServiceServer struct{}
 
-func (UnimplementedTelemetryServiceServer) SendData(context.Context, *TelemetryData) (*Reply, error) {
+func (UnimplementedTelemetryServiceServer) SendData(context.Context, *SensorData) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendData not implemented")
 }
 func (UnimplementedTelemetryServiceServer) mustEmbedUnimplementedTelemetryServiceServer() {}
@@ -87,7 +87,7 @@ func RegisterTelemetryServiceServer(s grpc.ServiceRegistrar, srv TelemetryServic
 }
 
 func _TelemetryService_SendData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TelemetryData)
+	in := new(SensorData)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func _TelemetryService_SendData_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: TelemetryService_SendData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TelemetryServiceServer).SendData(ctx, req.(*TelemetryData))
+		return srv.(TelemetryServiceServer).SendData(ctx, req.(*SensorData))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -108,7 +108,7 @@ func _TelemetryService_SendData_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TelemetryService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sensor.TelemetryService",
+	ServiceName: "telemetry.TelemetryService",
 	HandlerType: (*TelemetryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -117,5 +117,5 @@ var TelemetryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "sensor.proto",
+	Metadata: "proto/telemetry.proto",
 }

@@ -1,0 +1,17 @@
+syntax = "proto3";
+package telemetry;
+
+message SensorData {
+  string sensor_id = 1;
+  float temperature = 2;
+  float humidity = 3;
+  int64 timestamp = 4;
+}
+
+service TelemetryService {
+  rpc SendData(SensorData) returns (Empty) {}
+}
+
+option go_package = "./proto";
+
+message Empty {}

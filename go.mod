@@ -1,4 +1,4 @@
-module github.com/anna/iot-dual-stack
+module telemetry-bench
 
 go 1.24.0
 
