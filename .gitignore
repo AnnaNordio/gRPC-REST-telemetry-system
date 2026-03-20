@@ -1,4 +1,3 @@
-# --- Frontend (React/Node) ---
 node_modules/
 .pnp/
 .pnp.js
@@ -8,8 +7,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# --- Backend (Go) ---
-# Binari compilati
 *.exe
 *.exe~
 *.dll
@@ -17,20 +14,9 @@ yarn-error.log*
 *.dylib
 bin/
 
-
-# --- gRPC / Protobuf ---
-# Esclude i file generati automaticamente (.pb.go e .pb.gw.go)
-# Nota: in alcuni progetti di tesi si preferisce tenerli, 
-# ma se vuoi che il professore li rigeneri da solo, usa questi:
-*.pb.go
-*_grpc.pb.go
-
-# --- IDE & Sistema ---
 .vscode/
 .idea/
 .DS_Store
 *.swp
 
-# --- Variabili d'ambiente ---
-.env
-.env.local
+*.json
