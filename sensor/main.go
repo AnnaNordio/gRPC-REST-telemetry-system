@@ -45,29 +45,32 @@ func main() {
 
 	// 3. Loop di invio
 	log.Println("Inizio invio dati ogni secondo...")
+
+	var lastLatGrpc float64
+	var lastLatRest float64
 	for {
 		data := &pb.SensorData{
 			SensorId:    "sensor-01",
 			Temperature: 20 + rand.Float32()*10,
 			Humidity:    40 + rand.Float32()*20,
 			Timestamp:   time.Now().UnixMilli(),
+			LatencyRest: lastLatRest,
+        	LatencyGrpc: lastLatGrpc,
 		}
 
-		// Test REST
+		// Latency REST
 		startR := time.Now()
 		sendRest(httpClient, data)
-		latR := time.Since(startR)
-
-		// Test gRPC
+		lastLatRest = float64(time.Since(startR).Microseconds())
+		// Latency gRPC
 		startG := time.Now()
 		_, err := grpcClient.SendData(context.Background(), data)
-		latG := time.Since(startG)
-
+        lastLatGrpc = float64(time.Since(startG).Microseconds())
 		if err != nil {
 			log.Printf("Errore invio gRPC: %v", err)
 		} else {
 			fmt.Printf("[%s] SUCCESS | REST: %v | gRPC: %v\n", 
-				time.Now().Format("15:04:05"), latR, latG)
+				time.Now().Format("15:04:05"), lastLatRest, lastLatGrpc)
 		}
 
 		time.Sleep(1 * time.Second)

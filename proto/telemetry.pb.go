@@ -27,6 +27,8 @@ type SensorData struct {
 	Temperature   float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
 	Humidity      float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	LatencyRest   float64                `protobuf:"fixed64,5,opt,name=latency_rest,json=latencyRest,proto3" json:"latency_rest,omitempty"`
+	LatencyGrpc   float64                `protobuf:"fixed64,6,opt,name=latency_grpc,json=latencyGrpc,proto3" json:"latency_grpc,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -89,6 +91,20 @@ func (x *SensorData) GetTimestamp() int64 {
 	return 0
 }
 
+func (x *SensorData) GetLatencyRest() float64 {
+	if x != nil {
+		return x.LatencyRest
+	}
+	return 0
+}
+
+func (x *SensorData) GetLatencyGrpc() float64 {
+	if x != nil {
+		return x.LatencyGrpc
+	}
+	return 0
+}
+
 type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -129,13 +145,15 @@ var File_proto_telemetry_proto protoreflect.FileDescriptor
 
 const file_proto_telemetry_proto_rawDesc = "" +
 	"\n" +
-	"\x15proto/telemetry.proto\x12\ttelemetry\"\x85\x01\n" +
+	"\x15proto/telemetry.proto\x12\ttelemetry\"\xcb\x01\n" +
 	"\n" +
 	"SensorData\x12\x1b\n" +
 	"\tsensor_id\x18\x01 \x01(\tR\bsensorId\x12 \n" +
 	"\vtemperature\x18\x02 \x01(\x02R\vtemperature\x12\x1a\n" +
 	"\bhumidity\x18\x03 \x01(\x02R\bhumidity\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\"\a\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
+	"\flatency_rest\x18\x05 \x01(\x01R\vlatencyRest\x12!\n" +
+	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\"\a\n" +
 	"\x05Empty2I\n" +
 	"\x10TelemetryService\x125\n" +
 	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00B\tZ\a./protob\x06proto3"
