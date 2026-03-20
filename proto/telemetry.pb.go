@@ -154,9 +154,11 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
 	"\flatency_rest\x18\x05 \x01(\x01R\vlatencyRest\x12!\n" +
 	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\"\a\n" +
-	"\x05Empty2I\n" +
+	"\x05Empty2\x84\x01\n" +
 	"\x10TelemetryService\x125\n" +
-	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00B\tZ\a./protob\x06proto3"
+	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00\x129\n" +
+	"\n" +
+	"StreamData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00(\x01B\tZ\a./protob\x06proto3"
 
 var (
 	file_proto_telemetry_proto_rawDescOnce sync.Once
@@ -177,9 +179,11 @@ var file_proto_telemetry_proto_goTypes = []any{
 }
 var file_proto_telemetry_proto_depIdxs = []int32{
 	0, // 0: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
-	1, // 1: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 1: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
+	1, // 2: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
+	1, // 3: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

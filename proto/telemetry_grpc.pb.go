@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TelemetryService_SendData_FullMethodName = "/telemetry.TelemetryService/SendData"
+	TelemetryService_SendData_FullMethodName   = "/telemetry.TelemetryService/SendData"
+	TelemetryService_StreamData_FullMethodName = "/telemetry.TelemetryService/StreamData"
 )
 
 // TelemetryServiceClient is the client API for TelemetryService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TelemetryServiceClient interface {
 	SendData(ctx context.Context, in *SensorData, opts ...grpc.CallOption) (*Empty, error)
+	StreamData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SensorData, Empty], error)
 }
 
 type telemetryServiceClient struct {
@@ -47,11 +49,25 @@ func (c *telemetryServiceClient) SendData(ctx context.Context, in *SensorData, o
 	return out, nil
 }
 
+func (c *telemetryServiceClient) StreamData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SensorData, Empty], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &TelemetryService_ServiceDesc.Streams[0], TelemetryService_StreamData_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[SensorData, Empty]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TelemetryService_StreamDataClient = grpc.ClientStreamingClient[SensorData, Empty]
+
 // TelemetryServiceServer is the server API for TelemetryService service.
 // All implementations must embed UnimplementedTelemetryServiceServer
 // for forward compatibility.
 type TelemetryServiceServer interface {
 	SendData(context.Context, *SensorData) (*Empty, error)
+	StreamData(grpc.ClientStreamingServer[SensorData, Empty]) error
 	mustEmbedUnimplementedTelemetryServiceServer()
 }
 
@@ -64,6 +80,9 @@ type UnimplementedTelemetryServiceServer struct{}
 
 func (UnimplementedTelemetryServiceServer) SendData(context.Context, *SensorData) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendData not implemented")
+}
+func (UnimplementedTelemetryServiceServer) StreamData(grpc.ClientStreamingServer[SensorData, Empty]) error {
+	return status.Error(codes.Unimplemented, "method StreamData not implemented")
 }
 func (UnimplementedTelemetryServiceServer) mustEmbedUnimplementedTelemetryServiceServer() {}
 func (UnimplementedTelemetryServiceServer) testEmbeddedByValue()                          {}
@@ -104,6 +123,13 @@ func _TelemetryService_SendData_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TelemetryService_StreamData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(TelemetryServiceServer).StreamData(&grpc.GenericServerStream[SensorData, Empty]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TelemetryService_StreamDataServer = grpc.ClientStreamingServer[SensorData, Empty]
+
 // TelemetryService_ServiceDesc is the grpc.ServiceDesc for TelemetryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +142,12 @@ var TelemetryService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TelemetryService_SendData_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamData",
+			Handler:       _TelemetryService_StreamData_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "proto/telemetry.proto",
 }

@@ -63,3 +63,18 @@ async function fetchData() {
 
 
 setInterval(fetchData, 1000);
+
+async function toggleMode() {
+    const isStreaming = document.getElementById('modeToggle').checked;
+    const mode = isStreaming ? "streaming" : "polling";
+    
+    await fetch(`/set-mode?mode=${mode}`, { method: 'POST' });
+
+    chart.data.labels = [];
+    chart.data.datasets[0].data = []; 
+    chart.data.datasets[1].data = []; 
+    chart.update();
+
+    document.getElementById('rest-lat').innerText = "-- µs";
+    document.getElementById('grpc-lat').innerText = "-- µs";
+}

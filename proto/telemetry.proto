@@ -12,6 +12,7 @@ message SensorData {
 
 service TelemetryService {
   rpc SendData(SensorData) returns (Empty) {}
+  rpc StreamData(stream SensorData) returns (Empty) {}
 }
 
 option go_package = "./proto";

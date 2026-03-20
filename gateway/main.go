@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"fmt"
 
 	"google.golang.org/grpc"
 	pb "telemetry-bench/proto"
@@ -13,6 +14,17 @@ import (
 
 type server struct {
 	pb.UnimplementedTelemetryServiceServer
+}
+var currentMode = "polling"
+
+func (s *server) StreamData(stream pb.TelemetryService_StreamDataServer) error {
+    for {
+        in, err := stream.Recv()
+        if err != nil {
+            return err // Fine dello stream
+        }
+        processIncomingData("gRPC-Stream", in.LatencyGrpc)
+    }
 }
 
 func (s *server) SendData(ctx context.Context, in *pb.SensorData) (*pb.Empty, error) {
@@ -46,7 +58,27 @@ func main() {
 		
 		// Usiamo la funzione definita in latency.go
 		response := getDashboardData()
+		fmt.Printf("\r📊 [MEDIE] REST: %.2f µs | gRPC: %.2f µs | Modo: %s   ", 
+            response.AvgRest, response.AvgGrpc, currentMode)
 		json.NewEncoder(w).Encode(response)
+	})
+
+	http.HandleFunc("/set-mode", func(w http.ResponseWriter, r *http.Request) {
+		newMode := r.URL.Query().Get("mode")
+		
+		// Eseguiamo il reset solo se passiamo da una modalità all'altra
+		if newMode != "" && newMode != currentMode {
+			currentMode = newMode
+			
+			// Chiamata alla funzione definita in latency.go
+			resetStats() 
+		}
+		
+		w.WriteHeader(http.StatusOK)
+	})
+
+	http.HandleFunc("/get-mode", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, currentMode)
 	})
 
 	// Servire la dashboard

@@ -54,3 +54,18 @@ func getDashboardData() DashboardResponse {
 		AvgGrpc: avgG,
 	}
 }
+
+func resetStats() {
+    metricsMu.Lock()
+    defer metricsMu.Unlock()
+
+    // Svuota lo storico per pulire il grafico
+    history = []Metric{}
+
+    // Azzera i contatori per ricominciare la media da zero
+    sumRest = 0
+    countRest = 0
+    sumGrpc = 0
+    countGrpc = 0
+
+}
