@@ -6,14 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "telemetry-bench/proto" 
+	pb "telemetry-bench/proto"
 )
 
 const (
@@ -22,69 +21,62 @@ const (
 )
 
 func main() {
-	log.Println("--- Avvio Sensore ---")
+	log.Println("🚀 Avvio Sensore Modulare...")
 
-	// 1. Connessione gRPC (con timeout per non restare appesi)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	conn, err := grpc.DialContext(ctx, gatewayGrpcAddr, 
+	// 1. Setup gRPC (Connessione)
+	conn, err := grpc.Dial(gatewayGrpcAddr, 
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(), // Attende che la connessione sia stabilita
+		grpc.WithBlock(),
 	)
 	if err != nil {
-		log.Fatalf("ERRORE: Gateway gRPC non raggiungibile: %v", err)
+		log.Fatalf("Impossibile connettersi a gRPC: %v", err)
 	}
 	defer conn.Close()
 	grpcClient := pb.NewTelemetryServiceClient(conn)
-	log.Println("Connesso a gRPC Gateway")
 
-	// 2. Client HTTP
+	// 2. Setup HTTP Client
 	httpClient := &http.Client{Timeout: 2 * time.Second}
-	log.Println("Client HTTP pronto")
 
-	// 3. Loop di invio
-	log.Println("Inizio invio dati ogni secondo...")
-
-	var lastLatGrpc float64
-	var lastLatRest float64
 	for {
-		data := &pb.SensorData{
-			SensorId:    "sensor-01",
-			Temperature: 20 + rand.Float32()*10,
-			Humidity:    40 + rand.Float32()*20,
-			Timestamp:   time.Now().UnixMilli(),
-			LatencyRest: lastLatRest,
-        	LatencyGrpc: lastLatGrpc,
-		}
+		data := generateData()
 
-		// Latency REST
+		// --- ESECUZIONE REST ---
+		sizeREST := getJsonSize(data)
 		startR := time.Now()
 		sendRest(httpClient, data)
-		lastLatRest = float64(time.Since(startR).Microseconds())
-		// Latency gRPC
+		latR := float64(time.Since(startR).Microseconds())
+		updateLatency("REST", latR) 
+
+		// --- ESECUZIONE gRPC ---
+		sizeGRPC := getProtoSize(data)
 		startG := time.Now()
 		_, err := grpcClient.SendData(context.Background(), data)
-        lastLatGrpc = float64(time.Since(startG).Microseconds())
+		latG := float64(time.Since(startG).Microseconds())
+		
 		if err != nil {
-			log.Printf("Errore invio gRPC: %v", err)
+			log.Printf("Errore gRPC: %v", err)
 		} else {
-			fmt.Printf("[%s] SUCCESS | REST: %v | gRPC: %v\n", 
-				time.Now().Format("15:04:05"), lastLatRest, lastLatGrpc)
+			updateLatency("gRPC", latG) 
+			fmt.Printf("[%s] REST: %.0fµs (%0.fB) | gRPC: %.0fµs (%0.fB)\n", 
+				time.Now().Format("15:04:05"), latR, sizeREST, latG, sizeGRPC)
 		}
 
 		time.Sleep(1 * time.Second)
 	}
 }
 
+// Funzione di supporto per l'invio REST
 func sendRest(client *http.Client, data *pb.SensorData) {
 	b, _ := json.Marshal(data)
+	
+	// Se hai creato payload.go, qui potresti chiamare:
+	// savePayload("REST", float64(len(b)))
+
 	req, _ := http.NewRequest("POST", gatewayRestAddr, bytes.NewBuffer(b))
 	req.Header.Set("Content-Type", "application/json")
+	
 	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("Errore REST: %v", err)
-		return
+	if err == nil {
+		defer resp.Body.Close()
 	}
-	defer resp.Body.Close()
 }

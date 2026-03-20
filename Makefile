@@ -4,7 +4,7 @@ gen:
 		proto/telemetry.proto
 
 run-gateway:
-	go run gateway/main.go
+	go run ./gateway 
 
 run-sensor:
-	go run sensor/main.go
+	go run ./sensor
