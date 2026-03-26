@@ -61,7 +61,7 @@ const Dashboard = () => {
         data: restPoints.map(d => d.latency_ms),
         borderWidth: 2,
         pointRadius: 1,
-        tension: 0.3,
+        tension: 0,
       },
       {
         label: 'gRPC (µs)',
@@ -70,7 +70,7 @@ const Dashboard = () => {
         data: grpcPoints.map(d => d.latency_ms),
         borderWidth: 2,
         pointRadius: 1,
-        tension: 0.3,
+        tension: 0,
       }
     ]
   };
@@ -100,14 +100,12 @@ const Dashboard = () => {
           <p className="text-gray-500 mt-2 italic">Monitoraggio latenza gRPC vs REST</p>
         </div>
 
-        {/* Modalità Toggle Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 flex flex-col md:flex-row items-center justify-center gap-6">
           <div className="flex items-center gap-3">
             <span className={`text-sm font-bold uppercase tracking-wider ${isStreaming ? 'text-gray-400' : 'text-blue-700'}`}>
               Polling
             </span>
             
-            {/* Switch stilizzato */}
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 
