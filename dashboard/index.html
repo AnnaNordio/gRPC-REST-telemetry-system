@@ -1,50 +1,13 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📡 IoT Telemetry Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; padding: 20px; }
-        .header { text-align: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .value { font-size: 1.5rem; font-weight: bold; }
-        .status-rest { color: #18069b; }
-        .status-grpc { color: #ff5e00; }
-        .chart-container { background: white; padding: 20px; border-radius: 12px; }
-    </style>
-</head>
-<body>
-
-<div class="header">
-    <h1>📡 IoT Telemetry Dashboard</h1>
-</div>
-
-<div class="card" style="margin-bottom: 20px;">
-    <label class="switch">
-        <input type="checkbox" id="modeToggle" onchange="toggleMode()">
-        <span class="slider"></span>
-    </label>
-    <span id="modeLabel" style="font-weight: bold; margin-left: 10px;">Modalità: POLLING</span>
-</div>
-
-<div class="grid">
-    <div class="card">
-        <h3>Average latency REST</h3>
-        <div id="rest-lat" class="value status-rest">-- µs</div>
-    </div>
-    <div class="card">
-        <h3>Average latency gRPC</h3>
-        <div id="grpc-lat" class="value status-grpc">-- µs</div>
-    </div>
-</div>
-
-<div class="chart-container">
-    <canvas id="latencyChart"></canvas>
-</div>
-
-<script src="script.js"></script>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dashboard</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
