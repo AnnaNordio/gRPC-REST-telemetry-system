@@ -26,21 +26,25 @@ ChartJS.register(
 export const LatencyChart = ({ history }) => {
   const recentHistory = history?.slice(-40) || [];
   const chartLabels = recentHistory.map(d => d.timestamp);
+  const COLORS = {
+    rest: '#6d28d9',
+    grpc: '#ea580c'
+    };
 
   const chartData = {
     labels: chartLabels,
     datasets: [
       {
         label: 'REST (µs)',
-        borderColor: '#1e40af',
-        backgroundColor: '#1e40af',
+        borderColor: COLORS.rest,
+        backgroundColor: COLORS.rest,
         data: recentHistory.map(d => d.protocol.includes('REST') ? d.latency_ms : null),
         borderWidth: 2, pointRadius: 2, tension: 0, spanGaps: true,
       },
       {
         label: 'gRPC (µs)',
-        borderColor: '#ea580c',
-        backgroundColor: '#ea580c',
+        borderColor: COLORS.grpc,
+        backgroundColor: COLORS.grpc,
         data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.latency_ms : null),
         borderWidth: 2, pointRadius: 2, tension: 0, spanGaps: true,
       }

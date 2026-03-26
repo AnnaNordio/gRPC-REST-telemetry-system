@@ -56,8 +56,8 @@ const Dashboard = () => {
             value={data.avg_rest} 
             subValue={data.p99_rest} 
             unit="µs"
-            borderClass="border-blue-700" 
-            textColor="text-blue-800" 
+            borderClass="border-violet-800" 
+            textColor="text-violet-800" 
           />
           <StatCard 
             title="gRPC Average Latency" 

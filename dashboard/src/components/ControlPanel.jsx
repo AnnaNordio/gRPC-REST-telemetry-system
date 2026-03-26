@@ -17,7 +17,7 @@ export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeTog
               className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
                 payloadSize === size 
                   ? 'bg-slate-800 text-white border-slate-800 shadow-md' 
-                  : 'bg-white text-slate-400 border-slate-200 hover:border-slate-400'
+                  : 'bg-slate-50 text-slate-400 border-slate-200 hover:border-slate-400'
               }`}
             >
               {size}
@@ -32,10 +32,22 @@ export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeTog
       <div className="flex flex-col items-center gap-3">
         <span className="text-xs font-black uppercase tracking-widest text-slate-600">Transmission Mode</span>
         <div className="flex items-center gap-4 bg-slate-50 px-6 py-3 rounded-full border border-slate-200">
-          <span className={`text-xs font-black uppercase tracking-widest ${!isStreaming ? toggleActiveColor : toggleInactiveColor}`}>Polling</span>
+          <span className={`text-xs font-black uppercase tracking-widest ${!isStreaming ? 'text-blue-900' : toggleInactiveColor}`}>Polling</span>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" checked={isStreaming} onChange={onModeToggle} className="sr-only peer" />
-            <div className="w-14 h-7 bg-slate-200 rounded-full peer peer-checked:bg-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full"></div>
+            <div className={`w-14 h-7 rounded-full relative transition-colors duration-300 
+                ${isStreaming ? 'bg-slate-900' : 'bg-blue-900'} 
+                after:content-[''] 
+                after:absolute 
+                after:top-[2px] 
+                after:left-[2px] 
+                after:bg-white 
+                after:rounded-full 
+                after:h-6 
+                after:w-6 
+                after:transition-all 
+                peer-checked:after:translate-x-[28px]`}>
+            </div>     
           </label>
           <span className={`text-xs font-black uppercase tracking-widest ${isStreaming ? toggleActiveColor : toggleInactiveColor}`}>Streaming</span>
         </div>
