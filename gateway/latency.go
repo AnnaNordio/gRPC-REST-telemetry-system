@@ -2,6 +2,7 @@ package main
 
 import (
 	"time"
+	"sort"
 )
 
 type Metric struct {
@@ -40,18 +41,29 @@ func saveMetric(protocol string, latency float64) {
 }
 
 func getDashboardData() DashboardResponse {
-	metricsMu.Lock()
-	defer metricsMu.Unlock()
+    metricsMu.Lock()
+    defer metricsMu.Unlock()
 
-	avgR, avgG := 0.0, 0.0
-	if countRest > 0 { avgR = sumRest / countRest }
-	if countGrpc > 0 { avgG = sumGrpc / countGrpc }
+    var restLats, grpcLats []float64
+    for _, m := range history {
+        if m.Protocol == "REST" {
+            restLats = append(restLats, m.LatencyMs)
+        } else {
+            grpcLats = append(grpcLats, m.LatencyMs)
+        }
+    }
 
-	return DashboardResponse{
-		History: history,
-		AvgRest: avgR,
-		AvgGrpc: avgG,
-	}
+    avgR, avgG := 0.0, 0.0
+    if countRest > 0 { avgR = sumRest / countRest }
+    if countGrpc > 0 { avgG = sumGrpc / countGrpc }
+
+    return DashboardResponse{
+        History: history,
+        AvgRest: avgR,
+        AvgGrpc: avgG,
+        P99Rest: calculatePercentile(restLats, 0.99),
+        P99Grpc: calculatePercentile(grpcLats, 0.99),
+    }
 }
 
 func resetStats() {
@@ -65,4 +77,18 @@ func resetStats() {
     sumGrpc = 0
     countGrpc = 0
 
+}
+
+func calculatePercentile(latencies []float64, percentile float64) float64 {
+    if len(latencies) == 0 {
+        return 0
+    }
+    // Creiamo una copia per non sporcare i dati originali
+    sorted := make([]float64, len(latencies))
+    copy(sorted, latencies)
+    sort.Float64s(sorted)
+
+    // Calcoliamo l'indice (N * percentile)
+    index := int(float64(len(sorted)-1) * percentile)
+    return sorted[index]
 }

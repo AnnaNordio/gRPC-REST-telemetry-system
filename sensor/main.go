@@ -112,7 +112,6 @@ func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamData
         latG := float64(time.Since(startG).Microseconds())
         data.LatencyGrpc = latG 
         updateLatency("gRPC", latG)
-        fmt.Printf("[STREAMING] gRPC: %7.0f µs\n", latG)
     }
     dataCopy := *data 
     go func(d pb.SensorData) {
@@ -120,7 +119,6 @@ func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamData
         sendRest(client, &d)
         latR := float64(time.Since(startR).Microseconds())
         updateLatency("REST", latR)
-        fmt.Printf("[STREAMING] REST: %7.0f µs\n", latR)
     }(dataCopy)
 }
 

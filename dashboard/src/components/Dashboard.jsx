@@ -104,7 +104,6 @@ const Dashboard = () => {
     <div className="min-h-screen w-full bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto p-4 md:p-8">
         
-        {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-800">
             📡 IoT Telemetry Dashboard
@@ -140,6 +139,7 @@ const Dashboard = () => {
             <div className="text-4xl font-black text-blue-800 mt-2">
               {data.avg_rest ? `${data.avg_rest.toFixed(2)} µs` : '--'}
             </div>
+            <div className="text-sm text-blue-400"><strong>P99:</strong> {data.p99_rest? `${data.p99_rest.toFixed(2)} µs` : '--'}</div>
           </div>
           
           <div className="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-orange-600">
@@ -147,6 +147,7 @@ const Dashboard = () => {
             <div className="text-4xl font-black text-orange-600 mt-2">
               {data.avg_grpc ? `${data.avg_grpc.toFixed(2)} µs` : '--'}
             </div>
+            <div className="text-sm text-orange-400"><strong>P99:</strong> {data.p99_grpc? `${data.p99_grpc.toFixed(2)} µs` : '--'}</div>
           </div>
         </div>
 

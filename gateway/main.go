@@ -56,10 +56,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		
-		// Usiamo la funzione definita in latency.go
 		response := getDashboardData()
-		fmt.Printf("\r📊 [MEDIE] REST: %.2f µs | gRPC: %.2f µs | Modo: %s   ", 
-            response.AvgRest, response.AvgGrpc, currentMode)
 		json.NewEncoder(w).Encode(response)
 	})
 
