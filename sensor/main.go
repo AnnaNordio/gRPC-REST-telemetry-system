@@ -102,24 +102,26 @@ func executePolling(client *http.Client, grpcClient pb.TelemetryServiceClient, d
 
 // --- LOGICA STREAMING ---
 func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamDataClient, data *pb.SensorData) {
-	// REST Streaming (Simulato con goroutine asincrona)
-	fmt.Printf("[STREAMING]")
-	go func(d *pb.SensorData) {
-		startR := time.Now()
-		sendRest(client, d)
-		latR := float64(time.Since(startR).Microseconds())
-		updateLatency("REST", latR)
-		fmt.Printf("REST: %7.0f µs\n", latR)
-	}(data)
-
-	// gRPC Real Streaming (Sullo stream aperto)
-	startG := time.Now()
-	err := stream.Send(data)
-	if err == nil {
-		latG := float64(time.Since(startG).Microseconds())
-		updateLatency("gRPC", latG)
-		fmt.Printf("gRPC: %7.0f µs\n", latG)
-	}
+    startG := time.Now()
+    
+    err := stream.Send(data)
+    
+    if err != nil {
+        log.Printf("❌ Errore INVIO gRPC Stream: %v", err)
+    } else {
+        latG := float64(time.Since(startG).Microseconds())
+        data.LatencyGrpc = latG 
+        updateLatency("gRPC", latG)
+        fmt.Printf("[STREAMING] gRPC: %7.0f µs\n", latG)
+    }
+    dataCopy := *data 
+    go func(d pb.SensorData) {
+        startR := time.Now()
+        sendRest(client, &d)
+        latR := float64(time.Since(startR).Microseconds())
+        updateLatency("REST", latR)
+        fmt.Printf("[STREAMING] REST: %7.0f µs\n", latR)
+    }(dataCopy)
 }
 
 

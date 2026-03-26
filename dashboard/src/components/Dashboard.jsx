@@ -39,7 +39,11 @@ const Dashboard = () => {
     const modeString = newMode ? "streaming" : "polling";
     
     try {
-      await fetch(`/set-mode?mode=${modeString}`, { method: 'POST' });
+      await fetch(`/set-mode?mode=${modeString}`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
       setIsStreaming(newMode);
       setData({ history: [], avg_rest: 0, avg_grpc: 0 });
     } catch (err) {
@@ -47,30 +51,35 @@ const Dashboard = () => {
     }
   };
 
-  const limit = 30;
-  const restPoints = data.history?.filter(d => d.protocol === 'REST').slice(-limit) || [];
-  const grpcPoints = data.history?.filter(d => d.protocol === 'gRPC').slice(-limit) || [];
+  // 1. Prendiamo gli ultimi 40 messaggi dalla history (misti REST e gRPC)
+  const recentHistory = data.history?.slice(-40) || [];
+
+  // 2. Usiamo i timestamp di tutti i messaggi come etichette
+  const chartLabels = recentHistory.map(d => d.timestamp);
 
   const chartData = {
-    labels: grpcPoints.map(d => d.timestamp),
+    labels: chartLabels,
     datasets: [
       {
         label: 'REST (µs)',
-        borderColor: '#1e40af', // Blue 800
+        borderColor: '#1e40af',
         backgroundColor: '#1e40af',
-        data: restPoints.map(d => d.latency_ms),
+        // Se il messaggio è REST metti il valore, altrimenti metti null (non disegna nulla)
+        data: recentHistory.map(d => d.protocol.includes('REST') ? d.latency_ms : null),
         borderWidth: 2,
-        pointRadius: 1,
+        pointRadius: 2,
         tension: 0,
+        spanGaps: true, // FONDAMENTALE: unisce i punti anche se ci sono null in mezzo
       },
       {
         label: 'gRPC (µs)',
-        borderColor: '#ea580c', // Orange 600
+        borderColor: '#ea580c',
         backgroundColor: '#ea580c',
-        data: grpcPoints.map(d => d.latency_ms),
+        data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.latency_ms : null),
         borderWidth: 2,
-        pointRadius: 1,
+        pointRadius: 2,
         tension: 0,
+        spanGaps: true, // FONDAMENTALE: unisce i punti
       }
     ]
   };
@@ -88,6 +97,9 @@ const Dashboard = () => {
     }
   };
 
+  const toggleActiveColor = "text-slate-900"; 
+  const toggleInactiveColor = "text-slate-300";
+
   return (
     <div className="min-h-screen w-full bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto p-4 md:p-8">
@@ -97,12 +109,11 @@ const Dashboard = () => {
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-800">
             📡 IoT Telemetry Dashboard
           </h1>
-          <p className="text-gray-500 mt-2 italic">Monitoraggio latenza gRPC vs REST</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 flex flex-col md:flex-row items-center justify-center gap-6">
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-bold uppercase tracking-wider ${isStreaming ? 'text-gray-400' : 'text-blue-700'}`}>
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8 flex flex-col md:flex-row items-center justify-center gap-6">
+          <div className="flex items-center gap-4 bg-slate-50 px-6 py-3 rounded-full border border-slate-200">
+            <span className={`text-xs font-black uppercase tracking-widest transition-colors ${!isStreaming ? toggleActiveColor : toggleInactiveColor}`}>
               Polling
             </span>
             
@@ -113,15 +124,15 @@ const Dashboard = () => {
                 onChange={toggleMode} 
                 className="sr-only peer" 
               />
-              <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-600"></div>
+              {/* Switch Grigio Scuro / Nero per non confondersi con i dati */}
+              <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-slate-800"></div>
             </label>
 
-            <span className={`text-sm font-bold uppercase tracking-wider ${isStreaming ? 'text-orange-600' : 'text-gray-400'}`}>
+            <span className={`text-xs font-black uppercase tracking-widest transition-colors ${isStreaming ? toggleActiveColor : toggleInactiveColor}`}>
               Streaming
             </span>
           </div>
         </div>
-
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-blue-700">

@@ -23,7 +23,7 @@ func (s *server) StreamData(stream pb.TelemetryService_StreamDataServer) error {
         if err != nil {
             return err // Fine dello stream
         }
-        processIncomingData("gRPC-Stream", in.LatencyGrpc)
+        processIncomingData("gRPC", in.LatencyGrpc)
     }
 }
 
@@ -65,12 +65,8 @@ func main() {
 
 	http.HandleFunc("/set-mode", func(w http.ResponseWriter, r *http.Request) {
 		newMode := r.URL.Query().Get("mode")
-		
-		// Eseguiamo il reset solo se passiamo da una modalità all'altra
 		if newMode != "" && newMode != currentMode {
 			currentMode = newMode
-			
-			// Chiamata alla funzione definita in latency.go
 			resetStats() 
 		}
 		
