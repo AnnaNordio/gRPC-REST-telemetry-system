@@ -1,15 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
-	// Usiamo l'alias 'pb' per il tuo pacchetto proto generato
+	"google.golang.org/protobuf/proto"
 	pb "telemetry-bench/proto"
 )
 
+// generateData crea un oggetto SensorData con dimensioni variabili basate sul parametro size
 func generateData(size string) *pb.SensorData {
 	data := &pb.SensorData{
 		SensorId:    "sensor_1",
@@ -20,13 +22,12 @@ func generateData(size string) *pb.SensorData {
 
 	switch size {
 	case "medium":
-		// strings.Repeat richiede il pacchetto "strings"
 		data.PayloadContent = strings.Repeat("m", 10240) // 10KB
 	case "large":
 		data.PayloadContent = strings.Repeat("l", 102400) // 100KB
 	case "nested":
+		// Genera dati complessi per testare la serializzazione di strutture annidate
 		for i := 0; i < 50; i++ {
-			// strconv richiede il pacchetto "strconv"
 			data.Details = append(data.Details, &pb.NestedDetail{
 				Key:   "attr_" + strconv.Itoa(i),
 				Value: "value_data_point",
@@ -37,9 +38,27 @@ func generateData(size string) *pb.SensorData {
 			})
 		}
 	default:
-		// Caso "small" o default: payload minimo
+		// Caso "small": payload minimo
 		data.PayloadContent = "small_payload"
 	}
 
 	return data
+}
+
+// getJsonSize restituisce la dimensione in byte del payload serializzato in JSON
+func getJsonSize(v interface{}) int {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return 0
+	}
+	return len(b)
+}
+
+// getProtoSize restituisce la dimensione in byte del payload serializzato in Protobuf
+func getProtoSize(m proto.Message) int {
+	b, err := proto.Marshal(m)
+	if err != nil {
+		return 0
+	}
+	return len(b)
 }
