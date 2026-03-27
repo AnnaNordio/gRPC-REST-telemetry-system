@@ -38,14 +38,14 @@ export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeTog
         <div className="flex flex-col gap-3 bg-slate-50 p-4 rounded-3xl border border-slate-100">
           <div className="flex justify-between items-center px-2 mb-2">
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${!isStreaming ? 'text-blue-600' : 'text-slate-300'}`}>
-              Polling
+              Unary (Req-Res)
             </span>
             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isStreaming ? 'text-slate-900' : 'text-slate-300'}`}>
-              Streaming
+              Stream
             </span>
           </div>
           
-          <label className="relative w-full h-14 bg-slate-200 rounded-2xl cursor-pointer p-1 transition-colors duration-300 has-[:checked]:bg-slate-900">
+          <label className="relative w-full h-14 bg-blue-600 rounded-2xl cursor-pointer p-1 transition-colors duration-300 has-[:checked]:bg-slate-900">
             <input 
               type="checkbox" 
               checked={isStreaming} 

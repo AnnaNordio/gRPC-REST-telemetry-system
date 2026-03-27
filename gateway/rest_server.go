@@ -68,7 +68,7 @@ func handleSetMode(w http.ResponseWriter, r *http.Request) {
 		if newMode != currentMode {
 			currentMode = newMode
 			resetStats() // Resetta le metriche quando cambia il paradigma
-			fmt.Printf("🔄 Modalità cambiata in: %s\n", currentMode)
+			fmt.Printf("Modalità cambiata in: %s\n", currentMode)
 		}
 		w.WriteHeader(http.StatusOK)
 	} else {

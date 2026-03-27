@@ -14,7 +14,7 @@ var (
     currentMode = "polling"
     currentSize = "small"
 
-	warmupThreshold = 5
+	warmupThreshold = 4
     grpcCount       = 0
     restCount       = 0
 )

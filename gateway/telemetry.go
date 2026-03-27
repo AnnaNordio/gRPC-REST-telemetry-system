@@ -68,6 +68,7 @@ func resetStats() {
     countSizeRest = 0
     sumSizeGrpc = 0
     countSizeGrpc = 0
+	grpcCount = 0
+    restCount = 0
     
-    fmt.Println("Reset completo: statistiche azzerate.")
 }
