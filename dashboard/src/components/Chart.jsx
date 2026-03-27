@@ -23,7 +23,7 @@ ChartJS.register(
   Legend
 );
 
-export const LatencyChart = ({ history }) => {
+export const Chart = ({ history, measure, unit }) => {
   const recentHistory = history?.slice(-40) || [];
   const chartLabels = recentHistory.map(d => d.timestamp);
   const COLORS = {
@@ -35,14 +35,14 @@ export const LatencyChart = ({ history }) => {
     labels: chartLabels,
     datasets: [
       {
-        label: 'REST (µs)',
+        label: `REST (${unit})`,
         borderColor: COLORS.rest,
         backgroundColor: COLORS.rest,
         data: recentHistory.map(d => d.protocol.includes('REST') ? d.latency_ms : null),
         borderWidth: 2, pointRadius: 2, tension: 0, spanGaps: true,
       },
       {
-        label: 'gRPC (µs)',
+        label: `gRPC (${unit})`,
         borderColor: COLORS.grpc,
         backgroundColor: COLORS.grpc,
         data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.latency_ms : null),
@@ -64,7 +64,7 @@ export const LatencyChart = ({ history }) => {
       },
       y: { 
         beginAtZero: true, 
-        title: { display: true, text: 'Microseconds (µs)' } 
+        title: { display: true, text: `${measure} (${unit})` } 
       }
     }
   };

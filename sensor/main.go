@@ -78,19 +78,12 @@ func main() {
 
 // --- LOGICA STREAMING (Precisione Microsecondi) ---
 func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamDataClient, data *pb.SensorData) {
-	// 1. Genera il timestamp di partenza REALE in microsecondi
-	// Lo usiamo come ID unico per accoppiare i pallini nel grafico
 	startTs := time.Now().UnixMicro()
 	data.Timestamp = startTs
 
-	// 2. Invio gRPC Stream (immediato)
-	// Non calcoliamo la latenza qui, la calcolerà il FE o il Gateway
 	if err := stream.Send(data); err != nil {
 		fmt.Printf("gRPC Send Error: %v\n", err)
 	}
-
-	// 3. Invio REST (Asincrono tramite Goroutine)
-	// Passiamo una copia per non sporcare i dati dello stream
 	go func(d pb.SensorData) {
 		sendRest(client, &d)
 	}(*data)
