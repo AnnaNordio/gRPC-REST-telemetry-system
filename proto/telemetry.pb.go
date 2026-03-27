@@ -26,7 +26,7 @@ type SensorData struct {
 	SensorId      string                 `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3" json:"sensor_id,omitempty"`
 	Temperature   float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
 	Humidity      float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
-	Timestamp     string                 `protobuf:"bytes,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	LatencyRest   float64                `protobuf:"fixed64,5,opt,name=latency_rest,json=latencyRest,proto3" json:"latency_rest,omitempty"`
 	LatencyGrpc   float64                `protobuf:"fixed64,6,opt,name=latency_grpc,json=latencyGrpc,proto3" json:"latency_grpc,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -84,11 +84,11 @@ func (x *SensorData) GetHumidity() float32 {
 	return 0
 }
 
-func (x *SensorData) GetTimestamp() string {
+func (x *SensorData) GetTimestamp() int64 {
 	if x != nil {
 		return x.Timestamp
 	}
-	return ""
+	return 0
 }
 
 func (x *SensorData) GetLatencyRest() float64 {
@@ -109,6 +109,7 @@ type GrpcStats struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AvgLatency    float64                `protobuf:"fixed64,1,opt,name=avg_latency,json=avgLatency,proto3" json:"avg_latency,omitempty"`
 	P99Latency    float64                `protobuf:"fixed64,2,opt,name=p99_latency,json=p99Latency,proto3" json:"p99_latency,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -153,6 +154,13 @@ func (x *GrpcStats) GetAvgLatency() float64 {
 func (x *GrpcStats) GetP99Latency() float64 {
 	if x != nil {
 		return x.P99Latency
+	}
+	return 0
+}
+
+func (x *GrpcStats) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
 	}
 	return 0
 }
@@ -203,14 +211,15 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\tsensor_id\x18\x01 \x01(\tR\bsensorId\x12 \n" +
 	"\vtemperature\x18\x02 \x01(\x02R\vtemperature\x12\x1a\n" +
 	"\bhumidity\x18\x03 \x01(\x02R\bhumidity\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\tR\ttimestamp\x12!\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
 	"\flatency_rest\x18\x05 \x01(\x01R\vlatencyRest\x12!\n" +
-	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\"M\n" +
+	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\"k\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +
 	"\vp99_latency\x18\x02 \x01(\x01R\n" +
-	"p99Latency\"\a\n" +
+	"p99Latency\x12\x1c\n" +
+	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\"\a\n" +
 	"\x05Empty2\xf3\x01\n" +
 	"\x10TelemetryService\x125\n" +
 	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00\x129\n" +

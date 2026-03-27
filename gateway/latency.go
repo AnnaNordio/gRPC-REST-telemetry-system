@@ -6,30 +6,35 @@ import (
 )
 
 
-func saveMetric(protocol string, latency float64, sensorTimestamp string) {
+func saveMetric(protocol string, sensorTimestamp int64) {
+    if sensorTimestamp <= 0 { return }
+
     metricsMu.Lock()
     defer metricsMu.Unlock()
 
-    // Se il sensore non ha mandato il timestamp (es. polling vecchio), usa quello attuale
-    ts := sensorTimestamp
-    if ts == "" {
-        ts = time.Now().Format("15:04:05")
+    if protocol == "gRPC" {
+        lastGlobalGrpcTS = sensorTimestamp
     }
 
+    now := time.Now().UnixMicro()
+    realLatency := float64(now - sensorTimestamp)
+    displayTS := time.UnixMicro(sensorTimestamp).Format("15:04:05.000") 
+
     history = append(history, Metric{
-        Protocol:  protocol,
-        LatencyMs: latency,
-        Timestamp: ts,
+        Protocol:     protocol,
+        LatencyMs:    realLatency, 
+        Timestamp:    displayTS,
+        RawTimestamp: sensorTimestamp,
     })
 
     if len(history) > 200 {
-        history = history[1:len(history)]
+        history = history[1:]
     }
 }
 
 // Calcola tutti i dati aggregati per la Dashboard
 func getDashboardData() DashboardResponse {
-    metricsMu.Lock() // RLock non disponibile con sync.Mutex semplice, usiamo Lock
+    metricsMu.Lock()
     defer metricsMu.Unlock()
 
     var restLats, grpcLats []float64
@@ -46,11 +51,12 @@ func getDashboardData() DashboardResponse {
     }
 
     return DashboardResponse{
-        History: history,
-        AvgRest: safeAvg(sumR, len(restLats)),
-        AvgGrpc: safeAvg(sumG, len(grpcLats)),
-        P99Rest: calculatePercentile(restLats, 0.99),
-        P99Grpc: calculatePercentile(grpcLats, 0.99),
+        History:       history,
+        AvgRest:       safeAvg(sumR, len(restLats)),
+        AvgGrpc:       safeAvg(sumG, len(grpcLats)),
+        P99Rest:       calculatePercentile(restLats, 0.99),
+        P99Grpc:       calculatePercentile(grpcLats, 0.99),
+        LastGrpcTSRaw: lastGlobalGrpcTS,
     }
 }
 

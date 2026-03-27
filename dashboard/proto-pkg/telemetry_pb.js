@@ -122,7 +122,7 @@ proto.telemetry.SensorData.toObject = function(includeInstance, msg) {
     sensorId: jspb.Message.getFieldWithDefault(msg, 1, ""),
     temperature: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
     humidity: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    timestamp: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
     latencyRest: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
     latencyGrpc: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0)
   };
@@ -174,7 +174,7 @@ proto.telemetry.SensorData.deserializeBinaryFromReader = function(msg, reader) {
       msg.setHumidity(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTimestamp(value);
       break;
     case 5:
@@ -236,8 +236,8 @@ proto.telemetry.SensorData.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getTimestamp();
-  if (f.length > 0) {
-    writer.writeString(
+  if (f !== 0) {
+    writer.writeInt64(
       4,
       f
     );
@@ -314,20 +314,20 @@ proto.telemetry.SensorData.prototype.setHumidity = function(value) {
 
 
 /**
- * optional string timestamp = 4;
- * @return {string}
+ * optional int64 timestamp = 4;
+ * @return {number}
  */
 proto.telemetry.SensorData.prototype.getTimestamp = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /**
- * @param {string} value
+ * @param {number} value
  * @return {!proto.telemetry.SensorData} returns this
  */
 proto.telemetry.SensorData.prototype.setTimestamp = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -400,7 +400,8 @@ proto.telemetry.GrpcStats.prototype.toObject = function(opt_includeInstance) {
 proto.telemetry.GrpcStats.toObject = function(includeInstance, msg) {
   var f, obj = {
     avgLatency: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-    p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0)
+    p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -445,6 +446,10 @@ proto.telemetry.GrpcStats.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {number} */ (reader.readDouble());
       msg.setP99Latency(value);
       break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTimestamp(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -488,6 +493,13 @@ proto.telemetry.GrpcStats.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getTimestamp();
+  if (f !== 0) {
+    writer.writeInt64(
+      3,
+      f
+    );
+  }
 };
 
 
@@ -524,6 +536,24 @@ proto.telemetry.GrpcStats.prototype.getP99Latency = function() {
  */
 proto.telemetry.GrpcStats.prototype.setP99Latency = function(value) {
   return jspb.Message.setProto3FloatField(this, 2, value);
+};
+
+
+/**
+ * optional int64 timestamp = 3;
+ * @return {number}
+ */
+proto.telemetry.GrpcStats.prototype.getTimestamp = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.telemetry.GrpcStats} returns this
+ */
+proto.telemetry.GrpcStats.prototype.setTimestamp = function(value) {
+  return jspb.Message.setProto3IntField(this, 3, value);
 };
 
 

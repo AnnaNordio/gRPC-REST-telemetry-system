@@ -1,0 +1,67 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import * as protos from 'my-grpc-protos';
+import { formatTimestamp } from '../utils/formatters';
+
+export const useTelemetry = () => {
+  const [restData, setRestData] = useState({ avg: 0, p99: 0 });
+  const [grpcData, setGrpcData] = useState({ avg: 0, p99: 0 });
+  const [history, setHistory] = useState([]);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [payloadSize, setPayloadSize] = useState('small');
+
+  const grpcClient = useRef(new protos.TelemetryServiceClient('http://localhost:8081'));
+
+  const updateHistory = useCallback((newData) => {
+    const pointsToAdd = Array.isArray(newData) ? newData : [newData];
+    setHistory(prev => {
+      const map = new Map();
+      prev.forEach(p => map.set(`${p.timestamp}-${p.protocol}`, p));
+      pointsToAdd.forEach(p => {
+        if (p.timestamp) map.set(`${p.timestamp}-${p.protocol}`, p);
+      });
+      return Array.from(map.values())
+        .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+        .slice(-150);
+    });
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    // REST
+    try {
+      const response = await fetch('http://localhost:8080/results');
+      const data = await response.json();
+      setRestData({ avg: data.avg_rest, p99: data.p99_rest });
+      if (data.history) updateHistory(data.history);
+    } catch (err) { console.error("REST Error:", err); }
+
+    // gRPC Unary
+    if (!isStreaming) {
+      grpcClient.current.getStats(new protos.Empty(), {}, (err, response) => {
+        if (!err && response) {
+          const g = response.toObject();
+          const ts = g.timestamp || g.Timestamp || 0;
+          const syncTime = formatTimestamp(ts);
+          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency });
+          if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
+        }
+      });
+    }
+  }, [isStreaming, updateHistory]);
+
+  useEffect(() => {
+    let stream = null;
+    if (isStreaming) {
+      stream = grpcClient.current.getGrpcStream(new protos.Empty(), {});
+      stream.on('data', (response) => {
+        const g = response.toObject();
+        const syncTime = formatTimestamp(g.timestamp);
+        setGrpcData({ avg: g.avgLatency, p99: g.p99Latency });
+        if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
+      });
+    }
+    const interval = setInterval(fetchData, 1000);
+    return () => { if (stream) stream.cancel(); clearInterval(interval); };
+  }, [isStreaming, fetchData, updateHistory]);
+
+  return { restData, grpcData, history, isStreaming, setIsStreaming, payloadSize, setPayloadSize, setHistory };
+};
