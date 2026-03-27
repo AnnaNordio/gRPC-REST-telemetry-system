@@ -1,11 +1,10 @@
 package main
 
 import (
-    "fmt"
     "time"
 )
 
-func saveMetric(protocol string, sensorTimestamp int64) {
+/*func saveMetric(protocol string, sensorTimestamp int64) {
     if sensorTimestamp <= 0 { return }
 
     metricsMu.Lock()
@@ -43,18 +42,88 @@ func saveMetric(protocol string, sensorTimestamp int64) {
     }
 }
 
-func savePayload(protocol string, size int) {
+func savePayload(protocol string, pSize int64, hSize int64) {
     metricsMu.Lock()
     defer metricsMu.Unlock()
 
+    // Incremento contatori per il warmup
     if protocol == "REST" {
-        if restCount < warmupThreshold { return }
-        sumSizeRest += float64(size)
+        restCount++
+        if restCount <= warmupThreshold { return }
+    } else {
+        grpcCount++
+        if grpcCount <= warmupThreshold { return }
+    }
+
+    // Aggiungiamo il record alla history per i grafici temporali
+    newMetric := Metric{
+        Protocol:     protocol,
+        PayloadByte:  pSize,
+        OverheadByte: hSize,
+        Timestamp:    string(time.Now().UnixMilli()),
+    }
+    
+    // Manteniamo la history pulita (es. ultimi 100 elementi)
+    if len(history) > 100 {
+        history = history[1:]
+    }
+    history = append(history, newMetric)
+
+    // Aggiorniamo comunque le somme globali per le medie generali
+    if protocol == "REST" {
+        sumSizeRest += float64(pSize)
+        sumOverheadRest += float64(hSize)
         countSizeRest++
     } else {
-        if grpcCount < warmupThreshold { return }
-        sumSizeGrpc += float64(size)
+        sumSizeGrpc += float64(pSize)
+        sumOverheadGrpc += float64(hSize)
         countSizeGrpc++
+    }
+}*/
+
+func saveAllMetrics(protocol string, sensorTS int64, pSize int64, hSize int64) {
+    if sensorTS <= 0 { return }
+
+    metricsMu.Lock()
+    defer metricsMu.Unlock()
+
+    // 1. Warmup Check
+    if protocol == "gRPC" {
+        if grpcCount < warmupThreshold {
+            grpcCount++; return
+        }
+        lastGlobalGrpcTS = sensorTS
+    } else {
+        if restCount < warmupThreshold {
+            restCount++; return
+        }
+    }
+
+    // 2. Calcolo Latenza
+    now := time.Now().UnixMicro()
+    latency := float64(now - sensorTS)
+
+    // 3. Aggiornamento Totali Cumulativi (quelli che usi per le card)
+    if protocol == "REST" {
+        sumSizeRest += float64(pSize)
+        sumOverheadRest += float64(hSize)
+    } else {
+        sumSizeGrpc += float64(pSize)
+        sumOverheadGrpc += float64(hSize)
+    }
+
+    // 4. Aggiunta alla History (UNICA ENTRY)
+    history = append(history, Metric{
+        Protocol:     protocol,
+        LatencyMs:    latency,
+        PayloadByte:  pSize,
+        OverheadByte: hSize,
+        Timestamp:    time.UnixMicro(sensorTS).Format("15:04:05.000"),
+        RawTimestamp: sensorTS,
+    })
+
+    if len(history) > 200 {
+        history = history[1:]
     }
 }
 

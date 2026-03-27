@@ -91,6 +91,8 @@ type SensorData struct {
 	LatencyGrpc    float64                `protobuf:"fixed64,6,opt,name=latency_grpc,json=latencyGrpc,proto3" json:"latency_grpc,omitempty"`
 	PayloadContent string                 `protobuf:"bytes,7,opt,name=payload_content,json=payloadContent,proto3" json:"payload_content,omitempty"`
 	Details        []*NestedDetail        `protobuf:"bytes,8,rep,name=details,proto3" json:"details,omitempty"`
+	PayloadBytes   int64                  `protobuf:"varint,9,opt,name=payload_bytes,json=payloadBytes,proto3" json:"payload_bytes,omitempty"`
+	OverheadBytes  int64                  `protobuf:"varint,10,opt,name=overhead_bytes,json=overheadBytes,proto3" json:"overhead_bytes,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -179,6 +181,20 @@ func (x *SensorData) GetDetails() []*NestedDetail {
 		return x.Details
 	}
 	return nil
+}
+
+func (x *SensorData) GetPayloadBytes() int64 {
+	if x != nil {
+		return x.PayloadBytes
+	}
+	return 0
+}
+
+func (x *SensorData) GetOverheadBytes() int64 {
+	if x != nil {
+		return x.OverheadBytes
+	}
+	return 0
 }
 
 type GrpcStats struct {
@@ -304,7 +320,7 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\bmetadata\x18\x03 \x03(\v2%.telemetry.NestedDetail.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa7\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf3\x02\n" +
 	"\n" +
 	"SensorData\x12\x1b\n" +
 	"\tsensor_id\x18\x01 \x01(\tR\bsensorId\x12 \n" +
@@ -314,7 +330,10 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\flatency_rest\x18\x05 \x01(\x01R\vlatencyRest\x12!\n" +
 	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\x12'\n" +
 	"\x0fpayload_content\x18\a \x01(\tR\x0epayloadContent\x121\n" +
-	"\adetails\x18\b \x03(\v2\x17.telemetry.NestedDetailR\adetails\"\xaa\x01\n" +
+	"\adetails\x18\b \x03(\v2\x17.telemetry.NestedDetailR\adetails\x12#\n" +
+	"\rpayload_bytes\x18\t \x01(\x03R\fpayloadBytes\x12%\n" +
+	"\x0eoverhead_bytes\x18\n" +
+	" \x01(\x03R\roverheadBytes\"\xaa\x01\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +

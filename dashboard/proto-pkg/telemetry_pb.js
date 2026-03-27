@@ -350,7 +350,9 @@ proto.telemetry.SensorData.toObject = function(includeInstance, msg) {
     latencyGrpc: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
     payloadContent: jspb.Message.getFieldWithDefault(msg, 7, ""),
     detailsList: jspb.Message.toObjectList(msg.getDetailsList(),
-    proto.telemetry.NestedDetail.toObject, includeInstance)
+    proto.telemetry.NestedDetail.toObject, includeInstance),
+    payloadBytes: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    overheadBytes: jspb.Message.getFieldWithDefault(msg, 10, 0)
   };
 
   if (includeInstance) {
@@ -419,6 +421,14 @@ proto.telemetry.SensorData.deserializeBinaryFromReader = function(msg, reader) {
       var value = new proto.telemetry.NestedDetail;
       reader.readMessage(value,proto.telemetry.NestedDetail.deserializeBinaryFromReader);
       msg.addDetails(value);
+      break;
+    case 9:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setPayloadBytes(value);
+      break;
+    case 10:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setOverheadBytes(value);
       break;
     default:
       reader.skipField();
@@ -504,6 +514,20 @@ proto.telemetry.SensorData.serializeBinaryToWriter = function(message, writer) {
       8,
       f,
       proto.telemetry.NestedDetail.serializeBinaryToWriter
+    );
+  }
+  f = message.getPayloadBytes();
+  if (f !== 0) {
+    writer.writeInt64(
+      9,
+      f
+    );
+  }
+  f = message.getOverheadBytes();
+  if (f !== 0) {
+    writer.writeInt64(
+      10,
+      f
     );
   }
 };
@@ -670,6 +694,42 @@ proto.telemetry.SensorData.prototype.addDetails = function(opt_value, opt_index)
  */
 proto.telemetry.SensorData.prototype.clearDetailsList = function() {
   return this.setDetailsList([]);
+};
+
+
+/**
+ * optional int64 payload_bytes = 9;
+ * @return {number}
+ */
+proto.telemetry.SensorData.prototype.getPayloadBytes = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.telemetry.SensorData} returns this
+ */
+proto.telemetry.SensorData.prototype.setPayloadBytes = function(value) {
+  return jspb.Message.setProto3IntField(this, 9, value);
+};
+
+
+/**
+ * optional int64 overhead_bytes = 10;
+ * @return {number}
+ */
+proto.telemetry.SensorData.prototype.getOverheadBytes = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.telemetry.SensorData} returns this
+ */
+proto.telemetry.SensorData.prototype.setOverheadBytes = function(value) {
+  return jspb.Message.setProto3IntField(this, 10, value);
 };
 
 

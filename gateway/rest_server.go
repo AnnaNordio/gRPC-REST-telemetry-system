@@ -41,10 +41,14 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 		History []Metric `json:"history"`
 		AvgRest float64  `json:"avg_rest"`
 		P99Rest float64  `json:"p99_rest"`
+		PayloadSize float64 `json:"payload_size"`
+        Overhead    float64    `json:"overhead"`
 	}{
 		History: restOnlyHistory,
 		AvgRest: fullData.AvgRest,
 		P99Rest: fullData.P99Rest,
+		PayloadSize: fullData.TotalRestSize,
+		Overhead: fullData.TotalRestOverhead,
 	}
 
 	json.NewEncoder(w).Encode(response)
@@ -57,7 +61,6 @@ func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	saveMetric("REST", data.Timestamp)
 	w.WriteHeader(http.StatusOK)
 }
 
