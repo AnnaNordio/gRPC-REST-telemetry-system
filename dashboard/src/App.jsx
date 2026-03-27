@@ -62,8 +62,8 @@ const Dashboard = () => {
               {activeTab === 'latency' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <StatCard title="REST Avg" value={restData.avg} subtitle="99th Percentile" subValue={restData.p99} unit="μs" borderClass="border-violet-600" textColor="text-violet-700" />
-                    <StatCard title="gRPC Avg" value={grpcData.avg} subtitle="99th Percentile" subValue={grpcData.p99} unit="μs" borderClass="border-orange-500" textColor="text-orange-600" />
+                    <StatCard title="REST Average Latency" value={restData.avg} subtitle="99th Percentile" subValue={restData.p99} unit="μs" borderClass="border-violet-600" textColor="text-violet-700" />
+                    <StatCard title="gRPC Average Latency" value={grpcData.avg} subtitle="99th Percentile" subValue={grpcData.p99} unit="μs" borderClass="border-orange-500" textColor="text-orange-600" />
                   </div>
                   <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <Chart history={history} measure="Microseconds" unit="μs"/>
