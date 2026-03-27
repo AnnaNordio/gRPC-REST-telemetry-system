@@ -23,7 +23,7 @@ ChartJS.register(
   Legend
 );
 
-export const Chart = ({ history, measure, unit }) => {
+export const LineChart = ({ history, measure, unit }) => {
   const recentHistory = history?.slice(-40) || [];
   const chartLabels = recentHistory.map(d => d.timestamp);
   const COLORS = {

@@ -20,6 +20,7 @@ const (
 	gatewayRestAddr = "http://gateway:8080/telemetry"
 	gatewayGrpcAddr = "gateway:50051"
 	modeEndpoint    = "http://gateway:8080/get-mode"
+	sizeEndpoint    = "http://gateway:8080/get-size"
 )
 
 func main() {
@@ -51,29 +52,33 @@ func main() {
 
 	// 3. Loop di controllo (100ms per benchmark fluido)
 	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
+    defer ticker.Stop()
 
-	var currentMode string = "polling"
-	lastModeCheck := time.Now()
+    var currentMode string = "polling"
+    var currentSize string = "small"
+    lastConfigCheck := time.Now()
 
-	for range ticker.C {
-		if time.Since(lastModeCheck) > time.Second {
-			currentMode = fetchMode(httpClient)
-			lastModeCheck = time.Now()
-		}
+    for range ticker.C {
+        // Ogni secondo aggiorniamo la configurazione dal gateway
+        if time.Since(lastConfigCheck) > time.Second {
+            currentMode = fetchMode(httpClient)
+            currentSize = fetchSize(httpClient)
+            lastConfigCheck = time.Now()
+        }
 
-		data := generateData()
+        // Generiamo il dato in base alla size attuale
+        data := generateData(currentSize)
 
-		if currentMode == "polling" {
-			// Polling: un invio ogni secondo
-			if time.Now().UnixMilli()%1000 < 100 {
-				executePolling(httpClient, grpcClient, data)
-			}
-		} else {
-			// Streaming: invio continuo
-			executeStreaming(httpClient, stream, data)
-		}
-	}
+        if currentMode == "polling" {
+            // Polling: un invio ogni secondo (circa)
+            if time.Now().UnixMilli()%1000 < 100 {
+                executePolling(httpClient, grpcClient, data)
+            }
+        } else {
+            // Streaming: invio continuo ogni 100ms
+            executeStreaming(httpClient, stream, data)
+        }
+    }
 }
 
 // --- LOGICA STREAMING (Precisione Microsecondi) ---
@@ -122,6 +127,16 @@ func fetchMode(client *http.Client) string {
 	resp, err := client.Get(modeEndpoint)
 	if err != nil {
 		return "polling"
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	return string(body)
+}
+
+func fetchSize(client *http.Client) string {
+	resp, err := client.Get(sizeEndpoint)
+	if err != nil {
+		return "small"
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)

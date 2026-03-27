@@ -162,6 +162,7 @@ func main() {
 		newSize := r.URL.Query().Get("size")
 		if newSize != "" && newSize != currentSize {
 			currentSize = newSize
+			resetStats()
 		}
 		w.WriteHeader(http.StatusOK)
 	})

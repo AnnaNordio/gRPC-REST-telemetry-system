@@ -1,6 +1,12 @@
 syntax = "proto3";
 package telemetry;
 
+message NestedDetail {
+    string key = 1;
+    string value = 2;
+    map<string, string> metadata = 3;
+}
+
 message SensorData {
     string sensor_id = 1;
     float temperature = 2;
@@ -8,12 +14,16 @@ message SensorData {
     int64 timestamp = 4;
     double latency_rest = 5; 
     double latency_grpc = 6;
+    string payload_content = 7; 
+    repeated NestedDetail details = 8;
 }
 
 message GrpcStats {
     double avg_latency = 1;
     double p99_latency = 2;
     int64 timestamp = 3;
+    double payload_size = 4; 
+    double overhead = 5;     
 }
 
 message Empty {}
@@ -21,7 +31,6 @@ message Empty {}
 service TelemetryService {
   rpc SendData(SensorData) returns (Empty) {}
   rpc StreamData(stream SensorData) returns (Empty) {}
-  
   rpc GetGrpcStream (Empty) returns (stream GrpcStats);
   rpc GetStats (Empty) returns (GrpcStats);
 }

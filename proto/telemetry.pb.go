@@ -21,21 +21,83 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type SensorData struct {
+type NestedDetail struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SensorId      string                 `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3" json:"sensor_id,omitempty"`
-	Temperature   float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
-	Humidity      float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
-	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	LatencyRest   float64                `protobuf:"fixed64,5,opt,name=latency_rest,json=latencyRest,proto3" json:"latency_rest,omitempty"`
-	LatencyGrpc   float64                `protobuf:"fixed64,6,opt,name=latency_grpc,json=latencyGrpc,proto3" json:"latency_grpc,omitempty"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Metadata      map[string]string      `protobuf:"bytes,3,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *NestedDetail) Reset() {
+	*x = NestedDetail{}
+	mi := &file_proto_telemetry_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NestedDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NestedDetail) ProtoMessage() {}
+
+func (x *NestedDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_telemetry_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NestedDetail.ProtoReflect.Descriptor instead.
+func (*NestedDetail) Descriptor() ([]byte, []int) {
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *NestedDetail) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *NestedDetail) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *NestedDetail) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+type SensorData struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	SensorId       string                 `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3" json:"sensor_id,omitempty"`
+	Temperature    float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
+	Humidity       float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
+	Timestamp      int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	LatencyRest    float64                `protobuf:"fixed64,5,opt,name=latency_rest,json=latencyRest,proto3" json:"latency_rest,omitempty"`
+	LatencyGrpc    float64                `protobuf:"fixed64,6,opt,name=latency_grpc,json=latencyGrpc,proto3" json:"latency_grpc,omitempty"`
+	PayloadContent string                 `protobuf:"bytes,7,opt,name=payload_content,json=payloadContent,proto3" json:"payload_content,omitempty"`
+	Details        []*NestedDetail        `protobuf:"bytes,8,rep,name=details,proto3" json:"details,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
 func (x *SensorData) Reset() {
 	*x = SensorData{}
-	mi := &file_proto_telemetry_proto_msgTypes[0]
+	mi := &file_proto_telemetry_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +109,7 @@ func (x *SensorData) String() string {
 func (*SensorData) ProtoMessage() {}
 
 func (x *SensorData) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_telemetry_proto_msgTypes[0]
+	mi := &file_proto_telemetry_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +122,7 @@ func (x *SensorData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SensorData.ProtoReflect.Descriptor instead.
 func (*SensorData) Descriptor() ([]byte, []int) {
-	return file_proto_telemetry_proto_rawDescGZIP(), []int{0}
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SensorData) GetSensorId() string {
@@ -105,18 +167,34 @@ func (x *SensorData) GetLatencyGrpc() float64 {
 	return 0
 }
 
+func (x *SensorData) GetPayloadContent() string {
+	if x != nil {
+		return x.PayloadContent
+	}
+	return ""
+}
+
+func (x *SensorData) GetDetails() []*NestedDetail {
+	if x != nil {
+		return x.Details
+	}
+	return nil
+}
+
 type GrpcStats struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AvgLatency    float64                `protobuf:"fixed64,1,opt,name=avg_latency,json=avgLatency,proto3" json:"avg_latency,omitempty"`
 	P99Latency    float64                `protobuf:"fixed64,2,opt,name=p99_latency,json=p99Latency,proto3" json:"p99_latency,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	PayloadSize   float64                `protobuf:"fixed64,4,opt,name=payload_size,json=payloadSize,proto3" json:"payload_size,omitempty"`
+	Overhead      float64                `protobuf:"fixed64,5,opt,name=overhead,proto3" json:"overhead,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GrpcStats) Reset() {
 	*x = GrpcStats{}
-	mi := &file_proto_telemetry_proto_msgTypes[1]
+	mi := &file_proto_telemetry_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -128,7 +206,7 @@ func (x *GrpcStats) String() string {
 func (*GrpcStats) ProtoMessage() {}
 
 func (x *GrpcStats) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_telemetry_proto_msgTypes[1]
+	mi := &file_proto_telemetry_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -141,7 +219,7 @@ func (x *GrpcStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrpcStats.ProtoReflect.Descriptor instead.
 func (*GrpcStats) Descriptor() ([]byte, []int) {
-	return file_proto_telemetry_proto_rawDescGZIP(), []int{1}
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GrpcStats) GetAvgLatency() float64 {
@@ -165,6 +243,20 @@ func (x *GrpcStats) GetTimestamp() int64 {
 	return 0
 }
 
+func (x *GrpcStats) GetPayloadSize() float64 {
+	if x != nil {
+		return x.PayloadSize
+	}
+	return 0
+}
+
+func (x *GrpcStats) GetOverhead() float64 {
+	if x != nil {
+		return x.Overhead
+	}
+	return 0
+}
+
 type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -173,7 +265,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_proto_telemetry_proto_msgTypes[2]
+	mi := &file_proto_telemetry_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -185,7 +277,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_telemetry_proto_msgTypes[2]
+	mi := &file_proto_telemetry_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -198,14 +290,21 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_proto_telemetry_proto_rawDescGZIP(), []int{2}
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{3}
 }
 
 var File_proto_telemetry_proto protoreflect.FileDescriptor
 
 const file_proto_telemetry_proto_rawDesc = "" +
 	"\n" +
-	"\x15proto/telemetry.proto\x12\ttelemetry\"\xcb\x01\n" +
+	"\x15proto/telemetry.proto\x12\ttelemetry\"\xb6\x01\n" +
+	"\fNestedDetail\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\x12A\n" +
+	"\bmetadata\x18\x03 \x03(\v2%.telemetry.NestedDetail.MetadataEntryR\bmetadata\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa7\x02\n" +
 	"\n" +
 	"SensorData\x12\x1b\n" +
 	"\tsensor_id\x18\x01 \x01(\tR\bsensorId\x12 \n" +
@@ -213,13 +312,17 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\bhumidity\x18\x03 \x01(\x02R\bhumidity\x12\x1c\n" +
 	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
 	"\flatency_rest\x18\x05 \x01(\x01R\vlatencyRest\x12!\n" +
-	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\"k\n" +
+	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\x12'\n" +
+	"\x0fpayload_content\x18\a \x01(\tR\x0epayloadContent\x121\n" +
+	"\adetails\x18\b \x03(\v2\x17.telemetry.NestedDetailR\adetails\"\xaa\x01\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +
 	"\vp99_latency\x18\x02 \x01(\x01R\n" +
 	"p99Latency\x12\x1c\n" +
-	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\"\a\n" +
+	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12!\n" +
+	"\fpayload_size\x18\x04 \x01(\x01R\vpayloadSize\x12\x1a\n" +
+	"\boverhead\x18\x05 \x01(\x01R\boverhead\"\a\n" +
 	"\x05Empty2\xf3\x01\n" +
 	"\x10TelemetryService\x125\n" +
 	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00\x129\n" +
@@ -240,26 +343,30 @@ func file_proto_telemetry_proto_rawDescGZIP() []byte {
 	return file_proto_telemetry_proto_rawDescData
 }
 
-var file_proto_telemetry_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_proto_telemetry_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_telemetry_proto_goTypes = []any{
-	(*SensorData)(nil), // 0: telemetry.SensorData
-	(*GrpcStats)(nil),  // 1: telemetry.GrpcStats
-	(*Empty)(nil),      // 2: telemetry.Empty
+	(*NestedDetail)(nil), // 0: telemetry.NestedDetail
+	(*SensorData)(nil),   // 1: telemetry.SensorData
+	(*GrpcStats)(nil),    // 2: telemetry.GrpcStats
+	(*Empty)(nil),        // 3: telemetry.Empty
+	nil,                  // 4: telemetry.NestedDetail.MetadataEntry
 }
 var file_proto_telemetry_proto_depIdxs = []int32{
-	0, // 0: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
-	0, // 1: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
-	2, // 2: telemetry.TelemetryService.GetGrpcStream:input_type -> telemetry.Empty
-	2, // 3: telemetry.TelemetryService.GetStats:input_type -> telemetry.Empty
-	2, // 4: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
-	2, // 5: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
-	1, // 6: telemetry.TelemetryService.GetGrpcStream:output_type -> telemetry.GrpcStats
-	1, // 7: telemetry.TelemetryService.GetStats:output_type -> telemetry.GrpcStats
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: telemetry.NestedDetail.metadata:type_name -> telemetry.NestedDetail.MetadataEntry
+	0, // 1: telemetry.SensorData.details:type_name -> telemetry.NestedDetail
+	1, // 2: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
+	1, // 3: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
+	3, // 4: telemetry.TelemetryService.GetGrpcStream:input_type -> telemetry.Empty
+	3, // 5: telemetry.TelemetryService.GetStats:input_type -> telemetry.Empty
+	3, // 6: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
+	3, // 7: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
+	2, // 8: telemetry.TelemetryService.GetGrpcStream:output_type -> telemetry.GrpcStats
+	2, // 9: telemetry.TelemetryService.GetStats:output_type -> telemetry.GrpcStats
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_telemetry_proto_init() }
@@ -273,7 +380,7 @@ func file_proto_telemetry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_telemetry_proto_rawDesc), len(file_proto_telemetry_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
