@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"github.com/gorilla/websocket"	
 	pb "telemetry-bench/proto"
 )
 
@@ -87,8 +88,8 @@ func handleSetSize(w http.ResponseWriter, r *http.Request) {
 	if newSize != "" {
 		if newSize != currentSize {
 			currentSize = newSize
-			resetStats() // Resetta le metriche quando cambia il carico
-			fmt.Printf("📦 Dimensione payload cambiata in: %s\n", currentSize)
+			resetStats() 
+			fmt.Printf("Dimensione payload cambiata in: %s\n", currentSize)
 		}
 		w.WriteHeader(http.StatusOK)
 	} else {
@@ -100,4 +101,22 @@ func handleSetSize(w http.ResponseWriter, r *http.Request) {
 func handleGetSize(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, currentSize)
+}
+
+var upgrader = websocket.Upgrader{
+    CheckOrigin: func(r *http.Request) bool { return true }, 
+}
+
+func handleWS(w http.ResponseWriter, r *http.Request) {
+    conn, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        return
+    }
+    defer conn.Close()
+
+    for {
+        if _, _, err := conn.ReadMessage(); err != nil {
+            break 
+        }
+    }
 }

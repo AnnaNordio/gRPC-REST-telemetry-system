@@ -15,7 +15,11 @@ export default defineConfig({
       '/get-mode': 'http://localhost:8080',
       '/set-size': 'http://localhost:8080', 
       '/get-size': 'http://localhost:8080',
-      '/telemetry': 'http://localhost:8080'
+      '/telemetry': 'http://localhost:8080',
+      '/ws': {
+        target: 'ws://localhost:8080',
+        ws: true,
+      }
     }
   },
   optimizeDeps: {

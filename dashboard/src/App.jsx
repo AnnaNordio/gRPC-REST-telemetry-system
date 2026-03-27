@@ -4,7 +4,6 @@ import { ControlPanel } from './components/ControlPanel';
 import Tabs from './components/Tabs';
 
 // Import dei nuovi sottocomponenti
-import { DashboardHeader } from './components/DashboardHeader';
 import { LatencyView } from './components/views/LatencyView';
 import { PayloadView } from './components/views/PayloadView';
 
@@ -63,12 +62,13 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100">
       <div className="max-w-[1400px] mx-auto p-4 md:p-8">
         
-        {/* Intestazione */}
-        <DashboardHeader payloadSize={payloadSize} networkMode={isStreaming ? "Streaming" : "Polling"} />
-
+        <header className="mb-10">
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+            IoT Telemetry <span className="text-blue-600">Benchmark</span>
+          </h1>
+        </header>
         <div className="flex flex-col lg:flex-row gap-8 items-stretch">
           
-          {/* Barra Laterale dei Controlli */}
           <aside className="lg:w-80 flex-shrink-0">
             <div className="sticky top-8">
               <ControlPanel 
@@ -79,7 +79,6 @@ const Dashboard = () => {
                 isConnected={isConnected}
               />
               
-              {/* Info Box Aggiuntiva opzionale */}
               <div className="mt-6 p-4 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-200">
                 <h4 className="text-xs font-bold uppercase tracking-widest opacity-80">System Status</h4>
                 <div className="flex items-center gap-2 mt-2">
@@ -99,7 +98,6 @@ const Dashboard = () => {
             </div>
           </aside>
 
-          {/* Area Principale dei Contenuti */}
           <main className="flex-1">
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 

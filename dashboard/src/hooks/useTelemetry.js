@@ -7,6 +7,7 @@ export const useTelemetry = () => {
   const [grpcData, setGrpcData] = useState({ avg: 0, p99: 0 });
   const [history, setHistory] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [payloadSize, setPayloadSize] = useState('small');
 
   const grpcClient = useRef(new protos.TelemetryServiceClient('http://localhost:8081'));
@@ -63,5 +64,43 @@ export const useTelemetry = () => {
     return () => { if (stream) stream.cancel(); clearInterval(interval); };
   }, [isStreaming, fetchData, updateHistory]);
 
-  return { restData, grpcData, history, isStreaming, setIsStreaming, payloadSize, setPayloadSize, setHistory };
+  useEffect(() => {
+    let socket;
+    let reconnectTimeout;
+    let isMounted = true; // Per evitare aggiornamenti di stato su componenti smontati
+
+    const connect = () => {
+      const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+      
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = () => {
+        if (isMounted) {
+          setIsConnected(true);
+        }
+      };
+
+      socket.onclose = () => {
+        if (isMounted) {
+          setIsConnected(false);
+          reconnectTimeout = setTimeout(connect, 5000);
+        }
+      };
+
+      socket.onerror = () => {
+        socket.close();
+      };
+    };
+
+    const initialTimeout = setTimeout(connect, 500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(initialTimeout);
+      clearTimeout(reconnectTimeout);
+      if (socket) socket.close();
+    };
+  }, []);
+
+  return { restData, grpcData, history, isStreaming, setIsStreaming, payloadSize, setPayloadSize, setHistory, isConnected };
 };
