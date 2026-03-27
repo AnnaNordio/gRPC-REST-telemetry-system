@@ -1,0 +1,103 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	pb "telemetry-bench/proto"
+)
+
+// Middleware per gestire le richieste Cross-Origin
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Restituisce i dati per la dashboard (filtrando la history per REST)
+func handleResults(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fullData := getDashboardData()
+
+	// Filtriamo la history per mostrare solo i dati REST nel grafico dedicato
+	var restOnlyHistory []Metric
+	for _, m := range fullData.History {
+		if m.Protocol == "REST" {
+			restOnlyHistory = append(restOnlyHistory, m)
+		}
+	}
+
+	response := struct {
+		History []Metric `json:"history"`
+		AvgRest float64  `json:"avg_rest"`
+		P99Rest float64  `json:"p99_rest"`
+	}{
+		History: restOnlyHistory,
+		AvgRest: fullData.AvgRest,
+		P99Rest: fullData.P99Rest,
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+// Riceve i dati dai sensori via REST
+func handleTelemetry(w http.ResponseWriter, r *http.Request) {
+	var data pb.SensorData
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	saveMetric("REST", data.Timestamp)
+	w.WriteHeader(http.StatusOK)
+}
+
+// Cambia la modalità (polling vs streaming)
+func handleSetMode(w http.ResponseWriter, r *http.Request) {
+	newMode := r.URL.Query().Get("mode")
+	if newMode != "" && (newMode == "polling" || newMode == "streaming") {
+		if newMode != currentMode {
+			currentMode = newMode
+			resetStats() // Resetta le metriche quando cambia il paradigma
+			fmt.Printf("🔄 Modalità cambiata in: %s\n", currentMode)
+		}
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Error(w, "Modalità non valida", http.StatusBadRequest)
+	}
+}
+
+// Restituisce la modalità attuale
+func handleGetMode(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, currentMode)
+}
+
+// Cambia la dimensione del payload simulato
+func handleSetSize(w http.ResponseWriter, r *http.Request) {
+	newSize := r.URL.Query().Get("size")
+	if newSize != "" {
+		if newSize != currentSize {
+			currentSize = newSize
+			resetStats() // Resetta le metriche quando cambia il carico
+			fmt.Printf("📦 Dimensione payload cambiata in: %s\n", currentSize)
+		}
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Error(w, "Dimensione non valida", http.StatusBadRequest)
+	}
+}
+
+// Restituisce la dimensione del payload attuale
+func handleGetSize(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, currentSize)
+}

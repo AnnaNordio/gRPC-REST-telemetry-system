@@ -19,7 +19,7 @@ export const LatencyView = ({ restData, grpcData, history, comparison }) => (
         <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Latency Timeline</h3>
       </div>
       
-      <div className="h-[400px]">
+      <div>
         <LineChart history={history} measure="Microseconds" unit="μs"/>
       </div>
     </div>

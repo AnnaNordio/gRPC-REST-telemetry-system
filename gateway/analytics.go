@@ -1,38 +1,7 @@
 package main
 
-import (
-    "sort"
-    "time"
-)
+import "sort"
 
-
-func saveMetric(protocol string, sensorTimestamp int64) {
-    if sensorTimestamp <= 0 { return }
-
-    metricsMu.Lock()
-    defer metricsMu.Unlock()
-
-    if protocol == "gRPC" {
-        lastGlobalGrpcTS = sensorTimestamp
-    }
-
-    now := time.Now().UnixMicro()
-    realLatency := float64(now - sensorTimestamp)
-    displayTS := time.UnixMicro(sensorTimestamp).Format("15:04:05.000") 
-
-    history = append(history, Metric{
-        Protocol:     protocol,
-        LatencyMs:    realLatency, 
-        Timestamp:    displayTS,
-        RawTimestamp: sensorTimestamp,
-    })
-
-    if len(history) > 200 {
-        history = history[1:]
-    }
-}
-
-// Calcola tutti i dati aggregati per la Dashboard
 func getDashboardData() DashboardResponse {
     metricsMu.Lock()
     defer metricsMu.Unlock()
@@ -60,7 +29,6 @@ func getDashboardData() DashboardResponse {
     }
 }
 
-// Calcolo matematico della media
 func safeAvg(sum float64, count int) float64 {
     if count == 0 {
         return 0
@@ -81,11 +49,4 @@ func calculatePercentile(latencies []float64, percentile float64) float64 {
 
     index := int(float64(len(sorted)-1) * percentile)
     return sorted[index]
-}
-
-// Pulisce la history
-func resetStats() {
-    metricsMu.Lock()
-    defer metricsMu.Unlock()
-    history = []Metric{}
 }

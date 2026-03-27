@@ -2,8 +2,8 @@ import React from 'react';
 
 const Tabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { id: 'latency', label: 'Latency Analysis', icon: '⏱️' },
-    { id: 'payload', label: 'Payload Size', icon: '📦' },
+    { id: 'latency', label: 'Latency Analysis' },
+    { id: 'payload', label: 'Payload Size'},
   ];
 
   return (
