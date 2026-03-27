@@ -3,9 +3,12 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    // Necessario per le librerie protobuf
+    'global': 'window',
+  },
   server: {
-    port: 3000, // Imposta la porta del frontend a 3000
-    strictPort: true,
+    port: 3000,
     proxy: {
       '/results': 'http://localhost:8080',
       '/set-mode': 'http://localhost:8080',
@@ -14,5 +17,8 @@ export default defineConfig({
       '/get-size': 'http://localhost:8080',
       '/telemetry': 'http://localhost:8080'
     }
+  },
+  optimizeDeps: {
+    include: ['my-grpc-protos']
   }
 })

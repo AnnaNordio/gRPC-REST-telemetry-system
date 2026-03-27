@@ -18,14 +18,14 @@ export const StatCard = ({
       </h3>
       
       <div className={`text-4xl font-black ${textColor} mt-2`}>
-        {formatNum(value)}
+        {formatNum(value)!=0 ? formatNum(value) : '--'}
         <span className="text-lg ml-1 font-medium opacity-60">{unit}</span>
       </div>
       
       {subtitle && (
         <div className={`text-sm opacity-70 ${textColor} mt-1`}>
           <span className="font-bold">{subtitle}</span>
-          {subValue !== undefined && `: ${formatNum(subValue)} ${unit}`}
+          {subValue !== undefined && `: ${formatNum(subValue)!=0 ? formatNum(subValue) : '--'} ${unit}`}
         </div>
       )}
     </div>

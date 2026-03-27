@@ -5,16 +5,24 @@ message SensorData {
     string sensor_id = 1;
     float temperature = 2;
     float humidity = 3;
-    int64 timestamp = 4;
+    string timestamp = 4;
     double latency_rest = 5; 
     double latency_grpc = 6;
 }
 
+message GrpcStats {
+    double avg_latency = 1;
+    double p99_latency = 2;
+}
+
+message Empty {}
+
 service TelemetryService {
   rpc SendData(SensorData) returns (Empty) {}
   rpc StreamData(stream SensorData) returns (Empty) {}
+  
+  rpc GetGrpcStream (Empty) returns (stream GrpcStats);
+  rpc GetStats (Empty) returns (GrpcStats);
 }
 
 option go_package = "./proto";
-
-message Empty {}

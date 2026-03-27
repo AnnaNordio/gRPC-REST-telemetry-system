@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  gateway:
+    build:
+      context: .
+      target: gateway
+    ports:
+      - "50051:50051"
+      - "8080:8080"
+    networks:
+      - telemetry-net
+
+  sensor:
+    build:
+      context: .
+      target: sensor
+    depends_on:
+      - gateway
+    networks:
+      - telemetry-net
+
+  envoy:
+    image: envoyproxy/envoy:v1.22.0
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8081:8081"
+    networks:
+      - telemetry-net
+
+networks:
+  telemetry-net:
+    driver: bridge

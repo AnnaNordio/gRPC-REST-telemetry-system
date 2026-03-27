@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	gatewayRestAddr = "http://localhost:8080/telemetry"
-	gatewayGrpcAddr = "localhost:50051"
-	modeEndpoint    = "http://localhost:8080/get-mode"
+	gatewayRestAddr = "http://gateway:8080/telemetry"
+	gatewayGrpcAddr = "gateway:50051"
+	modeEndpoint    = "http://gateway:8080/get-mode"
 )
 
 func main() {
@@ -52,7 +52,7 @@ func main() {
 	}
 
 	// 3. Loop di controllo e invio
-	ticker := time.NewTicker(10 * time.Millisecond) // Risoluzione 10ms
+	ticker := time.NewTicker(100 * time.Millisecond) // Risoluzione 10ms
 	defer ticker.Stop()
 
 	var currentMode string = "polling"
@@ -100,26 +100,26 @@ func executePolling(client *http.Client, grpcClient pb.TelemetryServiceClient, d
 	
 }
 
-// --- LOGICA STREAMING ---
 func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamDataClient, data *pb.SensorData) {
+    // Genera il timestamp UNIFICATO qui
+    ts := time.Now().Format("15:04:05.000")
+    data.Timestamp = ts 
+
     startG := time.Now()
-    
-    err := stream.Send(data)
-    
-    if err != nil {
-        log.Printf("❌ Errore INVIO gRPC Stream: %v", err)
-    } else {
-        latG := float64(time.Since(startG).Microseconds())
-        data.LatencyGrpc = latG 
-        updateLatency("gRPC", latG)
-    }
-    dataCopy := *data 
+    _ = stream.Send(data)
+    latG := float64(time.Since(startG).Microseconds())
+    data.LatencyGrpc = latG // Manda anche il valore calcolato
+    fmt.Printf("[STREAM] gRPC: %7.0f µs | ", latG)
+
+    // 2. Invio REST (asincrono ma con lo STESSO timestamp)
     go func(d pb.SensorData) {
         startR := time.Now()
-        sendRest(client, &d)
+        // Aggiorniamo la latenza REST specifica per questa chiamata
+        sendRest(client, &d) 
         latR := float64(time.Since(startR).Microseconds())
-        updateLatency("REST", latR)
-    }(dataCopy)
+        // Nota: Qui il timestamp è quello creato sopra (ts)
+        fmt.Printf("REST: %7.0f µs\n", latR)
+    }(*data)
 }
 
 
