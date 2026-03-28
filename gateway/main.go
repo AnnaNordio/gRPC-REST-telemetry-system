@@ -29,6 +29,7 @@ func main() {
 	mux.HandleFunc("/get-mode", handleGetMode)
 	mux.HandleFunc("/set-size", handleSetSize)
 	mux.HandleFunc("/get-size", handleGetSize)
+    mux.HandleFunc("/reset", handleReset)
 	mux.HandleFunc("/ws", handleWS)    
 	
     fs := http.FileServer(http.Dir("dashboard"))

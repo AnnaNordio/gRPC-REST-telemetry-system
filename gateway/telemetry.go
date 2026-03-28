@@ -31,20 +31,11 @@ func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize i
     metricsMu.Lock()
     defer metricsMu.Unlock()
 
-    // 1. Logica di Warmup
     if protocol == "gRPC" {
-        if grpcCount < warmupThreshold {
-            grpcCount++
-            return
-        }
         lastGlobalGrpcTS = data.Timestamp
         totalPayloadGrpc += pSize
         totalOverheadGrpc += hSize
     } else {
-        if restCount < warmupThreshold {
-            restCount++
-            return
-        }
         totalPayloadRest += pSize
         totalOverheadRest += hSize
     }
@@ -76,6 +67,4 @@ func resetStats() {
     totalOverheadRest = 0
     totalPayloadGrpc = 0
     totalOverheadGrpc = 0
-	grpcCount = 0
-    restCount = 0
 }

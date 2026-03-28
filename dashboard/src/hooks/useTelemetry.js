@@ -103,5 +103,24 @@ export const useTelemetry = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const resetBackendAndLocal = async () => {
+      try {
+        // Avvisa il backend di resettare le statistiche globali
+        await fetch('http://localhost:8080/reset', { method: 'POST' });
+        console.log("Statistiche backend resettate");
+        
+        // Resetta lo stato locale per partire da un grafico pulito
+        setHistory([]);
+        setRestData({ avg: 0, p99: 0 });
+        setGrpcData({ avg: 0, p99: 0 });
+      } catch (err) {
+        console.error("Errore durante il reset iniziale:", err);
+      }
+    };
+
+    resetBackendAndLocal();
+  }, []);
+
   return { restData, grpcData, history, isStreaming, setIsStreaming, payloadSize, setPayloadSize, setHistory, isConnected };
 };

@@ -124,3 +124,14 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
         }
     }
 }
+
+func handleReset(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Metodo non consentito", http.StatusMethodNotAllowed)
+        return
+    }
+    
+    resetStats() 
+    fmt.Println("Statistiche resettate su richiesta del client")
+    w.WriteHeader(http.StatusOK)
+}

@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Il tuo reset personalizzato sotto */
 html, body, #root {
   margin: 0;
   padding: 0;
