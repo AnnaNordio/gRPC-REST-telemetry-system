@@ -1,11 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
   define: {
-    // Necessario per le librerie protobuf
+    // Indispensabile per evitare "global is not defined" nei pacchetti google-protobuf
     'global': 'window',
+  },
+  resolve: {
+    alias: {
+      // @ punta alla tua cartella src per comodità
+      '@': path.resolve(__dirname, './src'),
+      // Mappa il nome che usi nell'import al bundle generato da Webpack
+      // Assicurati che il percorso sia corretto rispetto a dove si trova questo file
+      'telemetry-proto-bundle': path.resolve(__dirname, './proto-pkg/dist/index.js'),
+    },
   },
   server: {
     port: 3000,
@@ -23,6 +33,7 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['my-grpc-protos']
+    // Forza Vite a pre-ottimizzare il bundle per una maggiore velocità di caricamento
+    include: ['telemetry-proto-bundle']
   }
 })

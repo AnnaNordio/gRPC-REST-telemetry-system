@@ -15,7 +15,6 @@ export const StatCard = ({
   };
 
   const hasValue = (val) => val !== undefined && val !== null && !isNaN(parseFloat(val));
-  console.log(unit)
   return (
     <div className={`relative bg-white p-6 rounded-2xl shadow-sm border-l-[10px] ${borderClass} transition-all hover:shadow-md overflow-hidden`}>
       

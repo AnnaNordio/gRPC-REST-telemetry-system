@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import * as protos from 'my-grpc-protos';
+import * as protos from 'telemetry-proto-bundle';
 import { formatTimestamp } from '../utils/formatters';
 
 export const useTelemetry = () => {
