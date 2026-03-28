@@ -14,12 +14,32 @@ type telemetryServer struct {
 
 func (s *telemetryServer) StreamData(stream pb.TelemetryService_StreamDataServer) error {
     md, _ := metadata.FromIncomingContext(stream.Context())
+    
+    // Calcoliamo l'overhead iniziale (Headers/Metadata)
+    initialHeaderSize := calculateGRPCOverhead(md)
+    
+    isFirstMessage := true
+
     for {
         in, err := stream.Recv()
         if err != nil {
             return err
         }
-        SaveGrpcMetrics(in, md)
+
+        var currentOverhead int64
+        if isFirstMessage {
+            // Primo messaggio: Headers + Frame gRPC (14)
+            currentOverhead = initialHeaderSize + 14
+            isFirstMessage = false
+        } else {
+            // Messaggi successivi: SOLO il frame gRPC (14)
+            currentOverhead = 14
+        }
+
+        pSize := int64(getProtoSize(in))
+        
+        // Invia il peso del SINGOLO evento
+        processAndStoreMetrics("gRPC", in, pSize, currentOverhead)
     }
 }
 
