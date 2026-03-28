@@ -26,23 +26,24 @@ export const GroupedBarChart = ({ restSize, restOverhead, grpcSize, grpcOverhead
   };
 
   const chartData = {
-    // Sull'asse X confrontiamo i due protocolli
-    labels: ['REST (JSON)', 'gRPC (Proto)'],
+    // Sull'asse X ora definiamo cosa stiamo guardando
+    labels: ['Payload Size', 'Overhead Size'],
     datasets: [
       {
-        label: `Payload Netto (${unit})`,
-        // Colore pieno ma leggermente opaco per il dato "puro"
-        backgroundColor: [COLORS.rest + '88', COLORS.grpc + '88'],
-        borderColor: [COLORS.rest, COLORS.grpc],
+        label: 'REST (JSON)',
+        backgroundColor: COLORS.rest, // Colore fisso viola
+        borderColor: COLORS.rest,
         borderWidth: 1,
-        // Prendiamo i dati reali passati dalle props
-        data: [restSize || 0, grpcSize || 0],
+        // Dati per REST: [payload, overhead]
+        data: [restSize || 0, restOverhead || 0],
       },
       {
-        label: `Overhead (${unit})`, // L'overhead spesso è in Byte, adatta se necessario
-        // Colore solido e acceso per evidenziare lo "spreco"
-        backgroundColor: [COLORS.rest, COLORS.grpc],
-        data: [restOverhead || 0, grpcOverhead || 0],
+        label: 'gRPC (Proto)',
+        backgroundColor: COLORS.grpc, // Colore fisso arancione
+        borderColor: COLORS.grpc,
+        borderWidth: 1,
+        // Dati per gRPC: [payload, overhead]
+        data: [grpcSize || 0, grpcOverhead || 0],
       }
     ]
   };
@@ -61,7 +62,7 @@ export const GroupedBarChart = ({ restSize, restOverhead, grpcSize, grpcOverhead
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: 'Size / Overhead' },
+        title: { display: true, text: 'Kilobyte (KB)' },
       }
     }
   };

@@ -55,13 +55,12 @@ export const useTelemetry = () => {
       stream = grpcClient.current.getGrpcStream(new protos.Empty(), {});
       stream.on('data', (response) => {
         const g = response.toObject();
-        console.log("gRPC Stream Data:", g);
         const syncTime = formatTimestamp(g.timestamp);
         setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead });
         if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
       });
     }
-    const interval = setInterval(fetchData, 1000);
+    const interval = setInterval(fetchData, 500);
     return () => { if (stream) stream.cancel(); clearInterval(interval); };
   }, [isStreaming, fetchData, updateHistory]);
 

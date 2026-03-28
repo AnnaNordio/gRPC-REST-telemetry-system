@@ -7,8 +7,6 @@ import Tabs from './components/Tabs';
 import { LatencyView } from './components/views/LatencyView';
 import { PayloadView } from './components/views/PayloadView';
 
-import { getComparison } from './utils/benchmarkUtils'; 
-
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('latency');
 
@@ -23,13 +21,6 @@ const Dashboard = () => {
     setHistory, 
     isConnected 
   } = useTelemetry();
-
-  // Calcolo delle performance per i due tab
-  const latencyComp = getComparison(restData.avg, grpcData.avg, 'latency');
-  
-  const restTotalSize = restData.size + (restData.overhead / 1024);
-  const grpcTotalSize = grpcData.size + (grpcData.overhead / 1024);
-  const sizeComp = getComparison(restTotalSize, grpcTotalSize, 'size');
 
   // --- HANDLERS ---
   const handleModeToggle = async () => {
@@ -107,13 +98,11 @@ const Dashboard = () => {
                   restData={restData} 
                   grpcData={grpcData} 
                   history={history} 
-                  comparison={latencyComp} 
                 />
               ) : (
                 <PayloadView 
                   restData={restData} 
                   grpcData={grpcData} 
-                  sizeComp={sizeComp} 
                 />
               )}
             </div>
