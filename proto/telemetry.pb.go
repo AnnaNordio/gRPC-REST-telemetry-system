@@ -82,15 +82,16 @@ func (x *NestedDetail) GetMetadata() map[string]string {
 }
 
 type SensorData struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	SensorId       string                 `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3" json:"sensor_id,omitempty"`
-	Temperature    float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
-	Humidity       float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
-	Timestamp      int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	PayloadContent string                 `protobuf:"bytes,5,opt,name=payload_content,json=payloadContent,proto3" json:"payload_content,omitempty"`
-	Details        []*NestedDetail        `protobuf:"bytes,6,rep,name=details,proto3" json:"details,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	SensorId        string                 `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3" json:"sensor_id,omitempty"`
+	Temperature     float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
+	Humidity        float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
+	Timestamp       int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Tags            []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`
+	Details         []*NestedDetail        `protobuf:"bytes,6,rep,name=details,proto3" json:"details,omitempty"`
+	ReadingsHistory map[string]float32     `protobuf:"bytes,7,rep,name=readings_history,json=readingsHistory,proto3" json:"readings_history,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed32,2,opt,name=value"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SensorData) Reset() {
@@ -151,16 +152,23 @@ func (x *SensorData) GetTimestamp() int64 {
 	return 0
 }
 
-func (x *SensorData) GetPayloadContent() string {
+func (x *SensorData) GetTags() []string {
 	if x != nil {
-		return x.PayloadContent
+		return x.Tags
 	}
-	return ""
+	return nil
 }
 
 func (x *SensorData) GetDetails() []*NestedDetail {
 	if x != nil {
 		return x.Details
+	}
+	return nil
+}
+
+func (x *SensorData) GetReadingsHistory() map[string]float32 {
+	if x != nil {
+		return x.ReadingsHistory
 	}
 	return nil
 }
@@ -288,15 +296,19 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\bmetadata\x18\x03 \x03(\v2%.telemetry.NestedDetail.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe1\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe7\x02\n" +
 	"\n" +
 	"SensorData\x12\x1b\n" +
 	"\tsensor_id\x18\x01 \x01(\tR\bsensorId\x12 \n" +
 	"\vtemperature\x18\x02 \x01(\x02R\vtemperature\x12\x1a\n" +
 	"\bhumidity\x18\x03 \x01(\x02R\bhumidity\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12'\n" +
-	"\x0fpayload_content\x18\x05 \x01(\tR\x0epayloadContent\x121\n" +
-	"\adetails\x18\x06 \x03(\v2\x17.telemetry.NestedDetailR\adetails\"\xaa\x01\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12\x12\n" +
+	"\x04tags\x18\x05 \x03(\tR\x04tags\x121\n" +
+	"\adetails\x18\x06 \x03(\v2\x17.telemetry.NestedDetailR\adetails\x12U\n" +
+	"\x10readings_history\x18\a \x03(\v2*.telemetry.SensorData.ReadingsHistoryEntryR\x0freadingsHistory\x1aB\n" +
+	"\x14ReadingsHistoryEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01\"\xaa\x01\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +
@@ -325,30 +337,32 @@ func file_proto_telemetry_proto_rawDescGZIP() []byte {
 	return file_proto_telemetry_proto_rawDescData
 }
 
-var file_proto_telemetry_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_telemetry_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_telemetry_proto_goTypes = []any{
 	(*NestedDetail)(nil), // 0: telemetry.NestedDetail
 	(*SensorData)(nil),   // 1: telemetry.SensorData
 	(*GrpcStats)(nil),    // 2: telemetry.GrpcStats
 	(*Empty)(nil),        // 3: telemetry.Empty
 	nil,                  // 4: telemetry.NestedDetail.MetadataEntry
+	nil,                  // 5: telemetry.SensorData.ReadingsHistoryEntry
 }
 var file_proto_telemetry_proto_depIdxs = []int32{
 	4, // 0: telemetry.NestedDetail.metadata:type_name -> telemetry.NestedDetail.MetadataEntry
 	0, // 1: telemetry.SensorData.details:type_name -> telemetry.NestedDetail
-	1, // 2: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
-	1, // 3: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
-	3, // 4: telemetry.TelemetryService.GetGrpcStream:input_type -> telemetry.Empty
-	3, // 5: telemetry.TelemetryService.GetStats:input_type -> telemetry.Empty
-	3, // 6: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
-	3, // 7: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
-	2, // 8: telemetry.TelemetryService.GetGrpcStream:output_type -> telemetry.GrpcStats
-	2, // 9: telemetry.TelemetryService.GetStats:output_type -> telemetry.GrpcStats
-	6, // [6:10] is the sub-list for method output_type
-	2, // [2:6] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	5, // 2: telemetry.SensorData.readings_history:type_name -> telemetry.SensorData.ReadingsHistoryEntry
+	1, // 3: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
+	1, // 4: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
+	3, // 5: telemetry.TelemetryService.GetGrpcStream:input_type -> telemetry.Empty
+	3, // 6: telemetry.TelemetryService.GetStats:input_type -> telemetry.Empty
+	3, // 7: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
+	3, // 8: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
+	2, // 9: telemetry.TelemetryService.GetGrpcStream:output_type -> telemetry.GrpcStats
+	2, // 10: telemetry.TelemetryService.GetStats:output_type -> telemetry.GrpcStats
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_telemetry_proto_init() }
@@ -362,7 +376,7 @@ func file_proto_telemetry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_telemetry_proto_rawDesc), len(file_proto_telemetry_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

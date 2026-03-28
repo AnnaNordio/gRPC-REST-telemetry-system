@@ -309,7 +309,7 @@ proto.telemetry.NestedDetail.prototype.clearMetadataMap = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.telemetry.SensorData.repeatedFields_ = [6];
+proto.telemetry.SensorData.repeatedFields_ = [5,6];
 
 
 
@@ -346,9 +346,10 @@ proto.telemetry.SensorData.toObject = function(includeInstance, msg) {
     temperature: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
     humidity: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
     timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    payloadContent: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    tagsList: (f = jspb.Message.getRepeatedField(msg, 5)) == null ? undefined : f,
     detailsList: jspb.Message.toObjectList(msg.getDetailsList(),
-    proto.telemetry.NestedDetail.toObject, includeInstance)
+    proto.telemetry.NestedDetail.toObject, includeInstance),
+    readingsHistoryMap: (f = msg.getReadingsHistoryMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -403,12 +404,18 @@ proto.telemetry.SensorData.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 5:
       var value = /** @type {string} */ (reader.readString());
-      msg.setPayloadContent(value);
+      msg.addTags(value);
       break;
     case 6:
       var value = new proto.telemetry.NestedDetail;
       reader.readMessage(value,proto.telemetry.NestedDetail.deserializeBinaryFromReader);
       msg.addDetails(value);
+      break;
+    case 7:
+      var value = msg.getReadingsHistoryMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readFloat, null, "", 0.0);
+         });
       break;
     default:
       reader.skipField();
@@ -467,9 +474,9 @@ proto.telemetry.SensorData.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getPayloadContent();
+  f = message.getTagsList();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeRepeatedString(
       5,
       f
     );
@@ -481,6 +488,10 @@ proto.telemetry.SensorData.serializeBinaryToWriter = function(message, writer) {
       f,
       proto.telemetry.NestedDetail.serializeBinaryToWriter
     );
+  }
+  f = message.getReadingsHistoryMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(7, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeFloat);
   }
 };
 
@@ -558,20 +569,39 @@ proto.telemetry.SensorData.prototype.setTimestamp = function(value) {
 
 
 /**
- * optional string payload_content = 5;
- * @return {string}
+ * repeated string tags = 5;
+ * @return {!Array<string>}
  */
-proto.telemetry.SensorData.prototype.getPayloadContent = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+proto.telemetry.SensorData.prototype.getTagsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 5));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.telemetry.SensorData} returns this
+ */
+proto.telemetry.SensorData.prototype.setTagsList = function(value) {
+  return jspb.Message.setField(this, 5, value || []);
 };
 
 
 /**
  * @param {string} value
+ * @param {number=} opt_index
  * @return {!proto.telemetry.SensorData} returns this
  */
-proto.telemetry.SensorData.prototype.setPayloadContent = function(value) {
-  return jspb.Message.setProto3StringField(this, 5, value);
+proto.telemetry.SensorData.prototype.addTags = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 5, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.telemetry.SensorData} returns this
+ */
+proto.telemetry.SensorData.prototype.clearTagsList = function() {
+  return this.setTagsList([]);
 };
 
 
@@ -610,6 +640,29 @@ proto.telemetry.SensorData.prototype.addDetails = function(opt_value, opt_index)
  */
 proto.telemetry.SensorData.prototype.clearDetailsList = function() {
   return this.setDetailsList([]);
+};
+
+
+/**
+ * map<string, float> readings_history = 7;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,number>}
+ */
+proto.telemetry.SensorData.prototype.getReadingsHistoryMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,number>} */ (
+      jspb.Message.getMapField(this, 7, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.telemetry.SensorData} returns this
+ */
+proto.telemetry.SensorData.prototype.clearReadingsHistoryMap = function() {
+  this.getReadingsHistoryMap().clear();
+  return this;
 };
 
 

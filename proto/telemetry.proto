@@ -12,8 +12,9 @@ message SensorData {
     float temperature = 2;
     float humidity = 3;
     int64 timestamp = 4;
-    string payload_content = 5; 
-    repeated NestedDetail details = 6;
+    repeated string tags = 5;                
+    repeated NestedDetail details = 6;       
+    map<string, float> readings_history = 7;
 }
 
 message GrpcStats {

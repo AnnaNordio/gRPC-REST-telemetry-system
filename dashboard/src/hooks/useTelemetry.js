@@ -40,11 +40,9 @@ export const useTelemetry = () => {
       grpcClient.current.getStats(new protos.Empty(), {}, (err, response) => {
         if (!err && response) {
           const g = response.toObject();
-                console.log("gRPC Data:", g);
-
           const ts = g.timestamp || g.Timestamp || 0;
           const syncTime = formatTimestamp(ts);
-          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overheadSize });
+          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead });
           if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
         }
       });
