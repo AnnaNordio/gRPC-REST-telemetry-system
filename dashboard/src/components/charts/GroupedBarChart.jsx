@@ -4,13 +4,12 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  BarElement, // Questo è l'elemento "bar" che mancava!
+  BarElement, // Registriamo l'elemento Bar
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
 
-// Registriamo i moduli necessari per far funzionare il grafico
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -20,28 +19,30 @@ ChartJS.register(
   Legend
 );
 
-export const GroupedBarChart = ({ restSize, restOverhead, grpcSize, grpcOverhead, unit = 'KB' }) => {
+export const GroupedBarChart = ({ restSize, restoverhead, grpcSize, grpcOverhead, unit = 'KB' }) => {
   const COLORS = {
     rest: '#6d28d9',
     grpc: '#ea580c'
   };
 
   const chartData = {
+    // Sull'asse X confrontiamo i due protocolli
     labels: ['REST (JSON)', 'gRPC (Proto)'],
     datasets: [
       {
-        label: `Payload Size (${unit})`,
+        label: `Payload Netto (${unit})`,
+        // Colore pieno ma leggermente opaco per il dato "puro"
         backgroundColor: [COLORS.rest + '88', COLORS.grpc + '88'],
         borderColor: [COLORS.rest, COLORS.grpc],
         borderWidth: 1,
+        // Prendiamo i dati reali passati dalle props
         data: [restSize || 0, grpcSize || 0],
       },
       {
-        label: `Overhead (${unit})`,
+        label: `Overhead (B)`, // L'overhead spesso è in Byte, adatta se necessario
+        // Colore solido e acceso per evidenziare lo "spreco"
         backgroundColor: [COLORS.rest, COLORS.grpc],
-        borderColor: [COLORS.rest, COLORS.grpc],
-        borderWidth: 1,
-        data: [restOverhead || 0, grpcOverhead || 0],
+        data: [restoverhead || 0, grpcOverhead || 0],
       }
     ]
   };
@@ -53,15 +54,14 @@ export const GroupedBarChart = ({ restSize, restOverhead, grpcSize, grpcOverhead
       legend: { position: 'top' },
       tooltip: {
         callbacks: {
-          title: (items) => items[0].label,
-          label: (context) => `${context.dataset.label}: ${context.raw} ${unit}`
+          label: (context) => `${context.dataset.label}: ${context.raw}`
         }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: unit },
+        title: { display: true, text: 'Size / Overhead' },
       }
     }
   };

@@ -16,8 +16,6 @@ message SensorData {
     double latency_grpc = 6;
     string payload_content = 7; 
     repeated NestedDetail details = 8;
-    int64 payload_bytes = 9;
-    int64 overhead_bytes = 10;
 }
 
 message GrpcStats {

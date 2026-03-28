@@ -26,10 +26,6 @@ func getDashboardData() DashboardResponse {
         P99Rest:       calculatePercentile(restLats, 0.99),
         P99Grpc:       calculatePercentile(grpcLats, 0.99),
         LastGrpcTSRaw: lastGlobalGrpcTS,
-		TotalRestSize:     float64(sumSizeRest),
-        TotalRestOverhead: float64(sumOverheadRest),
-        TotalGrpcSize:     float64(sumSizeGrpc),
-        TotalGrpcOverhead: float64(sumOverheadGrpc),
     }
 }
 

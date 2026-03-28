@@ -1,61 +1,34 @@
-import { getComparison } from '../../utils/benchmarkUtils'; 
 import { StatCard } from '../StatCard';
 import { GroupedBarChart } from '../charts/GroupedBarChart';
-import { ComparisonBadge } from '../ComparisonBadge';
 
-export const PayloadView = ({ restData, grpcData }) => {
-  const totalRestKB = (restData.totalSize + restData.totalOverhead) / 1024;
-  const totalGrpcKB = (grpcData.totalSize + grpcData.totalOverhead) / 1024;
-  const sizeComp = getComparison(totalRestKB, totalGrpcKB, 'size');
+export const PayloadView = ({ restData, grpcData, sizeComp }) => (
+  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <StatCard title="REST Total Size" value={restData.size + (restData.overhead / 1024)} subtitle="JSON Overhead" subValue={`${restData.overhead} B`} unit="KB" borderClass="border-violet-600" textColor="text-violet-700" />
+      <StatCard title="gRPC Total Size" value={grpcData.size + (grpcData.overhead / 1024)} subtitle="Protobuf Overhead" subValue={`${grpcData.overhead} B`} unit="KB" borderClass="border-orange-500" textColor="text-orange-600" />
+    </div>
 
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* Card per REST */}
-        <StatCard 
-          title="REST Total Traffic" 
-          value={restData.payloadSize.toFixed(2)} 
-          unit="KB"
-          subtitle="Total JSON Overhead" 
-          subValue={`${(restData.overhead / 1024).toFixed(2)} KB`} 
-          borderClass="border-violet-600" 
-          textColor="text-violet-700" 
-        />
-
-        {/* Card per gRPC */}
-        <StatCard 
-          title="gRPC Total Traffic" 
-          value={grpcData.payloadSize.toFixed(2)} 
-          unit="KB"
-          subtitle="Total Proto Overhead" 
-          subValue={(grpcData.overhead / 1024).toFixed(2)}
-          borderClass="border-orange-500" 
-          textColor="text-orange-600" 
-        />
-      </div>
-
-      {/* Il grafico mostrerà ora le "montagne" di dati accumulati */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative">
-        <div className="absolute top-8 right-8 z-10">
-          <ComparisonBadge data={sizeComp} />
-        </div>
-        <div className="flex items-center gap-2 mb-6">
+    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-2">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-            Data Volume Comparison
-          </h3>
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Weight Analysis</h3>
         </div>
-        <div>
-          <GroupedBarChart 
-            restSize={restData.payloadSize} 
-            restOverhead={restData.overhead} 
-            grpcSize={grpcData.payloadSize} 
-            grpcOverhead={grpcData.overhead} 
-            unit="KB"
-          />
+        <div className={`px-4 py-2 rounded-xl border-2 ${sizeComp.border} ${sizeComp.bg} text-right`}>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block leading-none mb-1">Efficiency</span>
+          <span className={`font-bold ${sizeComp.color}`}>{sizeComp.label}</span>
         </div>
+      </div>
+      
+      <div className="h-[400px]">
+        <GroupedBarChart 
+          restSize={restData.size} 
+          restOverhead={restData.overhead / 1024} 
+          grpcSize={grpcData.size} 
+          grpcOverhead={grpcData.overhead / 1024} 
+          unit="KB"
+        />
       </div>
     </div>
-  );
-};
+  </div>
+);

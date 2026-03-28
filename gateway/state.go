@@ -11,8 +11,6 @@ var (
     sumSizeRest, countSizeRest float64
     sumSizeGrpc, countSizeGrpc float64
 
-	sumOverheadRest, sumOverheadGrpc float64
-
     currentMode = "polling"
     currentSize = "small"
 
