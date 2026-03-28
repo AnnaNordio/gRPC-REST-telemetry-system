@@ -12,18 +12,16 @@ message SensorData {
     float temperature = 2;
     float humidity = 3;
     int64 timestamp = 4;
-    double latency_rest = 5; 
-    double latency_grpc = 6;
-    string payload_content = 7; 
-    repeated NestedDetail details = 8;
+    string payload_content = 5; 
+    repeated NestedDetail details = 6;
 }
 
 message GrpcStats {
     double avg_latency = 1;
     double p99_latency = 2;
     int64 timestamp = 3;
-    double payload_size = 4; 
-    double overhead = 5;     
+    int64 payload_size = 4; 
+    int64 overhead = 5;     
 }
 
 message Empty {}

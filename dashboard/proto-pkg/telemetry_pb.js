@@ -309,7 +309,7 @@ proto.telemetry.NestedDetail.prototype.clearMetadataMap = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.telemetry.SensorData.repeatedFields_ = [8];
+proto.telemetry.SensorData.repeatedFields_ = [6];
 
 
 
@@ -346,9 +346,7 @@ proto.telemetry.SensorData.toObject = function(includeInstance, msg) {
     temperature: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
     humidity: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
     timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    latencyRest: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
-    latencyGrpc: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
-    payloadContent: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    payloadContent: jspb.Message.getFieldWithDefault(msg, 5, ""),
     detailsList: jspb.Message.toObjectList(msg.getDetailsList(),
     proto.telemetry.NestedDetail.toObject, includeInstance)
   };
@@ -404,18 +402,10 @@ proto.telemetry.SensorData.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTimestamp(value);
       break;
     case 5:
-      var value = /** @type {number} */ (reader.readDouble());
-      msg.setLatencyRest(value);
-      break;
-    case 6:
-      var value = /** @type {number} */ (reader.readDouble());
-      msg.setLatencyGrpc(value);
-      break;
-    case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setPayloadContent(value);
       break;
-    case 8:
+    case 6:
       var value = new proto.telemetry.NestedDetail;
       reader.readMessage(value,proto.telemetry.NestedDetail.deserializeBinaryFromReader);
       msg.addDetails(value);
@@ -477,31 +467,17 @@ proto.telemetry.SensorData.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLatencyRest();
-  if (f !== 0.0) {
-    writer.writeDouble(
-      5,
-      f
-    );
-  }
-  f = message.getLatencyGrpc();
-  if (f !== 0.0) {
-    writer.writeDouble(
-      6,
-      f
-    );
-  }
   f = message.getPayloadContent();
   if (f.length > 0) {
     writer.writeString(
-      7,
+      5,
       f
     );
   }
   f = message.getDetailsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      8,
+      6,
       f,
       proto.telemetry.NestedDetail.serializeBinaryToWriter
     );
@@ -582,47 +558,11 @@ proto.telemetry.SensorData.prototype.setTimestamp = function(value) {
 
 
 /**
- * optional double latency_rest = 5;
- * @return {number}
- */
-proto.telemetry.SensorData.prototype.getLatencyRest = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.telemetry.SensorData} returns this
- */
-proto.telemetry.SensorData.prototype.setLatencyRest = function(value) {
-  return jspb.Message.setProto3FloatField(this, 5, value);
-};
-
-
-/**
- * optional double latency_grpc = 6;
- * @return {number}
- */
-proto.telemetry.SensorData.prototype.getLatencyGrpc = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.telemetry.SensorData} returns this
- */
-proto.telemetry.SensorData.prototype.setLatencyGrpc = function(value) {
-  return jspb.Message.setProto3FloatField(this, 6, value);
-};
-
-
-/**
- * optional string payload_content = 7;
+ * optional string payload_content = 5;
  * @return {string}
  */
 proto.telemetry.SensorData.prototype.getPayloadContent = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -631,17 +571,17 @@ proto.telemetry.SensorData.prototype.getPayloadContent = function() {
  * @return {!proto.telemetry.SensorData} returns this
  */
 proto.telemetry.SensorData.prototype.setPayloadContent = function(value) {
-  return jspb.Message.setProto3StringField(this, 7, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
 /**
- * repeated NestedDetail details = 8;
+ * repeated NestedDetail details = 6;
  * @return {!Array<!proto.telemetry.NestedDetail>}
  */
 proto.telemetry.SensorData.prototype.getDetailsList = function() {
   return /** @type{!Array<!proto.telemetry.NestedDetail>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.telemetry.NestedDetail, 8));
+    jspb.Message.getRepeatedWrapperField(this, proto.telemetry.NestedDetail, 6));
 };
 
 
@@ -650,7 +590,7 @@ proto.telemetry.SensorData.prototype.getDetailsList = function() {
  * @return {!proto.telemetry.SensorData} returns this
 */
 proto.telemetry.SensorData.prototype.setDetailsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 8, value);
+  return jspb.Message.setRepeatedWrapperField(this, 6, value);
 };
 
 
@@ -660,7 +600,7 @@ proto.telemetry.SensorData.prototype.setDetailsList = function(value) {
  * @return {!proto.telemetry.NestedDetail}
  */
 proto.telemetry.SensorData.prototype.addDetails = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 8, opt_value, proto.telemetry.NestedDetail, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 6, opt_value, proto.telemetry.NestedDetail, opt_index);
 };
 
 
@@ -708,8 +648,8 @@ proto.telemetry.GrpcStats.toObject = function(includeInstance, msg) {
     avgLatency: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
     p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
     timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    payloadSize: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0),
-    overhead: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0)
+    payloadSize: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    overhead: jspb.Message.getFieldWithDefault(msg, 5, 0)
   };
 
   if (includeInstance) {
@@ -759,11 +699,11 @@ proto.telemetry.GrpcStats.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTimestamp(value);
       break;
     case 4:
-      var value = /** @type {number} */ (reader.readDouble());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setPayloadSize(value);
       break;
     case 5:
-      var value = /** @type {number} */ (reader.readDouble());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setOverhead(value);
       break;
     default:
@@ -817,15 +757,15 @@ proto.telemetry.GrpcStats.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getPayloadSize();
-  if (f !== 0.0) {
-    writer.writeDouble(
+  if (f !== 0) {
+    writer.writeInt64(
       4,
       f
     );
   }
   f = message.getOverhead();
-  if (f !== 0.0) {
-    writer.writeDouble(
+  if (f !== 0) {
+    writer.writeInt64(
       5,
       f
     );
@@ -888,11 +828,11 @@ proto.telemetry.GrpcStats.prototype.setTimestamp = function(value) {
 
 
 /**
- * optional double payload_size = 4;
+ * optional int64 payload_size = 4;
  * @return {number}
  */
 proto.telemetry.GrpcStats.prototype.getPayloadSize = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
@@ -901,16 +841,16 @@ proto.telemetry.GrpcStats.prototype.getPayloadSize = function() {
  * @return {!proto.telemetry.GrpcStats} returns this
  */
 proto.telemetry.GrpcStats.prototype.setPayloadSize = function(value) {
-  return jspb.Message.setProto3FloatField(this, 4, value);
+  return jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
 /**
- * optional double overhead = 5;
+ * optional int64 overhead = 5;
  * @return {number}
  */
 proto.telemetry.GrpcStats.prototype.getOverhead = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
 
@@ -919,7 +859,7 @@ proto.telemetry.GrpcStats.prototype.getOverhead = function() {
  * @return {!proto.telemetry.GrpcStats} returns this
  */
 proto.telemetry.GrpcStats.prototype.setOverhead = function(value) {
-  return jspb.Message.setProto3FloatField(this, 5, value);
+  return jspb.Message.setProto3IntField(this, 5, value);
 };
 
 

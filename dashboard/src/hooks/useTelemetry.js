@@ -31,7 +31,7 @@ export const useTelemetry = () => {
     try {
       const response = await fetch('http://localhost:8080/results');
       const data = await response.json();
-      setRestData({ avg: data.avg_rest, p99: data.p99_rest });
+      setRestData({ avg: data.avg_rest, p99: data.p99_rest, payloadSize: data.payload_size, overheadSize: data.overhead_size });
       if (data.history) updateHistory(data.history);
     } catch (err) { console.error("REST Error:", err); }
 
@@ -40,9 +40,11 @@ export const useTelemetry = () => {
       grpcClient.current.getStats(new protos.Empty(), {}, (err, response) => {
         if (!err && response) {
           const g = response.toObject();
+                console.log("gRPC Data:", g);
+
           const ts = g.timestamp || g.Timestamp || 0;
           const syncTime = formatTimestamp(ts);
-          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency });
+          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overheadSize });
           if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
         }
       });

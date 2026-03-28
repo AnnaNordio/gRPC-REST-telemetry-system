@@ -19,7 +19,7 @@ ChartJS.register(
   Legend
 );
 
-export const GroupedBarChart = ({ restSize, restoverhead, grpcSize, grpcOverhead, unit = 'KB' }) => {
+export const GroupedBarChart = ({ restSize, restOverhead, grpcSize, grpcOverhead, unit = 'KB' }) => {
   const COLORS = {
     rest: '#6d28d9',
     grpc: '#ea580c'
@@ -39,10 +39,10 @@ export const GroupedBarChart = ({ restSize, restoverhead, grpcSize, grpcOverhead
         data: [restSize || 0, grpcSize || 0],
       },
       {
-        label: `Overhead (B)`, // L'overhead spesso è in Byte, adatta se necessario
+        label: `Overhead (${unit})`, // L'overhead spesso è in Byte, adatta se necessario
         // Colore solido e acceso per evidenziare lo "spreco"
         backgroundColor: [COLORS.rest, COLORS.grpc],
-        data: [restoverhead || 0, grpcOverhead || 0],
+        data: [restOverhead || 0, grpcOverhead || 0],
       }
     ]
   };

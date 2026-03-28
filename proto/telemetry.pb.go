@@ -87,10 +87,8 @@ type SensorData struct {
 	Temperature    float32                `protobuf:"fixed32,2,opt,name=temperature,proto3" json:"temperature,omitempty"`
 	Humidity       float32                `protobuf:"fixed32,3,opt,name=humidity,proto3" json:"humidity,omitempty"`
 	Timestamp      int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	LatencyRest    float64                `protobuf:"fixed64,5,opt,name=latency_rest,json=latencyRest,proto3" json:"latency_rest,omitempty"`
-	LatencyGrpc    float64                `protobuf:"fixed64,6,opt,name=latency_grpc,json=latencyGrpc,proto3" json:"latency_grpc,omitempty"`
-	PayloadContent string                 `protobuf:"bytes,7,opt,name=payload_content,json=payloadContent,proto3" json:"payload_content,omitempty"`
-	Details        []*NestedDetail        `protobuf:"bytes,8,rep,name=details,proto3" json:"details,omitempty"`
+	PayloadContent string                 `protobuf:"bytes,5,opt,name=payload_content,json=payloadContent,proto3" json:"payload_content,omitempty"`
+	Details        []*NestedDetail        `protobuf:"bytes,6,rep,name=details,proto3" json:"details,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -153,20 +151,6 @@ func (x *SensorData) GetTimestamp() int64 {
 	return 0
 }
 
-func (x *SensorData) GetLatencyRest() float64 {
-	if x != nil {
-		return x.LatencyRest
-	}
-	return 0
-}
-
-func (x *SensorData) GetLatencyGrpc() float64 {
-	if x != nil {
-		return x.LatencyGrpc
-	}
-	return 0
-}
-
 func (x *SensorData) GetPayloadContent() string {
 	if x != nil {
 		return x.PayloadContent
@@ -186,8 +170,8 @@ type GrpcStats struct {
 	AvgLatency    float64                `protobuf:"fixed64,1,opt,name=avg_latency,json=avgLatency,proto3" json:"avg_latency,omitempty"`
 	P99Latency    float64                `protobuf:"fixed64,2,opt,name=p99_latency,json=p99Latency,proto3" json:"p99_latency,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	PayloadSize   float64                `protobuf:"fixed64,4,opt,name=payload_size,json=payloadSize,proto3" json:"payload_size,omitempty"`
-	Overhead      float64                `protobuf:"fixed64,5,opt,name=overhead,proto3" json:"overhead,omitempty"`
+	PayloadSize   int64                  `protobuf:"varint,4,opt,name=payload_size,json=payloadSize,proto3" json:"payload_size,omitempty"`
+	Overhead      int64                  `protobuf:"varint,5,opt,name=overhead,proto3" json:"overhead,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -243,14 +227,14 @@ func (x *GrpcStats) GetTimestamp() int64 {
 	return 0
 }
 
-func (x *GrpcStats) GetPayloadSize() float64 {
+func (x *GrpcStats) GetPayloadSize() int64 {
 	if x != nil {
 		return x.PayloadSize
 	}
 	return 0
 }
 
-func (x *GrpcStats) GetOverhead() float64 {
+func (x *GrpcStats) GetOverhead() int64 {
 	if x != nil {
 		return x.Overhead
 	}
@@ -304,25 +288,23 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\bmetadata\x18\x03 \x03(\v2%.telemetry.NestedDetail.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa7\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe1\x01\n" +
 	"\n" +
 	"SensorData\x12\x1b\n" +
 	"\tsensor_id\x18\x01 \x01(\tR\bsensorId\x12 \n" +
 	"\vtemperature\x18\x02 \x01(\x02R\vtemperature\x12\x1a\n" +
 	"\bhumidity\x18\x03 \x01(\x02R\bhumidity\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
-	"\flatency_rest\x18\x05 \x01(\x01R\vlatencyRest\x12!\n" +
-	"\flatency_grpc\x18\x06 \x01(\x01R\vlatencyGrpc\x12'\n" +
-	"\x0fpayload_content\x18\a \x01(\tR\x0epayloadContent\x121\n" +
-	"\adetails\x18\b \x03(\v2\x17.telemetry.NestedDetailR\adetails\"\xaa\x01\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12'\n" +
+	"\x0fpayload_content\x18\x05 \x01(\tR\x0epayloadContent\x121\n" +
+	"\adetails\x18\x06 \x03(\v2\x17.telemetry.NestedDetailR\adetails\"\xaa\x01\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +
 	"\vp99_latency\x18\x02 \x01(\x01R\n" +
 	"p99Latency\x12\x1c\n" +
 	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12!\n" +
-	"\fpayload_size\x18\x04 \x01(\x01R\vpayloadSize\x12\x1a\n" +
-	"\boverhead\x18\x05 \x01(\x01R\boverhead\"\a\n" +
+	"\fpayload_size\x18\x04 \x01(\x03R\vpayloadSize\x12\x1a\n" +
+	"\boverhead\x18\x05 \x01(\x03R\boverhead\"\a\n" +
 	"\x05Empty2\xf3\x01\n" +
 	"\x10TelemetryService\x125\n" +
 	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00\x129\n" +

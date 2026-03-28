@@ -1,60 +1,67 @@
 package main
 
 import (
-    "fmt"
     "time"
+    "net/http"
+    "google.golang.org/grpc/metadata"  
+    pb "telemetry-bench/proto"
 )
 
-func saveMetric(protocol string, sensorTimestamp int64) {
-    if sensorTimestamp <= 0 { return }
+func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
+    pSize := int64(getJsonSize(data))
+    hSize := calculateHTTPOverhead(r)
+    
+    processAndStoreMetrics("REST", data, pSize, hSize)
+}
+
+func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
+    pSize := int64(getProtoSize(data))
+    hSize := 5 + calculateGRPCOverhead(md) 
+    
+    processAndStoreMetrics("gRPC", data, pSize, hSize)
+}
+
+func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize int64) {
+    if data.Timestamp <= 0 {
+        return
+    }
+
+    latency := calculateLatency(data.Timestamp)
 
     metricsMu.Lock()
     defer metricsMu.Unlock()
 
+    // 1. Logica di Warmup
     if protocol == "gRPC" {
         if grpcCount < warmupThreshold {
             grpcCount++
-            fmt.Printf("⏳ [Warm-up gRPC] %d/%d\n", grpcCount, warmupThreshold)
             return
         }
-        lastGlobalGrpcTS = sensorTimestamp
-    } else if protocol == "REST" {
+        lastGlobalGrpcTS = data.Timestamp
+        totalPayloadGrpc += pSize
+        totalOverheadGrpc += hSize
+    } else {
         if restCount < warmupThreshold {
             restCount++
-            fmt.Printf("⏳ [Warm-up REST] %d/%d\n", restCount, warmupThreshold)
             return
         }
+        totalPayloadRest += pSize
+        totalOverheadRest += hSize
     }
-    // ---------------------------
 
-    now := time.Now().UnixMicro()
-    realLatency := float64(now-sensorTimestamp) 
-    displayTS := time.UnixMicro(sensorTimestamp).Format("15:04:05.000") 
-
-    history = append(history, Metric{
+    // 2. Archiviazione nella History
+    newMetric := Metric{
         Protocol:     protocol,
-        LatencyMs:    realLatency, 
-        Timestamp:    displayTS,
-        RawTimestamp: sensorTimestamp,
-    })
+        LatencyMs:    latency,
+        PayloadByte:  pSize,
+        OverheadByte: hSize,
+        Timestamp:    string(time.UnixMicro(data.Timestamp).Format("15:04:05.000")),
+        RawTimestamp: data.Timestamp,
+    }
 
+    history = append(history, newMetric)
     if len(history) > 200 {
         history = history[1:]
-    }
-}
-
-func savePayload(protocol string, size int) {
-    metricsMu.Lock()
-    defer metricsMu.Unlock()
-
-    if protocol == "REST" {
-        if restCount < warmupThreshold { return }
-        sumSizeRest += float64(size)
-        countSizeRest++
-    } else {
-        if grpcCount < warmupThreshold { return }
-        sumSizeGrpc += float64(size)
-        countSizeGrpc++
     }
 }
 
@@ -62,13 +69,13 @@ func resetStats() {
     metricsMu.Lock()
     defer metricsMu.Unlock()
     
-    // Azzeriamo tutto: history, medie e contatori di warm-up
     history = []Metric{}
-    sumSizeRest = 0
     countSizeRest = 0
-    sumSizeGrpc = 0
     countSizeGrpc = 0
+    totalPayloadRest = 0
+    totalOverheadRest = 0
+    totalPayloadGrpc = 0
+    totalOverheadGrpc = 0
 	grpcCount = 0
     restCount = 0
-    
 }

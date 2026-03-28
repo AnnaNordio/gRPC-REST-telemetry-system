@@ -1,13 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
-
-	"google.golang.org/protobuf/proto"
 	pb "telemetry-bench/proto"
 )
 
@@ -43,22 +40,4 @@ func generateData(size string) *pb.SensorData {
 	}
 
 	return data
-}
-
-// getJsonSize restituisce la dimensione in byte del payload serializzato in JSON
-func getJsonSize(v interface{}) int {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return 0
-	}
-	return len(b)
-}
-
-// getProtoSize restituisce la dimensione in byte del payload serializzato in Protobuf
-func getProtoSize(m proto.Message) int {
-	b, err := proto.Marshal(m)
-	if err != nil {
-		return 0
-	}
-	return len(b)
 }
