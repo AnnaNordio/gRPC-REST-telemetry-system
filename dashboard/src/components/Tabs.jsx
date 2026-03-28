@@ -3,25 +3,26 @@ import React from 'react';
 const Tabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'latency', label: 'Latency Analysis' },
-    { id: 'payload', label: 'Payload SizeAnalysis' },
+    { id: 'payload', label: 'Payload Size Analysis' },
+    { id: 'overhead', label: 'Overhead Analysis' },
   ];
 
   return (
-    <div className="flex justify-center mb-2">
-      <div className="inline-flex p-1 bg-slate-200/50 rounded-xl backdrop-blur-sm border border-slate-300/50">
+    <div className="w-full mb-4"> 
+      <div className="flex w-full bg-slate-200/50 rounded-xl backdrop-blur-sm shadow-sm">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-              flex items-center px-6 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200
+              flex-1 flex items-center justify-center px-6 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200
               ${activeTab === tab.id 
-                ? 'bg-white text-blue-600 shadow-md transform scale-105' 
+                ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
               }
             `}
           >
-            <span className="mr-2">{tab.icon}</span>
+            {tab.icon && <span className="mr-2">{tab.icon}</span>}
             {tab.label}
           </button>
         ))}
