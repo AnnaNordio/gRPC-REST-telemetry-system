@@ -35,7 +35,7 @@ export const getLatencyComparison = (restAvg, grpcAvg) => {
   const isGrpcFaster = grpcAvg < restAvg;
   const diff = Math.abs(restAvg - grpcAvg);
   const maxVal = Math.max(restAvg, grpcAvg);
-  const percentage = ((diff / maxVal) * 100).toFixed(1);
+  const percentage = ((diff / maxVal) * 100).toFixed(2);
 
   return {
     winner: isGrpcFaster ? 'gRPC' : 'REST',

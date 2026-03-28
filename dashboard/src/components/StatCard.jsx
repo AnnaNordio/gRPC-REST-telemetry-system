@@ -11,7 +11,7 @@ export const StatCard = ({
 }) => {
   const formatNum = (num) => {
     const n = parseFloat(num);
-    return !isNaN(n) ? n.toFixed(1) : '0.0';
+    return !isNaN(n) ? n.toFixed(2) : '--';
   };
 
   const hasValue = (val) => val !== undefined && val !== null && !isNaN(parseFloat(val));
