@@ -8,7 +8,7 @@ export const LatencyView = ({ restData, grpcData, history }) => {
   const comparison = getLatencyComparison(restData.avg, grpcData.avg);
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard 
           title="REST Avg Latency" 

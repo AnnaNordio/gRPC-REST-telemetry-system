@@ -6,6 +6,7 @@ import Tabs from './components/Tabs';
 // Import dei nuovi sottocomponenti
 import { LatencyView } from './components/views/LatencyView';
 import { PayloadView } from './components/views/PayloadView';
+import { ConnectionCard } from './components/ConnectionCard';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('latency');
@@ -70,22 +71,7 @@ const Dashboard = () => {
                 isConnected={isConnected}
               />
               
-              <div className="mt-6 p-4 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-200">
-                <h4 className="text-xs font-bold uppercase tracking-widest opacity-80">System Status</h4>
-                <div className="flex items-center gap-2 mt-2">
-                  <span 
-                    className={`h-3 w-3 rounded-full flex-shrink-0 ${
-                      isConnected 
-                        ? "bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.9)]" 
-                        : "bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.9)]"
-                    }`}
-                  ></span>
-                  
-                  <p className="text-sm font-medium leading-none">
-                    {isConnected ? "Connected to Gateway" : "Gateway Offline"}
-                  </p>
-                </div>
-              </div>
+              <ConnectionCard isConnected={isConnected} />
             </div>
           </aside>
 

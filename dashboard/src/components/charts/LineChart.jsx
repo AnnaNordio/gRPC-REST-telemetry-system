@@ -70,7 +70,7 @@ export const LineChart = ({ history, measure, unit }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-50 h-[450px]">
+    <div className="h-[400px] w-full">
       <Line data={chartData} options={chartOptions} />
     </div>
   );

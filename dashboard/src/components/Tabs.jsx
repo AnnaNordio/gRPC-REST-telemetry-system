@@ -3,11 +3,11 @@ import React from 'react';
 const Tabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'latency', label: 'Latency Analysis' },
-    { id: 'payload', label: 'Payload Size'},
+    { id: 'payload', label: 'Payload SizeAnalysis' },
   ];
 
   return (
-    <div className="flex justify-center mb-8">
+    <div className="flex justify-center mb-2">
       <div className="inline-flex p-1 bg-slate-200/50 rounded-xl backdrop-blur-sm border border-slate-300/50">
         {tabs.map((tab) => (
           <button
