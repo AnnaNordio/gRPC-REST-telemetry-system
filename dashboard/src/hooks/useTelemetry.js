@@ -69,15 +69,16 @@ export const useTelemetry = () => {
     let reconnectTimeout;
     let isMounted = true; // Per evitare aggiornamenti di stato su componenti smontati
 
+    // Cerca la funzione connect() dentro il tuo useEffect in useTelemetry.js
     const connect = () => {
-      const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+      // Invece di usare window.location.host (che sarebbe localhost:3000)
+      // puntiamo direttamente al backend sulla 8080
+      const wsUrl = `ws://${window.location.hostname}:8080/ws`;
       
       socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
-        if (isMounted) {
-          setIsConnected(true);
-        }
+        if (isMounted) setIsConnected(true);
       };
 
       socket.onclose = () => {

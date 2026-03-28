@@ -5,35 +5,35 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   define: {
-    // Indispensabile per evitare "global is not defined" nei pacchetti google-protobuf
+    // Risolve il problema dei pacchetti gRPC-web/protobuf che cercano 'global'
     'global': 'window',
   },
   resolve: {
     alias: {
-      // @ punta alla tua cartella src per comodità
       '@': path.resolve(__dirname, './src'),
-      // Mappa il nome che usi nell'import al bundle generato da Webpack
-      // Assicurati che il percorso sia corretto rispetto a dove si trova questo file
       'telemetry-proto-bundle': path.resolve(__dirname, './proto-pkg/dist/index.js'),
     },
   },
   server: {
     port: 3000,
+    // host: true permette a Vite di ascoltare su 0.0.0.0 (indispensabile per Docker)
+    host: true, 
+    strictPort: true,
+    hmr: {
+      // Assicura che l'Hot Module Replacement punti alla porta corretta sul tuo browser
+      clientPort: 3000,
+    },
     proxy: {
-      '/results': 'http://localhost:8080',
-      '/set-mode': 'http://localhost:8080',
-      '/get-mode': 'http://localhost:8080',
-      '/set-size': 'http://localhost:8080', 
-      '/get-size': 'http://localhost:8080',
-      '/telemetry': 'http://localhost:8080',
-      '/ws': {
-        target: 'ws://localhost:8080',
-        ws: true,
-      }
+      // Sostituiamo 'localhost' con 'gateway' (il nome del servizio in docker-compose)
+      '/results': 'http://gateway:8080',
+      '/set-mode': 'http://gateway:8080',
+      '/get-mode': 'http://gateway:8080',
+      '/set-size': 'http://gateway:8080', 
+      '/get-size': 'http://gateway:8080',
+      '/telemetry': 'http://gateway:8080',
     }
   },
   optimizeDeps: {
-    // Forza Vite a pre-ottimizzare il bundle per una maggiore velocità di caricamento
     include: ['telemetry-proto-bundle']
   }
 })
