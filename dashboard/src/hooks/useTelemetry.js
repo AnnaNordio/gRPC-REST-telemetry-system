@@ -108,7 +108,6 @@ export const useTelemetry = () => {
       try {
         // Avvisa il backend di resettare le statistiche globali
         await fetch('http://localhost:8080/reset', { method: 'POST' });
-        console.log("Statistiche backend resettate");
         
         // Resetta lo stato locale per partire da un grafico pulito
         setHistory([]);

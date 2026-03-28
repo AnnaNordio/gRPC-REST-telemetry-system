@@ -7,6 +7,7 @@ import (
     "io"
     "net/http"
     "time"
+    "log"
 
     pb "telemetry-bench/proto"
 )
@@ -32,12 +33,18 @@ func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamData
     go sendRest(client, data)
 }
 
+// executePolling modificata per essere più robusta
 func executePolling(client *http.Client, grpcClient pb.TelemetryServiceClient, data *pb.SensorData) {
-    data.Timestamp = time.Now().UnixMicro()
-
-    // Entrambi asincroni per massima velocità del loop
-    go sendRest(client, data)
-    go func() {
-        _, _ = grpcClient.SendData(context.Background(), data)
-    }()
+	data.Timestamp = time.Now().UnixMicro()
+	
+	// REST asincrono
+	go sendRest(client, data)
+	
+	// gRPC Unary
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	_, err := grpcClient.SendData(ctx, data)
+	if err != nil {
+		log.Printf("Errore gRPC Polling: %v", err)
+	}
 }

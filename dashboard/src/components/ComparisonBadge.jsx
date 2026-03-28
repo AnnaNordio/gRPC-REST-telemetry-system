@@ -4,7 +4,7 @@ export const ComparisonBadge = ({ data }) => {
       <div className="w-2 h-2 rounded-full animate-pulse bg-slate-300"></div>
         <div className="text-right">
           <span className="text-xs font-black text-slate-900">
-            Collecting Data...
+            Initializing Benchmark...
           </span>
       </div>
     </div>
