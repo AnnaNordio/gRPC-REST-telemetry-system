@@ -3,13 +3,27 @@ package main
 import (
     "io"
     "net/http"
+    "strconv"
 )
 
-func fetchConfig(client *http.Client) (string, string, string) {
-    mode := fetchValue(client, modeEndpoint, "polling")
-    size := fetchValue(client, sizeEndpoint, "small")
-    sensors := fetchValue(client, sensorsEndpoint, "1")
-    return mode, size, sensors
+type RemoteConfig struct {
+    Mode    string
+    Size    string
+    Sensors int
+}
+
+func fetchFullConfig(client *http.Client) RemoteConfig {
+    m := fetchValue(client, modeEndpoint, "polling")
+    sz := fetchValue(client, sizeEndpoint, "small")
+    sStr := fetchValue(client, sensorsEndpoint, "1")
+    
+    sInt, _ := strconv.Atoi(sStr) 
+    
+    return RemoteConfig{
+        Mode:    m,
+        Size:    sz,
+        Sensors: sInt,
+    }
 }
 
 func fetchValue(client *http.Client, url string, defaultValue string) string {

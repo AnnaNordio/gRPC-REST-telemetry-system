@@ -9,35 +9,54 @@ import (
     "google.golang.org/protobuf/proto"
 )
 
+const aggregateWindow = 200
+
 func getDashboardData() DashboardResponse {
     metricsMu.Lock()
     defer metricsMu.Unlock()
 
-    var restLats, grpcLats []float64
-    var sumR, sumG float64
+    // 1. Prendiamo gli ultimi 200 campioni per protocollo (Indipendentemente dal sensore)
+    restLats := getLastNLats(history, "REST", aggregateWindow)
+    grpcLats := getLastNLats(history, "gRPC", aggregateWindow)
 
-    for _, m := range history {
-        if m.Protocol == "REST" {
-            restLats = append(restLats, m.LatencyMs)
-            sumR += m.LatencyMs
-        } else {
-            grpcLats = append(grpcLats, m.LatencyMs)
-            sumG += m.LatencyMs
-        }
-    }
+    // 2. Calcolo Latenza Media Aggregata (su finestra mobile)
+    avgRest := calculateAverage(restLats)
+    avgGrpc := calculateAverage(grpcLats)
+
+    // 3. Calcolo P99 Aggregato
+    p99Rest := calculatePercentile(restLats, 0.99)
+    p99Grpc := calculatePercentile(grpcLats, 0.99)
 
     return DashboardResponse{
-        History:       history,
+        History:           history, // La history intera serve per disegnare le linee del grafico
+        AvgRest:           avgRest, // I "numeroni" nelle card
+        AvgGrpc:           avgGrpc,
+        P99Rest:           p99Rest,
+        P99Grpc:           p99Grpc,
         TotalPayloadRest:  totalPayloadRest,
         TotalOverheadRest: totalOverheadRest,
         TotalPayloadGrpc:  totalPayloadGrpc,
         TotalOverheadGrpc: totalOverheadGrpc,
-        AvgRest:       safeAvg(sumR, len(restLats)),
-        AvgGrpc:       safeAvg(sumG, len(grpcLats)),
-        P99Rest:       calculatePercentile(restLats, 0.99),
-        P99Grpc:       calculatePercentile(grpcLats, 0.99),
-        LastGrpcTSRaw: lastGlobalGrpcTS,
+        LastGrpcTSRaw:     lastGlobalGrpcTS,
     }
+}
+
+// Helper per isolare le latenze dell'ultimo periodo
+func getLastNLats(h []Metric, protocol string, n int) []float64 {
+    var lats []float64
+    for i := len(h) - 1; i >= 0 && len(lats) < n; i-- {
+        if h[i].Protocol == protocol {
+            lats = append(lats, h[i].LatencyMs)
+        }
+    }
+    return lats
+}
+
+func calculateAverage(lats []float64) float64 {
+    if len(lats) == 0 { return 0 }
+    var sum float64
+    for _, l := range lats { sum += l }
+    return sum / float64(len(lats))
 }
 
 func calculateLatency(sensorTS int64) float64 {

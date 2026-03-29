@@ -4,7 +4,6 @@ type Metric struct {
     Protocol     string  `json:"protocol"`
     LatencyMs    float64 `json:"latency_ms"`
     Timestamp    string  `json:"timestamp"`     
-    RawTimestamp int64   `json:"raw_timestamp"`
     PayloadByte  int64   `json:"payload_byte"`
     OverheadByte int64   `json:"overhead_byte"`
 }

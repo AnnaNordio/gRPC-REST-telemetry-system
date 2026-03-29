@@ -6,6 +6,7 @@ export const StatCard = ({
   percentageTitle,
   percentageValue,
   unit,
+  subunit,
   borderClass, 
   textColor 
 }) => {
@@ -45,7 +46,7 @@ export const StatCard = ({
         <div className={`text-sm mt-4 flex items-center gap-2 font-bold opacity-90 ${textColor}`}>
           <span className="uppercase tracking-wide">{subtitle}:</span>
           <span className="px-1 py-0.5">
-            {hasValue(subValue) ? `${formatNum(subValue)} ${unit}` : '--'}
+            {hasValue(subValue) ? `${formatNum(subValue)} ${subunit || unit}` : '--'}
           </span>
         </div>
       )}

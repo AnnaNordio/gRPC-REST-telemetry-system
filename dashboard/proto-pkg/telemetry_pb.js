@@ -141,9 +141,9 @@ proto.telemetry.NestedDetail.prototype.toObject = function(opt_includeInstance) 
  */
 proto.telemetry.NestedDetail.toObject = function(includeInstance, msg) {
   var f, obj = {
-    key: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    value: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    metadataMap: (f = msg.getMetadataMap()) ? f.toObject(includeInstance, undefined) : []
+key: jspb.Message.getFieldWithDefault(msg, 1, ""),
+value: jspb.Message.getFieldWithDefault(msg, 2, ""),
+metadataMap: (f = msg.getMetadataMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -342,14 +342,14 @@ proto.telemetry.SensorData.prototype.toObject = function(opt_includeInstance) {
  */
 proto.telemetry.SensorData.toObject = function(includeInstance, msg) {
   var f, obj = {
-    sensorId: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    temperature: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    humidity: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    tagsList: (f = jspb.Message.getRepeatedField(msg, 5)) == null ? undefined : f,
-    detailsList: jspb.Message.toObjectList(msg.getDetailsList(),
+sensorId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+temperature: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+humidity: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
+tagsList: (f = jspb.Message.getRepeatedField(msg, 5)) == null ? undefined : f,
+detailsList: jspb.Message.toObjectList(msg.getDetailsList(),
     proto.telemetry.NestedDetail.toObject, includeInstance),
-    readingsHistoryMap: (f = msg.getReadingsHistoryMap()) ? f.toObject(includeInstance, undefined) : []
+readingsHistoryMap: (f = msg.getReadingsHistoryMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -698,11 +698,11 @@ proto.telemetry.GrpcStats.prototype.toObject = function(opt_includeInstance) {
  */
 proto.telemetry.GrpcStats.toObject = function(includeInstance, msg) {
   var f, obj = {
-    avgLatency: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-    p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    payloadSize: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    overhead: jspb.Message.getFieldWithDefault(msg, 5, 0)
+avgLatency: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
+payloadSize: jspb.Message.getFieldWithDefault(msg, 4, 0),
+overhead: jspb.Message.getFieldWithDefault(msg, 5, 0)
   };
 
   if (includeInstance) {

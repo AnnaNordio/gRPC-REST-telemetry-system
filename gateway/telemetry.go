@@ -4,6 +4,7 @@ import (
     "time"
     "net/http"
     "google.golang.org/grpc/metadata"  
+    "fmt"
     pb "telemetry-bench/proto"
 )
 
@@ -47,7 +48,6 @@ func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize i
         PayloadByte:  pSize,
         OverheadByte: hSize,
         Timestamp:    string(time.UnixMicro(data.Timestamp).Format("15:04:05.000")),
-        RawTimestamp: data.Timestamp,
     }
 
     history = append(history, newMetric)
@@ -57,6 +57,7 @@ func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize i
 }
 
 func resetStats() {
+    fmt.Println("Resetting all metrics and history...")
     metricsMu.Lock()
     defer metricsMu.Unlock()
     

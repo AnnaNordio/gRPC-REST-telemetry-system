@@ -60,7 +60,6 @@ const Dashboard = () => {
       });
       if (resp.ok) {
         setSensorNumber(count);
-        console.log(`Sensori aggiornati a ${count}, reset grafico...`);
         setHistory([]); 
       }
     } catch (err) {

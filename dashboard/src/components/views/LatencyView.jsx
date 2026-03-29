@@ -11,18 +11,18 @@ export const LatencyView = ({ restData, grpcData, history }) => {
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard 
-          title="REST Avg Latency" 
+          title="REST Average Aggregate Latency" 
           value={restData.avg} 
-          subtitle="99th Percentile" 
+          subtitle="99th Percentile (Tail Latency)" 
           subValue={restData.p99} 
           unit="μs" 
           borderClass="border-violet-600" 
           textColor="text-violet-700" 
         />
         <StatCard 
-          title="gRPC Avg Latency" 
+          title="gRPC Average Aggregate Latency" 
           value={grpcData.avg} 
-          subtitle="99th Percentile" 
+          subtitle="99th Percentile (Tail Latency)" 
           subValue={grpcData.p99} 
           unit="μs" 
           borderClass="border-orange-500" 
@@ -38,7 +38,7 @@ export const LatencyView = ({ restData, grpcData, history }) => {
         <div className="flex items-center gap-2 mb-6">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-            Latency Timeline
+            Instantaneous Latency Timeline (All Sensors)
           </h3>
         </div>
         

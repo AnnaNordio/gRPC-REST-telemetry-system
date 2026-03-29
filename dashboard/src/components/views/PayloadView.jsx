@@ -32,23 +32,25 @@ const comparison = getPayloadComparison(restKB.total, grpcKB.total);  return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard 
           title="REST Payload Size" 
-          value={restKB.payload} 
+          value={restKB.payload > 1024  ?(restKB.payload / 1024).toFixed(2) :restKB.payload.toFixed(2)} 
           subtitle="JSON Overhead" 
-          subValue={restKB.overhead} 
+          subValue={restKB.overhead > 1024  ?(restKB.overhead / 1024).toFixed(2) :restKB.overhead.toFixed(2)} 
           percentageTitle={"Efficiency"}
           percentageValue={restEfficiency}
-          unit="KB" 
+          unit={restKB.payload > 1024  ?"MB" :"KB"}  
+          subunit={restKB.overhead > 1024  ?"MB" :"KB"}  
           borderClass="border-violet-600" 
           textColor="text-violet-700" 
         />
         <StatCard 
           title="gRPC Payload Size" 
-          value={grpcKB.payload} 
+          value={grpcKB.payload > 1024  ?(grpcKB.payload / 1024).toFixed(2) :grpcKB.payload.toFixed(2)} 
           subtitle="Protobuf Overhead" 
-          subValue={grpcKB.overhead} 
+          subValue={grpcKB.overhead > 1024  ?(grpcKB.overhead / 1024).toFixed(2) :grpcKB.overhead.toFixed(2)} 
           percentageTitle={"Efficiency"}
           percentageValue={grpcEfficiency}
-          unit="KB" 
+          unit={grpcKB.payload > 1024  ?"MB" :"KB"}  
+          subunit={grpcKB.overhead > 1024  ?"MB" :"KB"}  
           borderClass="border-orange-500" 
           textColor="text-orange-600" 
         />
