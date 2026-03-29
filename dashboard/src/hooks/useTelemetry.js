@@ -23,7 +23,7 @@ export const useTelemetry = () => {
       });
       return Array.from(map.values())
         .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-        .slice(-150);
+        .slice(-600);
     });
   }, []);
 
@@ -32,7 +32,7 @@ export const useTelemetry = () => {
     try {
       const response = await fetch('http://localhost:8080/results');
       const data = await response.json();
-      setRestData({ avg: data.avg_rest, p99: data.p99_rest, payloadSize: data.payload_size, overheadSize: data.overhead_size, jitter: data.jitter_rest });
+      setRestData({ avg: data.avg_rest, p99: data.p99_rest, payloadSize: data.payload_size, overheadSize: data.overhead_size, jitter: data.jitter_rest, throughput: data.throughput_rest });
       if (data.history) updateHistory(data.history);
     } catch (err) { console.error("REST Error:", err); }
 
@@ -43,7 +43,7 @@ export const useTelemetry = () => {
           const g = response.toObject();
           const ts = g.timestamp || g.Timestamp || 0;
           const syncTime = formatTimestamp(ts);
-          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead, jitter: g.jitter });
+          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead, jitter: g.jitter, throughput: g.throughput });
           if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
         }
       });
@@ -57,7 +57,7 @@ export const useTelemetry = () => {
       stream.on('data', (response) => {
         const g = response.toObject();
         const syncTime = formatTimestamp(g.timestamp);
-        setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead, jitter: g.jitter });
+        setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead, jitter: g.jitter, throughput: g.throughput });
         if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency });
       });
     }

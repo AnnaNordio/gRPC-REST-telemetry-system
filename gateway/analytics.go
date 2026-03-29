@@ -32,8 +32,8 @@ func getDashboardData() DashboardResponse {
     jitterGrpc := calculateJitter(grpcLats)
 
     return DashboardResponse{
-        History:           history, // La history intera serve per disegnare le linee del grafico
-        AvgRest:           avgRest, // I "numeroni" nelle card
+        History:           history, 
+        AvgRest:           avgRest, 
         AvgGrpc:           avgGrpc,
         P99Rest:           p99Rest,
         P99Grpc:           p99Grpc,
@@ -44,17 +44,27 @@ func getDashboardData() DashboardResponse {
         TotalPayloadGrpc:  totalPayloadGrpc,
         TotalOverheadGrpc: totalOverheadGrpc,
         LastGrpcTSRaw:     lastGlobalGrpcTS,
+        ThroughputRest: throughputRest,
+        ThroughputGrpc: throughputGrpc,
     }
 }
 
 // Helper per isolare le latenze dell'ultimo periodo
 func getLastNLats(h []Metric, protocol string, n int) []float64 {
     var lats []float64
+    // 1. Raccogliamo i dati (partendo dal più recente)
     for i := len(h) - 1; i >= 0 && len(lats) < n; i-- {
         if h[i].Protocol == protocol {
             lats = append(lats, h[i].LatencyMs)
         }
     }
+
+    // 2. INVERTIAMO l'array per riportarlo in ordine cronologico (Vecchio -> Nuovo)
+    // Fondamentale per il Delta Jitter coerente
+    for i, j := 0, len(lats)-1; i < j; i, j = i+1, j-1 {
+        lats[i], lats[j] = lats[j], lats[i]
+    }
+    
     return lats
 }
 
@@ -92,26 +102,28 @@ func calculatePercentile(latencies []float64, percentile float64) float64 {
     return sorted[index]
 }
 
+// calculateJitter ora calcola il "Delta Jitter" (RFC 3550 style)
+// Rappresenta la variazione media della latenza tra campioni consecutivi.
 func calculateJitter(lats []float64) float64 {
-    n := len(lats)
-    if n < 2 {
-        return 0
-    }
+	n := len(lats)
+	// Servono almeno 2 campioni per calcolare una differenza
+	if n < 2 {
+		return 0
+	}
 
-    // 1. Calcoliamo la media
-    avg := calculateAverage(lats)
+	var sumAbsDiff float64
+	
+	// Il Delta Jitter analizza la differenza tra il pacchetto attuale e il precedente
+	// Inizia dall'indice 1 per confrontare i[1] con i[0]
+	for i := 1; i < n; i++ {
+		// Calcoliamo la variazione assoluta tra due campioni consecutivi
+		diff := math.Abs(lats[i] - lats[i-1])
+		sumAbsDiff += diff
+	}
 
-    // 2. Calcoliamo la somma degli scarti quadratici
-    var sumSq float64
-    for _, l := range lats {
-        diff := l - avg
-        sumSq += diff * diff
-    }
-
-    // 3. Deviazione standard (Jitter)
-    // Usiamo n-1 per la correzione di Bessel (più accurata per campioni limitati)
-    variance := sumSq / float64(n-1)
-    return math.Sqrt(variance)
+	// Restituisce la media delle variazioni (Average Point-to-Point Jitter)
+	// Dividiamo per n-1 perché con n campioni abbiamo n-1 intervalli
+	return sumAbsDiff / float64(n-1)
 }
 
 // getJsonSize restituisce la dimensione in byte del payload serializzato in JSON

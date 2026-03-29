@@ -11,25 +11,28 @@ export const LatencyView = ({ restData, grpcData, history }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard 
           title="REST Average Aggregate Latency" 
-          value={restData.avg} 
+          value={restData.avg > 1000  ?(restData.avg / 1000).toFixed(2) :restData.avg.toFixed(2)} 
           subtitle="99th Percentile (Tail Latency)" 
-          subValue={restData.p99} 
-          unit="μs" 
+          subValue={restData.p99 > 1000  ?(restData.p99 / 1000).toFixed(2) :restData.p99.toFixed(2)} 
+          unit={restData.avg > 1000  ? "ms" : "μs"} 
+          subunit={restData.p99 > 1000  ? "ms" : "μs"} 
           addedTitle="Jitter"
-          addedValue={restData.jitter}
-          addedUnit="μs"
+          addedValue={restData.jitter > 1000  ?(restData.jitter / 1000) :restData.jitter} 
+          addedUnit={restData.jitter > 1000  ? "ms" : "μs"} 
+
           borderClass="border-violet-600" 
           textColor="text-violet-700" 
         />
         <StatCard 
           title="gRPC Average Aggregate Latency" 
-          value={grpcData.avg} 
+          value={grpcData.avg > 1000  ?(grpcData.avg / 1000).toFixed(2) :grpcData.avg.toFixed(2)} 
           subtitle="99th Percentile (Tail Latency)" 
-          subValue={grpcData.p99} 
-          unit="μs" 
+          subValue={grpcData.p99 > 1000  ?(grpcData.p99 / 1000).toFixed(2) :grpcData.p99.toFixed(2)} 
+          unit={grpcData.avg > 1000  ? "ms" : "μs"} 
+          subunit={grpcData.p99 > 1000  ? "ms" : "μs"} 
           addedTitle="Jitter"
-          addedValue={grpcData.jitter}
-          addedUnit="μs"
+          addedValue={grpcData.jitter > 1000  ?(grpcData.jitter / 1000):grpcData.jitter} 
+          addedUnit={grpcData.jitter > 1000  ? "ms" : "μs"} 
           borderClass="border-orange-500" 
           textColor="text-orange-600" 
         />
@@ -48,7 +51,7 @@ export const LatencyView = ({ restData, grpcData, history }) => {
         </div>
         
         <div>
-          <LineChart history={history} measure="Microseconds" unit="μs"/>
+          <LineChart history={history} measure="Microseconds" unit="μs" />
         </div>
       </div>
     </div>

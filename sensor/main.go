@@ -95,59 +95,56 @@ func syncSensors(target int, client pb.TelemetryServiceClient, http *http.Client
 }
 
 func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServiceClient, httpClient *http.Client) {
-	ticker := time.NewTicker(100 * time.Millisecond) // 10Hz
-	defer ticker.Stop()
+    // Ticker a 100ms = 10Hz (10 messaggi al secondo)
+    ticker := time.NewTicker(100 * time.Millisecond)
+    defer ticker.Stop()
 
-	var stream pb.TelemetryService_StreamDataClient
-	var lastMode string
+    var stream pb.TelemetryService_StreamDataClient
+    var lastMode string
 
-	for {
-		select {
-		case <-stopCh:
-			if stream != nil {
-				stream.CloseSend()
-			}
-			return
-		case <-ticker.C:
-			// LETTURA DINAMICA della configurazione (RLock per massime performance)
-			configMu.RLock()
-			mode := globalMode
-			size := globalSize
-			configMu.RUnlock()
+    for {
+        select {
+        case <-stopCh:
+            if stream != nil {
+                stream.CloseSend()
+            }
+            return
+        case <-ticker.C:
+            // 1. Lettura configurazione dinamica
+            configMu.RLock()
+            mode := globalMode
+            size := globalSize
+            configMu.RUnlock()
 
-			// Se il modo cambia, resettiamo lo stream gRPC se esistente
-			if mode != lastMode && stream != nil {
-				stream.CloseSend()
-				stream = nil
-			}
-			lastMode = mode
-			data := generateData(size)
+            // 2. Gestione cambio modalità e reset stream
+            if mode != lastMode && stream != nil {
+                stream.CloseSend()
+                stream = nil
+            }
+            lastMode = mode
 
-			if mode == "polling" {
-				// Esecuzione Unary (REQ-RES)
-				// Eseguiamo solo 1 volta al secondo per non saturare i log in Unary
-				if time.Now().UnixMilli()%1000 < 100 {
-					executePolling(httpClient, grpcClient, data)
-				}
-			} else {
-				// Esecuzione STREAMING
-				if stream == nil {
-					var err error
-					stream, err = grpcClient.StreamData(context.Background())
-					if err != nil {
-						log.Printf("![%d] Errore apertura stream: %v", id, err)
-						continue
-					}
-				}
+            // 3. Generazione dati
+            data := generateData(size)
 
-				if err := stream.Send(data); err != nil {
-					log.Printf("![%d] Errore invio stream: %v", id, err)
-					stream = nil // Reset per riconnessione al prossimo tick
-				}
+            // 4. Esecuzione Logica di Invio
+            if mode == "polling" {
+                // Esecuzione Unary (REQ-RES) a 10Hz
+                // Rimosso il filtro %1000 per uniformare la frequenza
+                executePolling(httpClient, grpcClient, data)
+            } else {
+                // Esecuzione STREAMING a 10Hz
+                // Inizializzazione stream se necessario
+                if stream == nil {
+                    var err error
+                    stream, err = grpcClient.StreamData(context.Background())
+                    if err != nil {
+                        log.Printf("![%d] Errore apertura stream: %v", id, err)
+                        continue
+                    }
+                }
 
-				// REST simultaneo per confronto overhead (come nel tuo codice originale)
-				go sendRest(httpClient, data)
-			}
-		}
-	}
+                executeStreaming(httpClient, stream, data)
+            }
+        }
+    }
 }

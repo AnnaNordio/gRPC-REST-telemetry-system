@@ -5,10 +5,13 @@ import (
     "net"
     "net/http"
     "google.golang.org/grpc"
+    "time"
+    "sync/atomic"
     pb "telemetry-bench/proto"
 )
 
 func main() {
+    startThroughputTicker()
     // 1. Avvio gRPC Server
     go func() {
         lis, err := net.Listen("tcp", ":50051")
@@ -39,4 +42,20 @@ func main() {
 
     log.Println("gRPC Server in ascolto su :50051")
     log.Fatal(http.ListenAndServe(":8080", enableCORS(mux)))
+}
+
+func startThroughputTicker() {
+    go func() {
+        ticker := time.NewTicker(1 * time.Second)
+        for range ticker.C {
+            // Legge e resetta i contatori atomici definiti nelle variabili globali
+            currRest := atomic.SwapUint64(&msgCountRest, 0)
+            currGrpc := atomic.SwapUint64(&msgCountGrpc, 0)
+
+            metricsMu.Lock()
+            throughputRest = float64(currRest)
+            throughputGrpc = float64(currGrpc)
+            metricsMu.Unlock()
+        }
+    }()
 }

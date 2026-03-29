@@ -1,59 +1,30 @@
+import React from 'react';
 import { StatCard } from '../StatCard';
-import { GroupedBarChart } from '../charts/GroupedBarChart';
+import { BarChart } from '../charts/BarChart';
 import { ComparisonBadge } from '../ComparisonBadge';
-import { getPayloadComparison } from '../../utils/benchmarkUtils';
+import { getThroughputComparison } from '../../utils/benchmarkUtils';
 
-export const ThroughputView = ({ restData, grpcData }) => {
-  // 1. Calcoliamo tutto in KB una volta sola all'inizio
-  const restKB = {
-    payload: restData.payloadSize / 1024,
-    overhead: restData.overheadSize / 1024,
-    total: (restData.payloadSize + restData.overheadSize) / 1024,
-  };
-
-  const grpcKB = {
-    payload: grpcData.payloadSize / 1024,
-    overhead: grpcData.overheadSize / 1024,
-    total: (grpcData.payloadSize + grpcData.overheadSize) / 1024,
-  };
-
-  // Calcolo Efficienza REST
-  const restEfficiency = restKB.payload > 0 
-    ? ((restKB.payload / (restKB.payload + restKB.overhead)) * 100).toFixed(2) 
-    : 0;
-
-  // Calcolo Efficienza gRPC
-  const grpcEfficiency = grpcKB.payload > 0 
-    ? ((grpcKB.payload / (grpcKB.payload + grpcKB.overhead)) * 100).toFixed(2) 
-    : 0;
-
-const comparison = getPayloadComparison(restKB.total, grpcKB.total);  return (
+export const ThroughputView = ({ restData, grpcData, history }) => {
+  const comparison = getThroughputComparison(restData.throughput, grpcData.throughput);
+  return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard 
-          title="REST Payload Size" 
-          value={restKB.payload} 
-          subtitle="JSON Overhead" 
-          subValue={restKB.overhead} 
-          percentageTitle={"Efficiency"}
-          percentageValue={restEfficiency}
-          unit="KB" 
+          title="REST Throughput" 
+          value={restData.throughput} 
+          unit="msg/s" 
           borderClass="border-violet-600" 
           textColor="text-violet-700" 
         />
         <StatCard 
-          title="gRPC Payload Size" 
-          value={grpcKB.payload} 
-          subtitle="Protobuf Overhead" 
-          subValue={grpcKB.overhead} 
-          percentageTitle={"Efficiency"}
-          percentageValue={grpcEfficiency}
-          unit="KB" 
+          title="gRPC Throughput" 
+          value={grpcData.throughput} 
+          unit="msg/s" 
           borderClass="border-orange-500" 
           textColor="text-orange-600" 
         />
       </div>
-
+      
       <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative">
         <div className="absolute top-6 right-6 z-10">
           <ComparisonBadge data={comparison} />
@@ -61,19 +32,15 @@ const comparison = getPayloadComparison(restKB.total, grpcKB.total);  return (
         
         <div className="flex items-center gap-2 mb-6">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Total Throughput Analysis</h3>
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+            Instantaneous Throughput Timeline (All Sensors)
+          </h3>
         </div>
         
-         <div>
-          <GroupedBarChart 
-            restSize={restKB.payload} 
-            restOverhead={restKB.overhead} 
-            grpcSize={grpcKB.payload} 
-            grpcOverhead={grpcKB.overhead} 
-            unit="KB"
-          />
+        <div>
+          <BarChart restValue={restData.throughput} grpcValue={grpcData.throughput} measure="Messages per Second" unit="msg/s"/>
         </div>
-      </div>       
+      </div>
     </div>
   );
 };

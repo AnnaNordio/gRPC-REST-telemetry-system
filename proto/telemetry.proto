@@ -24,6 +24,7 @@ message GrpcStats {
     int64 payload_size = 4; 
     int64 overhead = 5;    
     double jitter = 6; 
+    double throughput = 7;
 }
 
 message Empty {}

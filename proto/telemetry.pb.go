@@ -181,6 +181,7 @@ type GrpcStats struct {
 	PayloadSize   int64                  `protobuf:"varint,4,opt,name=payload_size,json=payloadSize,proto3" json:"payload_size,omitempty"`
 	Overhead      int64                  `protobuf:"varint,5,opt,name=overhead,proto3" json:"overhead,omitempty"`
 	Jitter        float64                `protobuf:"fixed64,6,opt,name=jitter,proto3" json:"jitter,omitempty"`
+	Throughput    float64                `protobuf:"fixed64,7,opt,name=throughput,proto3" json:"throughput,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -257,6 +258,13 @@ func (x *GrpcStats) GetJitter() float64 {
 	return 0
 }
 
+func (x *GrpcStats) GetThroughput() float64 {
+	if x != nil {
+		return x.Throughput
+	}
+	return 0
+}
+
 type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -316,7 +324,7 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\x10readings_history\x18\a \x03(\v2*.telemetry.SensorData.ReadingsHistoryEntryR\x0freadingsHistory\x1aB\n" +
 	"\x14ReadingsHistoryEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01\"\xc2\x01\n" +
+	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01\"\xe2\x01\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +
@@ -325,7 +333,10 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12!\n" +
 	"\fpayload_size\x18\x04 \x01(\x03R\vpayloadSize\x12\x1a\n" +
 	"\boverhead\x18\x05 \x01(\x03R\boverhead\x12\x16\n" +
-	"\x06jitter\x18\x06 \x01(\x01R\x06jitter\"\a\n" +
+	"\x06jitter\x18\x06 \x01(\x01R\x06jitter\x12\x1e\n" +
+	"\n" +
+	"throughput\x18\a \x01(\x01R\n" +
+	"throughput\"\a\n" +
 	"\x05Empty2\xf3\x01\n" +
 	"\x10TelemetryService\x125\n" +
 	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00\x129\n" +

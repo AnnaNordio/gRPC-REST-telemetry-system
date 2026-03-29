@@ -4,6 +4,7 @@ import (
     "time"
     "net/http"
     "google.golang.org/grpc/metadata"  
+    "sync/atomic"
     pb "telemetry-bench/proto"
 )
 
@@ -32,10 +33,12 @@ func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize i
     defer metricsMu.Unlock()
 
     if protocol == "gRPC" {
+        atomic.AddUint64(&msgCountGrpc, 1)
         lastGlobalGrpcTS = data.Timestamp
         totalPayloadGrpc += pSize
         totalOverheadGrpc += hSize
     } else {
+        atomic.AddUint64(&msgCountRest, 1)
         totalPayloadRest += pSize
         totalOverheadRest += hSize
     }
@@ -66,4 +69,8 @@ func resetStats() {
     totalOverheadRest = 0
     totalPayloadGrpc = 0
     totalOverheadGrpc = 0
+    atomic.StoreUint64(&msgCountRest, 0)
+    atomic.StoreUint64(&msgCountGrpc, 0)
+    throughputRest = 0
+    throughputGrpc = 0
 }

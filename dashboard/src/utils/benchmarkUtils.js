@@ -1,25 +1,31 @@
+// Costante per il pareggio
+export const COMPARISON_WINNER = {
+  REST: 'REST',
+  GRPC: 'gRPC',
+  DRAW: 'DRAW'
+};
+
+const DRAW_STYLE = {
+  winner: COMPARISON_WINNER.DRAW,
+  color: "text-slate-500",
+  bg: "bg-slate-50",
+  border: "border-slate-200"
+};
+
 export const getPayloadComparison = (restTotalKB, grpcTotalKB) => {
-  // Controlliamo che i dati esistano e non siano identici
-  if (!restTotalKB || !grpcTotalKB || restTotalKB === grpcTotalKB) {
-    return { 
-      text: "Calculating savings...", 
-      winner: null, 
-      color: "text-slate-400", 
-      bg: "bg-slate-50", 
-      border: "border-slate-100" 
-    };
+  if (!restTotalKB || !grpcTotalKB) return { ...DRAW_STYLE, text: "Calculating..." };
+  
+  // Caso Pareggio
+  if (restTotalKB === grpcTotalKB) {
+    return { ...DRAW_STYLE, text: "Equal Payload Size" };
   }
 
   const isGrpcLighter = grpcTotalKB < restTotalKB;
   const savedKB = Math.abs(restTotalKB - grpcTotalKB);
-  
-  // Se il risparmio supera i 1024 KB, mostriamo MB, altrimenti KB
-  const savedDisplay = savedKB > 1024 
-    ? `${(savedKB / 1024).toFixed(2)} MB` 
-    : `${savedKB.toFixed(2)} KB`;
+  const savedDisplay = savedKB > 1024 ? `${(savedKB / 1024).toFixed(2)} MB` : `${savedKB.toFixed(2)} KB`;
 
   return {
-    winner: isGrpcLighter ? 'gRPC' : 'REST',
+    winner: isGrpcLighter ? COMPARISON_WINNER.GRPC : COMPARISON_WINNER.REST,
     text: `${isGrpcLighter ? 'gRPC' : 'REST'} saved ${savedDisplay}`,
     color: isGrpcLighter ? "text-orange-600" : "text-violet-600",
     bg: isGrpcLighter ? "bg-orange-50" : "bg-violet-50",
@@ -28,20 +34,41 @@ export const getPayloadComparison = (restTotalKB, grpcTotalKB) => {
 };
 
 export const getLatencyComparison = (restAvg, grpcAvg) => {
-  if (!restAvg || !grpcAvg || restAvg === grpcAvg) {
-    return { text: "Analyzing latency...", winner: null, color: "text-slate-400", bg: "bg-slate-50", border: "border-slate-100" };
+  if (!restAvg || !grpcAvg) return { ...DRAW_STYLE, text: "Analyzing..." };
+
+  if (restAvg === grpcAvg) {
+    return { ...DRAW_STYLE, text: "Identical Latency" };
   }
 
   const isGrpcFaster = grpcAvg < restAvg;
   const diff = Math.abs(restAvg - grpcAvg);
-  const maxVal = Math.max(restAvg, grpcAvg);
-  const percentage = ((diff / maxVal) * 100).toFixed(2);
+  const percentage = ((diff / Math.max(restAvg, grpcAvg)) * 100).toFixed(2);
 
   return {
-    winner: isGrpcFaster ? 'gRPC' : 'REST',
+    winner: isGrpcFaster ? COMPARISON_WINNER.GRPC : COMPARISON_WINNER.REST,
     text: `Best Avg. Latency: ${isGrpcFaster ? 'gRPC' : 'REST'} (-${percentage}%)`,
     color: isGrpcFaster ? "text-orange-600" : "text-violet-600",
     bg: isGrpcFaster ? "bg-orange-50" : "bg-violet-50",
     border: isGrpcFaster ? "border-orange-200" : "border-violet-200"
+  };
+};
+
+export const getThroughputComparison = (restThroughput, grpcThroughput) => {
+  if (!restThroughput || !grpcThroughput) return { ...DRAW_STYLE, text: "Monitoring..." };
+
+  if (restThroughput === grpcThroughput) {
+    return { ...DRAW_STYLE, text: "Stable Throughput (Equal)" };
+  }
+
+  const isGrpcHigher = grpcThroughput > restThroughput;
+  const diff = Math.abs(grpcThroughput - restThroughput);
+  const percentage = ((diff / Math.min(restThroughput, grpcThroughput)) * 100).toFixed(2);
+
+  return {
+    winner: isGrpcHigher ? COMPARISON_WINNER.GRPC : COMPARISON_WINNER.REST,
+    text: `Higher Throughput: ${isGrpcHigher ? 'gRPC' : 'REST'} (+${percentage}%)`,
+    color: isGrpcHigher ? "text-orange-600" : "text-violet-600",
+    bg: isGrpcHigher ? "bg-orange-50" : "bg-violet-50",
+    border: isGrpcHigher ? "border-orange-200" : "border-violet-200"
   };
 };

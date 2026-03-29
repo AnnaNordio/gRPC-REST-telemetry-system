@@ -44,6 +44,7 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 		PayloadSize int64 `json:"payload_size"`
 		Overhead int64 `json:"overhead_size"`
 		Jitter float64 `json:"jitter_rest"`
+		Throughput float64 `json:"throughput_rest"`
 	}{
 		History: restOnlyHistory,
 		AvgRest: fullData.AvgRest,
@@ -51,6 +52,7 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 		PayloadSize: fullData.TotalPayloadRest,
         Overhead: fullData.TotalOverheadRest,
 		Jitter: fullData.JitterRest,
+		Throughput: fullData.ThroughputRest,
 	}
 
 	json.NewEncoder(w).Encode(response)

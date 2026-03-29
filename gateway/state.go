@@ -20,4 +20,10 @@ var (
     currentMode = "polling"
     currentSize = "small"
     currentSensors = "1"
+
+    msgCountRest uint64
+    msgCountGrpc uint64
+    
+    throughputRest float64
+    throughputGrpc float64
 )
