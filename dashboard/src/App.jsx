@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTelemetry } from './hooks/useTelemetry';
 import { ControlPanel } from './components/ControlPanel';
 import Tabs from './components/Tabs';
@@ -52,19 +52,20 @@ const Dashboard = () => {
     }
   };
 
-  const handleSensorChange = async (count) => {
-  try {
-    const resp = await fetch(`http://localhost:8080/set-sensors?count=${count}`, { 
-      method: 'POST' 
-    });
-    if (resp.ok) {
-      setSensorNumber(count);
-      setHistory([]); 
+  const handleSensorChange = useCallback(async (count) => {
+    try {
+      const resp = await fetch(`http://localhost:8080/set-sensors?count=${count}`, { 
+        method: 'POST' 
+      });
+      if (resp.ok) {
+        setSensorNumber(count);
+        console.log(`Sensori aggiornati a ${count}, reset grafico...`);
+        setHistory([]); 
+      }
+    } catch (err) {
+      console.error("Errore aggiornamento sensori:", err);
     }
-  } catch (err) {
-    console.error("Errore aggiornamento sensori:", err);
-  }
-};
+  }, [setSensorNumber, setHistory]);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100">
