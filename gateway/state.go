@@ -19,4 +19,5 @@ var (
 
     currentMode = "polling"
     currentSize = "small"
+    currentSensors = "1"
 )

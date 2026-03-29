@@ -107,6 +107,26 @@ func handleGetSize(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, currentSize)
 }
 
+func handleSetSensors(w http.ResponseWriter, r *http.Request) {
+	newCount := r.URL.Query().Get("count")
+	if newCount != "" {
+		if newCount != currentSensors {
+			currentSensors = newCount
+			resetStats()
+			fmt.Printf("Numero sensori cambiato in: %s\n", currentSensors)
+		}
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Error(w, "Numero sensori non valido", http.StatusBadRequest)
+	}
+}
+
+// Restituisce il numero di sensori attuale
+func handleGetSensors(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, currentSensors)
+}
+
 var upgrader = websocket.Upgrader{
     CheckOrigin: func(r *http.Request) bool { return true }, 
 }

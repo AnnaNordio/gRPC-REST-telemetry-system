@@ -19,6 +19,8 @@ const Dashboard = () => {
     setIsStreaming, 
     payloadSize, 
     setPayloadSize, 
+    sensorNumber,
+    setSensorNumber,
     setHistory, 
     isConnected 
   } = useTelemetry();
@@ -50,6 +52,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleSensorChange = async (count) => {
+  try {
+    const resp = await fetch(`http://localhost:8080/set-sensors?count=${count}`, { 
+      method: 'POST' 
+    });
+    if (resp.ok) {
+      setSensorNumber(count);
+      setHistory([]); 
+    }
+  } catch (err) {
+    console.error("Errore aggiornamento sensori:", err);
+  }
+};
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100">
       <div className="max-w-[1400px] mx-auto p-4 md:p-8">
@@ -68,6 +84,7 @@ const Dashboard = () => {
                 onSizeChange={handleSizeChange} 
                 isStreaming={isStreaming} 
                 onModeToggle={handleModeToggle}
+                onSensorChange={handleSensorChange}
                 isConnected={isConnected}
               />
               

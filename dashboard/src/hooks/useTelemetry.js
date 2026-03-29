@@ -9,6 +9,7 @@ export const useTelemetry = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [payloadSize, setPayloadSize] = useState('small');
+  const [sensorNumber, setSensorNumber] = useState(1);
 
   const grpcClient = useRef(new protos.TelemetryServiceClient('http://localhost:8081'));
 
@@ -113,13 +114,13 @@ export const useTelemetry = () => {
         setHistory([]);
         setRestData({ avg: 0, p99: 0 });
         setGrpcData({ avg: 0, p99: 0 });
+        setSensorNumber(1); 
       } catch (err) {
         console.error("Errore durante il reset iniziale:", err);
       }
     };
-
     resetBackendAndLocal();
   }, []);
 
-  return { restData, grpcData, history, isStreaming, setIsStreaming, payloadSize, setPayloadSize, setHistory, isConnected };
+  return { restData, grpcData, history, isStreaming, setIsStreaming, payloadSize, setPayloadSize, sensorNumber, setSensorNumber, setHistory, isConnected };
 };
