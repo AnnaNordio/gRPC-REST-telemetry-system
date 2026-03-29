@@ -4,7 +4,7 @@ const Tabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'latency', label: 'Latency Analysis' },
     { id: 'payload', label: 'Payload Size Analysis' },
-    { id: 'throughput', label: 'Total Throughput Analysis' },
+    { id: 'throughput', label: 'Throughput Analysis' },
   ];
 
   return (

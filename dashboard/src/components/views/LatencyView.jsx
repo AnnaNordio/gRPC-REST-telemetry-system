@@ -6,7 +6,6 @@ import { getLatencyComparison } from '../../utils/benchmarkUtils';
 
 export const LatencyView = ({ restData, grpcData, history }) => {
   const comparison = getLatencyComparison(restData.avg, grpcData.avg);
-
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -16,6 +15,9 @@ export const LatencyView = ({ restData, grpcData, history }) => {
           subtitle="99th Percentile (Tail Latency)" 
           subValue={restData.p99} 
           unit="μs" 
+          addedTitle="Jitter"
+          addedValue={restData.jitter}
+          addedUnit="μs"
           borderClass="border-violet-600" 
           textColor="text-violet-700" 
         />
@@ -25,6 +27,9 @@ export const LatencyView = ({ restData, grpcData, history }) => {
           subtitle="99th Percentile (Tail Latency)" 
           subValue={grpcData.p99} 
           unit="μs" 
+          addedTitle="Jitter"
+          addedValue={grpcData.jitter}
+          addedUnit="μs"
           borderClass="border-orange-500" 
           textColor="text-orange-600" 
         />

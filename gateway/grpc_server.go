@@ -3,7 +3,6 @@ package main
 import (
     "context"
     "time"
-    "fmt"
     "google.golang.org/grpc/metadata"  
     pb "telemetry-bench/proto"
 )
@@ -64,6 +63,7 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
                 Timestamp:  fullData.LastGrpcTSRaw,
                 PayloadSize: fullData.TotalPayloadGrpc,
                 Overhead: fullData.TotalOverheadGrpc,
+                Jitter: fullData.JitterGrpc,
             }
             if err := stream.Send(grpcStats); err != nil {
                 return err
@@ -74,12 +74,12 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
 
 func (s *telemetryServer) GetStats(ctx context.Context, in *pb.Empty) (*pb.GrpcStats, error) {
     fullData := getDashboardData()
-    fmt.Printf("gRPC Stats Requested: Avg=%.2f ms, P99=%.2f ms, Payload=%d B, Overhead=%d B\n", fullData.AvgGrpc, fullData.P99Grpc, fullData.TotalPayloadGrpc, fullData.TotalOverheadGrpc)
     return &pb.GrpcStats{
         AvgLatency: fullData.AvgGrpc,
         P99Latency: fullData.P99Grpc,
         Timestamp:  fullData.LastGrpcTSRaw,
         PayloadSize: fullData.TotalPayloadGrpc,
         Overhead: fullData.TotalOverheadGrpc,
+        Jitter: fullData.JitterGrpc,
     }, nil
 }

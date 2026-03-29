@@ -43,12 +43,14 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 		P99Rest float64  `json:"p99_rest"`
 		PayloadSize int64 `json:"payload_size"`
 		Overhead int64 `json:"overhead_size"`
+		Jitter float64 `json:"jitter_rest"`
 	}{
 		History: restOnlyHistory,
 		AvgRest: fullData.AvgRest,
 		P99Rest: fullData.P99Rest,
 		PayloadSize: fullData.TotalPayloadRest,
         Overhead: fullData.TotalOverheadRest,
+		Jitter: fullData.JitterRest,
 	}
 
 	json.NewEncoder(w).Encode(response)
@@ -72,7 +74,6 @@ func handleSetMode(w http.ResponseWriter, r *http.Request) {
 		if newMode != currentMode {
 			currentMode = newMode
 			resetStats() // Resetta le metriche quando cambia il paradigma
-			fmt.Printf("Modalità cambiata in: %s\n", currentMode)
 		}
 		w.WriteHeader(http.StatusOK)
 	} else {
@@ -93,7 +94,6 @@ func handleSetSize(w http.ResponseWriter, r *http.Request) {
 		if newSize != currentSize {
 			currentSize = newSize
 			resetStats() 
-			fmt.Printf("Dimensione payload cambiata in: %s\n", currentSize)
 		}
 		w.WriteHeader(http.StatusOK)
 	} else {
@@ -113,7 +113,6 @@ func handleSetSensors(w http.ResponseWriter, r *http.Request) {
 		if newCount != currentSensors {
 			currentSensors = newCount
 			resetStats()
-			fmt.Printf("Numero sensori cambiato in: %s\n", currentSensors)
 		}
 		w.WriteHeader(http.StatusOK)
 	} else {
@@ -152,6 +151,5 @@ func handleReset(w http.ResponseWriter, r *http.Request) {
     }
     
     resetStats() 
-    fmt.Println("Statistiche resettate su richiesta del client")
     w.WriteHeader(http.StatusOK)
 }

@@ -7,6 +7,7 @@ import (
     "net/http"
     "google.golang.org/grpc/metadata"  
     "google.golang.org/protobuf/proto"
+    "math"
 )
 
 const aggregateWindow = 200
@@ -27,12 +28,17 @@ func getDashboardData() DashboardResponse {
     p99Rest := calculatePercentile(restLats, 0.99)
     p99Grpc := calculatePercentile(grpcLats, 0.99)
 
+    jitterRest := calculateJitter(restLats)
+    jitterGrpc := calculateJitter(grpcLats)
+
     return DashboardResponse{
         History:           history, // La history intera serve per disegnare le linee del grafico
         AvgRest:           avgRest, // I "numeroni" nelle card
         AvgGrpc:           avgGrpc,
         P99Rest:           p99Rest,
         P99Grpc:           p99Grpc,
+        JitterRest:        jitterRest, 
+        JitterGrpc:        jitterGrpc,
         TotalPayloadRest:  totalPayloadRest,
         TotalOverheadRest: totalOverheadRest,
         TotalPayloadGrpc:  totalPayloadGrpc,
@@ -84,6 +90,28 @@ func calculatePercentile(latencies []float64, percentile float64) float64 {
 
     index := int(float64(len(sorted)-1) * percentile)
     return sorted[index]
+}
+
+func calculateJitter(lats []float64) float64 {
+    n := len(lats)
+    if n < 2 {
+        return 0
+    }
+
+    // 1. Calcoliamo la media
+    avg := calculateAverage(lats)
+
+    // 2. Calcoliamo la somma degli scarti quadratici
+    var sumSq float64
+    for _, l := range lats {
+        diff := l - avg
+        sumSq += diff * diff
+    }
+
+    // 3. Deviazione standard (Jitter)
+    // Usiamo n-1 per la correzione di Bessel (più accurata per campioni limitati)
+    variance := sumSq / float64(n-1)
+    return math.Sqrt(variance)
 }
 
 // getJsonSize restituisce la dimensione in byte del payload serializzato in JSON

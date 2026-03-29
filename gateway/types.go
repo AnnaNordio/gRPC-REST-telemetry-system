@@ -14,6 +14,8 @@ type DashboardResponse struct {
     AvgGrpc       float64  `json:"avg_grpc"`
     P99Rest       float64  `json:"p99_rest"`
     P99Grpc       float64  `json:"p99_grpc"`
+    JitterRest    float64  `json:"jitter_rest"`
+    JitterGrpc    float64  `json:"jitter_grpc"`
     TotalPayloadRest  int64 `json:"total_payload_rest"`
     TotalOverheadRest int64 `json:"total_overhead_rest"`
     TotalPayloadGrpc  int64 `json:"total_payload_grpc"`

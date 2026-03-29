@@ -702,7 +702,8 @@ avgLatency: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
 p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
 timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
 payloadSize: jspb.Message.getFieldWithDefault(msg, 4, 0),
-overhead: jspb.Message.getFieldWithDefault(msg, 5, 0)
+overhead: jspb.Message.getFieldWithDefault(msg, 5, 0),
+jitter: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0)
   };
 
   if (includeInstance) {
@@ -758,6 +759,10 @@ proto.telemetry.GrpcStats.deserializeBinaryFromReader = function(msg, reader) {
     case 5:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setOverhead(value);
+      break;
+    case 6:
+      var value = /** @type {number} */ (reader.readDouble());
+      msg.setJitter(value);
       break;
     default:
       reader.skipField();
@@ -820,6 +825,13 @@ proto.telemetry.GrpcStats.serializeBinaryToWriter = function(message, writer) {
   if (f !== 0) {
     writer.writeInt64(
       5,
+      f
+    );
+  }
+  f = message.getJitter();
+  if (f !== 0.0) {
+    writer.writeDouble(
+      6,
       f
     );
   }
@@ -913,6 +925,24 @@ proto.telemetry.GrpcStats.prototype.getOverhead = function() {
  */
 proto.telemetry.GrpcStats.prototype.setOverhead = function(value) {
   return jspb.Message.setProto3IntField(this, 5, value);
+};
+
+
+/**
+ * optional double jitter = 6;
+ * @return {number}
+ */
+proto.telemetry.GrpcStats.prototype.getJitter = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.telemetry.GrpcStats} returns this
+ */
+proto.telemetry.GrpcStats.prototype.setJitter = function(value) {
+  return jspb.Message.setProto3FloatField(this, 6, value);
 };
 
 

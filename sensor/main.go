@@ -56,9 +56,6 @@ func main() {
         globalSize = config.Size
         configMu.Unlock()
 
-        log.Printf("Config aggiornata: mode=%s, size=%s, sensors=%d", 
-            config.Mode, config.Size, config.Sensors)
-
         // 3. Sincronizza il numero di goroutine usando config.Sensors
         // Nota: Sensors è già un int, non serve più strconv.Atoi qui!
         syncSensors(config.Sensors, grpcClient, httpClient)
@@ -95,7 +92,6 @@ func syncSensors(target int, client pb.TelemetryServiceClient, http *http.Client
 		}
 	}
 	currentSensors = target
-	log.Printf("Flotta sensori aggiornata: %d attivi", currentSensors)
 }
 
 func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServiceClient, httpClient *http.Client) {
@@ -111,7 +107,6 @@ func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServi
 			if stream != nil {
 				stream.CloseSend()
 			}
-			log.Printf("Sensore [%d] arrestato", id)
 			return
 		case <-ticker.C:
 			// LETTURA DINAMICA della configurazione (RLock per massime performance)
@@ -126,7 +121,6 @@ func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServi
 				stream = nil
 			}
 			lastMode = mode
-			log.Printf("Sensore [%d] generazione dati: mode=%s, size=%s", id, mode, size)
 			data := generateData(size)
 
 			if mode == "polling" {

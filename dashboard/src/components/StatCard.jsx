@@ -3,8 +3,9 @@ export const StatCard = ({
   subtitle,   
   value,       
   subValue,   
-  percentageTitle,
-  percentageValue,
+  addedTitle,
+  addedValue,
+  addedUnit,
   unit,
   subunit,
   borderClass, 
@@ -20,13 +21,13 @@ export const StatCard = ({
     <div className={`relative bg-white p-6 rounded-2xl shadow-sm border-l-[10px] ${borderClass} transition-all hover:shadow-md overflow-hidden`}>
       
       {/* Badge Percentuale - Più visibile e spaziato */}
-      {percentageTitle && hasValue(percentageValue) && (
+      {addedTitle && hasValue(addedValue) && (
         <div className={`absolute top-5 right-5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-end shadow-sm`}>
           <span className="text-[12px] uppercase font-bold text-slate-400 leading-none mb-1.5 tracking-wider">
-            {percentageTitle}
+            {addedTitle}
           </span>
           <span className={`text-base font-black ${textColor}`}>
-            {formatNum(percentageValue)}%
+            {formatNum(addedValue)}{addedUnit}
           </span>
         </div>
       )}

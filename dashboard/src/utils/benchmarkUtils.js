@@ -39,7 +39,7 @@ export const getLatencyComparison = (restAvg, grpcAvg) => {
 
   return {
     winner: isGrpcFaster ? 'gRPC' : 'REST',
-    text: `${isGrpcFaster ? 'gRPC' : 'REST'} is ${percentage}% faster`,
+    text: `Best Avg. Latency: ${isGrpcFaster ? 'gRPC' : 'REST'} (-${percentage}%)`,
     color: isGrpcFaster ? "text-orange-600" : "text-violet-600",
     bg: isGrpcFaster ? "bg-orange-50" : "bg-violet-50",
     border: isGrpcFaster ? "border-orange-200" : "border-violet-200"

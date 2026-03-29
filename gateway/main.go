@@ -17,7 +17,7 @@ func main() {
         }
         s := grpc.NewServer()
         pb.RegisterTelemetryServiceServer(s, &telemetryServer{})
-        log.Println("🚀 gRPC Server in ascolto su :50051")
+        log.Println("gRPC Server in ascolto su :50051")
         s.Serve(lis)
     }()
 
@@ -37,6 +37,6 @@ func main() {
     fs := http.FileServer(http.Dir("dashboard"))
     mux.Handle("/", fs)
 
-    log.Println("🚀 Gateway e Dashboard attivi su http://localhost:8080")
+    log.Println("gRPC Server in ascolto su :50051")
     log.Fatal(http.ListenAndServe(":8080", enableCORS(mux)))
 }
