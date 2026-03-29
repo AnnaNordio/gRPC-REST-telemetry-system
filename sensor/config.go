@@ -5,10 +5,11 @@ import (
     "net/http"
 )
 
-func fetchConfig(client *http.Client) (string, string) {
+func fetchConfig(client *http.Client) (string, string, string) {
     mode := fetchValue(client, modeEndpoint, "polling")
     size := fetchValue(client, sizeEndpoint, "small")
-    return mode, size
+    sensors := fetchValue(client, sensorsEndpoint, "1")
+    return mode, size, sensors
 }
 
 func fetchValue(client *http.Client, url string, defaultValue string) string {

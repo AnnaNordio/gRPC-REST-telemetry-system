@@ -6,4 +6,5 @@ const (
     gatewayGrpcAddr = "gateway:50051"
     modeEndpoint    = gatewayBaseUrl + "/get-mode"
     sizeEndpoint    = gatewayBaseUrl + "/get-size"
+    sensorsEndpoint = gatewayBaseUrl + "/get-sensors"
 )
