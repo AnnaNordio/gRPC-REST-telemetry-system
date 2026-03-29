@@ -6,6 +6,7 @@ import Tabs from './components/Tabs';
 // Import dei nuovi sottocomponenti
 import { LatencyView } from './components/views/LatencyView';
 import { PayloadView } from './components/views/PayloadView';
+import { ThroughputView } from './components/views/ThroughputView';
 import { ConnectionCard } from './components/ConnectionCard';
 
 const Dashboard = () => {
@@ -67,6 +68,20 @@ const Dashboard = () => {
     }
   }, [setSensorNumber, setHistory]);
 
+  const renderActiveView = () => {
+    switch (activeTab) {
+      case 'latency':
+        return <LatencyView restData={restData} grpcData={grpcData} history={history} />;
+      case 'payload':
+        return <PayloadView restData={restData} grpcData={grpcData} />;
+      case 'throughput':
+        return <ThroughputView restData={restData} grpcData={grpcData} />;
+      default:
+        return null;
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100">
       <div className="max-w-[1400px] mx-auto p-4 md:p-8">
@@ -97,18 +112,7 @@ const Dashboard = () => {
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
             <div className="mt-8 transition-all duration-300">
-              {activeTab === 'latency' ? (
-                <LatencyView 
-                  restData={restData} 
-                  grpcData={grpcData} 
-                  history={history} 
-                />
-              ) : (
-                <PayloadView 
-                  restData={restData} 
-                  grpcData={grpcData} 
-                />
-              )}
+              {renderActiveView()}
             </div>
           </main>
 

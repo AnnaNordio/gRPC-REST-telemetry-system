@@ -10,7 +10,7 @@ export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeTog
         <SensorScaleConfig onSensorChange={onSensorChange} />
       </ControlSection>
 
-      <ControlSection title="Payload Config">
+      <ControlSection title="Payload Size">
         <PayloadSelector currentSize={payloadSize} onSizeChange={onSizeChange} />
       </ControlSection>
 

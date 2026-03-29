@@ -3,7 +3,7 @@ import { GroupedBarChart } from '../charts/GroupedBarChart';
 import { ComparisonBadge } from '../ComparisonBadge';
 import { getPayloadComparison } from '../../utils/benchmarkUtils';
 
-export const PayloadView = ({ restData, grpcData }) => {
+export const ThroughputView = ({ restData, grpcData }) => {
   // 1. Calcoliamo tutto in KB una volta sola all'inizio
   const restKB = {
     payload: restData.payloadSize / 1024,
@@ -61,7 +61,7 @@ const comparison = getPayloadComparison(restKB.total, grpcKB.total);  return (
         
         <div className="flex items-center gap-2 mb-6">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Payload Size Analysis</h3>
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Total Throughput Analysis</h3>
         </div>
         
          <div>
