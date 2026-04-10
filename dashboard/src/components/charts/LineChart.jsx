@@ -25,7 +25,6 @@ ChartJS.register(
 
 export const LineChart = ({ history, unit }) => {
   const recentHistory = history?.slice(-50) || [];
-  console.log("LineChart - Recent History:", recentHistory); // Debug log per verificare i dati in ingresso
   const chartLabels = recentHistory.map(d => d.timestamp);
 
   const COLORS = {

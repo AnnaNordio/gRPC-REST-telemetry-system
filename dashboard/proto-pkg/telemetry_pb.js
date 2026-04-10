@@ -703,8 +703,8 @@ p99Latency: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
 timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
 payloadSize: jspb.Message.getFieldWithDefault(msg, 4, 0),
 overhead: jspb.Message.getFieldWithDefault(msg, 5, 0),
-jitter: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
-throughput: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0)
+throughput: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
+marshaltime: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0)
   };
 
   if (includeInstance) {
@@ -763,11 +763,11 @@ proto.telemetry.GrpcStats.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 6:
       var value = /** @type {number} */ (reader.readDouble());
-      msg.setJitter(value);
+      msg.setThroughput(value);
       break;
     case 7:
       var value = /** @type {number} */ (reader.readDouble());
-      msg.setThroughput(value);
+      msg.setMarshaltime(value);
       break;
     default:
       reader.skipField();
@@ -833,14 +833,14 @@ proto.telemetry.GrpcStats.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getJitter();
+  f = message.getThroughput();
   if (f !== 0.0) {
     writer.writeDouble(
       6,
       f
     );
   }
-  f = message.getThroughput();
+  f = message.getMarshaltime();
   if (f !== 0.0) {
     writer.writeDouble(
       7,
@@ -941,10 +941,10 @@ proto.telemetry.GrpcStats.prototype.setOverhead = function(value) {
 
 
 /**
- * optional double jitter = 6;
+ * optional double throughput = 6;
  * @return {number}
  */
-proto.telemetry.GrpcStats.prototype.getJitter = function() {
+proto.telemetry.GrpcStats.prototype.getThroughput = function() {
   return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0));
 };
 
@@ -953,16 +953,16 @@ proto.telemetry.GrpcStats.prototype.getJitter = function() {
  * @param {number} value
  * @return {!proto.telemetry.GrpcStats} returns this
  */
-proto.telemetry.GrpcStats.prototype.setJitter = function(value) {
+proto.telemetry.GrpcStats.prototype.setThroughput = function(value) {
   return jspb.Message.setProto3FloatField(this, 6, value);
 };
 
 
 /**
- * optional double throughput = 7;
+ * optional double marshalTime = 7;
  * @return {number}
  */
-proto.telemetry.GrpcStats.prototype.getThroughput = function() {
+proto.telemetry.GrpcStats.prototype.getMarshaltime = function() {
   return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 7, 0.0));
 };
 
@@ -971,7 +971,7 @@ proto.telemetry.GrpcStats.prototype.getThroughput = function() {
  * @param {number} value
  * @return {!proto.telemetry.GrpcStats} returns this
  */
-proto.telemetry.GrpcStats.prototype.setThroughput = function(value) {
+proto.telemetry.GrpcStats.prototype.setMarshaltime = function(value) {
   return jspb.Message.setProto3FloatField(this, 7, value);
 };
 

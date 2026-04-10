@@ -35,10 +35,10 @@ func (s *telemetryServer) StreamData(stream pb.TelemetryService_StreamDataServer
             currentOverhead = 14
         }
 
-        pSize := int64(getProtoSize(in))
+        pSize, mTime := getProtoMetrics(in)
         
         // Invia il peso del SINGOLO evento
-        processAndStoreMetrics("gRPC", in, pSize, currentOverhead)
+        processAndStoreMetrics("gRPC", in, pSize, currentOverhead, mTime)
     }
 }
 
@@ -64,6 +64,7 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
                 PayloadSize: fullData.TotalPayloadGrpc,
                 Overhead: fullData.TotalOverheadGrpc,
                 Throughput: fullData.ThroughputGrpc,
+                MarshalTime: fullData.MarshalAvgGrpc,
             }
             if err := stream.Send(grpcStats); err != nil {
                 return err
@@ -81,5 +82,6 @@ func (s *telemetryServer) GetStats(ctx context.Context, in *pb.Empty) (*pb.GrpcS
         PayloadSize: fullData.TotalPayloadGrpc,
         Overhead: fullData.TotalOverheadGrpc,
         Throughput: fullData.ThroughputGrpc,
+        MarshalTime: fullData.MarshalAvgGrpc,
     }, nil
 }

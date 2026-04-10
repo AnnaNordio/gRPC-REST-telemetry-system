@@ -16,8 +16,8 @@ func getDashboardData() DashboardResponse {
     defer metricsMu.Unlock()
 
     // 1. Prendiamo gli ultimi 200 campioni per protocollo (Indipendentemente dal sensore)
-    restLats := getLastNLats(history, "REST", aggregateWindow)
-    grpcLats := getLastNLats(history, "gRPC", aggregateWindow)
+    restLats, restMarshals := getLastMetrics(history, "REST", aggregateWindow)
+    grpcLats, grpcMarshals := getLastMetrics(history, "gRPC", aggregateWindow)
 
     // 2. Calcolo Latenza Media Aggregata (su finestra mobile)
     avgRest := calculateAverage(restLats)
@@ -26,6 +26,9 @@ func getDashboardData() DashboardResponse {
     // 3. Calcolo P99 Aggregato
     p99Rest := calculatePercentile(restLats, 0.99)
     p99Grpc := calculatePercentile(grpcLats, 0.99)
+
+    marshalAvgRest := calculateAverage(restMarshals)    
+    marshalAvgGrpc := calculateAverage(grpcMarshals)
 
     enrichedHistory := make([]Metric, len(history))
     copy(enrichedHistory, history)
@@ -45,6 +48,8 @@ func getDashboardData() DashboardResponse {
         AvgGrpc:           avgGrpc,
         P99Rest:           p99Rest,
         P99Grpc:           p99Grpc,
+        MarshalAvgRest:    marshalAvgRest,
+        MarshalAvgGrpc:    marshalAvgGrpc,
         TotalPayloadRest:  totalPayloadRest,
         TotalOverheadRest: totalOverheadRest,
         TotalPayloadGrpc:  totalPayloadGrpc,
@@ -56,21 +61,16 @@ func getDashboardData() DashboardResponse {
 }
 
 // Helper per isolare le latenze dell'ultimo periodo
-func getLastNLats(h []Metric, protocol string, n int) []float64 {
+func getLastMetrics(h []Metric, protocol string, n int) ([]float64, []float64) {
     var lats []float64
-    // 1. Raccogliamo i dati (partendo dal più recente)
+    var marshals []float64
     for i := len(h) - 1; i >= 0 && len(lats) < n; i-- {
         if h[i].Protocol == protocol {
             lats = append(lats, h[i].LatencyMs)
+            marshals = append(marshals, h[i].MarshalTime)
         }
     }
-
-    // 2. INVERTIAMO l'array per riportarlo in ordine cronologico (Vecchio -> Nuovo)
-    for i, j := 0, len(lats)-1; i < j; i, j = i+1, j-1 {
-        lats[i], lats[j] = lats[j], lats[i]
-    }
-    
-    return lats
+    return lats, marshals
 }
 
 func calculateAverage(lats []float64) float64 {
@@ -107,23 +107,31 @@ func calculatePercentile(latencies []float64, percentile float64) float64 {
     return sorted[index]
 }
 
-// getJsonSize restituisce la dimensione in byte del payload serializzato in JSON
-func getJsonSize(v interface{}) int64 {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return 0
-	}
-	return int64(len(b))
+// Calcola peso (byte) e tempo (us) in un unico passaggio per JSON
+func getJsonMetrics(v interface{}) (int64, float64) {
+    start := time.Now()
+    b, err := json.Marshal(v)
+    elapsed := float64(time.Since(start).Microseconds())
+    
+    if err != nil {
+        return 0, 0
+    }
+    return int64(len(b)), elapsed
 }
 
-// getProtoSize restituisce la dimensione in byte del payload serializzato in Protobuf
-func getProtoSize(m proto.Message) int64 {
-	b, err := proto.Marshal(m)
-	if err != nil {
-		return 0
-	}
-	return int64(len(b))
+// Calcola peso (byte) e tempo (us) in un unico passaggio per Protobuf
+func getProtoMetrics(m proto.Message) (int64, float64) {
+    start := time.Now()
+    b, err := proto.Marshal(m)
+    elapsed := float64(time.Since(start).Microseconds())
+    
+    if err != nil {
+        return 0, 0
+    }
+    return int64(len(b)), elapsed
 }
+
+
 
 // Supporto per calcolare i byte reali degli header REST
 func calculateHTTPOverhead(req *http.Request) int64 {

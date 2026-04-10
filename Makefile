@@ -13,9 +13,3 @@ gen:
 	# 3. Build del bundle per Vite
 	# Usiamo && per assicurarci che se npm install fallisce, il build non parta
 	cd dashboard/proto-pkg && npm install && npm run build
-
-run-gateway:
-	go run ./gateway/*.go 
-
-run-sensor:
-	go run ./sensor/*.go

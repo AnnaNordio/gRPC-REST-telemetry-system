@@ -6,9 +6,6 @@ import { getLatencyComparison } from '../../utils/benchmarkUtils';
 
 export const LatencyView = ({ restData, grpcData, history }) => {
   const comparison = getLatencyComparison(restData.avg, grpcData.avg);
-  console.log("LatencyView - Rest Data:", restData);
-  console.log("LatencyView - gRPC Data:", grpcData);
-  console.log("LatencyView - History Data:", history);
   const formatVal = (val) => (val > 1000 ? (val / 1000).toFixed(2) : val.toFixed(2));
   const getUnit = (val) => (val > 1000 ? "ms" : "μs");
 

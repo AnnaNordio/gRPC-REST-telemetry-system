@@ -1,5 +1,5 @@
 import { StatCard } from '../StatCard';
-import { GroupedBarChart } from '../charts/GroupedBarChart';
+import { StackedBarChart } from '../charts/StackedBarChartPayload';
 import { ComparisonBadge } from '../ComparisonBadge';
 import { getPayloadComparison } from '../../utils/benchmarkUtils';
 
@@ -69,12 +69,9 @@ const comparison = getPayloadComparison(restKB.total, grpcKB.total);  return (
         </div>
         
          <div>
-          <GroupedBarChart 
-            restSize={restKB.payload} 
-            restOverhead={restKB.overhead} 
-            grpcSize={grpcKB.payload} 
-            grpcOverhead={grpcKB.overhead} 
-            unit="KB"
+          <StackedBarChart 
+            restData={restData}
+            grpcData={grpcData}
           />
         </div>
       </div>       

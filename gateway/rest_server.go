@@ -44,6 +44,7 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 		PayloadSize int64 `json:"payload_size"`
 		Overhead int64 `json:"overhead_size"`
 		Throughput float64 `json:"throughput_rest"`
+		MarshalTime float64 `json:"marshal_time_rest"`
 	}{
 		History: restOnlyHistory,
 		AvgRest: fullData.AvgRest,
@@ -51,6 +52,7 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 		PayloadSize: fullData.TotalPayloadRest,
         Overhead: fullData.TotalOverheadRest,
 		Throughput: fullData.ThroughputRest,
+		MarshalTime: fullData.MarshalAvgRest,
 	}
 
 	json.NewEncoder(w).Encode(response)

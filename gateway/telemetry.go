@@ -9,20 +9,20 @@ import (
 )
 
 func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
-    pSize := int64(getJsonSize(data))
+    pSize, mTime := getJsonMetrics(data)
     hSize := calculateHTTPOverhead(r)
     
-    processAndStoreMetrics("REST", data, pSize, hSize)
+    processAndStoreMetrics("REST", data, pSize, hSize, mTime)
 }
 
 func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
-    pSize := int64(getProtoSize(data))
+    pSize, mTime := getProtoMetrics(data)
     hSize := 5 + calculateGRPCOverhead(md) 
     
-    processAndStoreMetrics("gRPC", data, pSize, hSize)
+    processAndStoreMetrics("gRPC", data, pSize, hSize, mTime)
 }
 
-func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize int64) {
+func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize int64, mTime float64) {
     if data.Timestamp <= 0 {
         return
     }
@@ -49,6 +49,7 @@ func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize i
         LatencyMs:    latency,
         PayloadByte:  pSize,
         OverheadByte: hSize,
+        MarshalTime:  mTime,
         Timestamp:    string(time.UnixMicro(data.Timestamp).Format("15:04:05.000")),
     }
 

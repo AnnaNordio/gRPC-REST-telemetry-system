@@ -7,6 +7,7 @@ import Tabs from './components/Tabs';
 import { LatencyView } from './components/views/LatencyView';
 import { PayloadView } from './components/views/PayloadView';
 import { ThroughputView } from './components/views/ThroughputView';
+import { MarshalView } from './components/views/MarshalView';
 import { ConnectionCard } from './components/ConnectionCard';
 
 const Dashboard = () => {
@@ -73,8 +74,10 @@ const Dashboard = () => {
         return <LatencyView restData={restData} grpcData={grpcData} history={history} />;
       case 'payload':
         return <PayloadView restData={restData} grpcData={grpcData} />;
-      case 'throughput':
+      case 'scalability':
         return <ThroughputView restData={restData} grpcData={grpcData} />;
+      case 'marshalling':
+        return <MarshalView restData={restData} grpcData={grpcData} history={history} />;
       default:
         return null;
     }

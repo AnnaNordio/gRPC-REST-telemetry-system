@@ -72,3 +72,22 @@ export const getThroughputComparison = (restThroughput, grpcThroughput) => {
     border: isGrpcHigher ? "border-orange-200" : "border-violet-200"
   };
 };
+
+export const getMarshalComparison = (restMarshalUs, grpcMarshalUs) => {
+  if (!restMarshalUs || !grpcMarshalUs) return { ...DRAW_STYLE, text: "Measuring CPU..." };
+
+  if (Math.abs(restMarshalUs - grpcMarshalUs) < 0.1) {
+    return { ...DRAW_STYLE, text: "Similar CPU Usage" };
+  }
+
+  const isGrpcFaster = grpcMarshalUs < restMarshalUs;
+  const ratio = (Math.max(restMarshalUs, grpcMarshalUs) / Math.min(restMarshalUs, grpcMarshalUs)).toFixed(1);
+
+  return {
+    winner: isGrpcFaster ? COMPARISON_WINNER.GRPC : COMPARISON_WINNER.REST,
+    text: `CPU Efficiency: ${isGrpcFaster ? 'gRPC' : 'REST'} is ${ratio}x faster`,
+    color: isGrpcFaster ? "text-orange-600" : "text-violet-600",
+    bg: isGrpcFaster ? "bg-orange-50" : "bg-violet-50",
+    border: isGrpcFaster ? "border-orange-200" : "border-violet-200"
+  };
+};

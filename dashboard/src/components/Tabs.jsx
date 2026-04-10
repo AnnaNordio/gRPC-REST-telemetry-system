@@ -2,9 +2,10 @@ import React from 'react';
 
 const Tabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { id: 'latency', label: 'Latency Analysis' },
-    { id: 'payload', label: 'Payload Size Analysis' },
-    { id: 'throughput', label: 'Throughput Analysis' },
+    { id: 'latency', label: 'Latency & Reliability' },
+    { id: 'marshalling', label: 'Computational Cost' },
+    { id: 'payload', label: 'Payload & Efficiency' },
+    { id: 'scalability', label: 'Scalability & Stress Test' },
   ];
 
   return (
