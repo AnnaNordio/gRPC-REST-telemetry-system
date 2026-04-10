@@ -6,6 +6,7 @@ type Metric struct {
     Timestamp    string  `json:"timestamp"`     
     PayloadByte  int64   `json:"payload_byte"`
     OverheadByte int64   `json:"overhead_byte"`
+    P99         float64 `json:"p99_ms"`
 }
 
 type DashboardResponse struct {
@@ -14,8 +15,6 @@ type DashboardResponse struct {
     AvgGrpc       float64  `json:"avg_grpc"`
     P99Rest       float64  `json:"p99_rest"`
     P99Grpc       float64  `json:"p99_grpc"`
-    JitterRest    float64  `json:"jitter_rest"`
-    JitterGrpc    float64  `json:"jitter_grpc"`
     ThroughputGrpc float64  `json:"throughput_grpc"`
     ThroughputRest float64  `json:"throughput_rest"`
     TotalPayloadRest  int64 `json:"total_payload_rest"`

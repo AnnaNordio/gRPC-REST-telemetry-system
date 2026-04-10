@@ -63,7 +63,6 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
                 Timestamp:  fullData.LastGrpcTSRaw,
                 PayloadSize: fullData.TotalPayloadGrpc,
                 Overhead: fullData.TotalOverheadGrpc,
-                Jitter: fullData.JitterGrpc,
                 Throughput: fullData.ThroughputGrpc,
             }
             if err := stream.Send(grpcStats); err != nil {
@@ -81,7 +80,6 @@ func (s *telemetryServer) GetStats(ctx context.Context, in *pb.Empty) (*pb.GrpcS
         Timestamp:  fullData.LastGrpcTSRaw,
         PayloadSize: fullData.TotalPayloadGrpc,
         Overhead: fullData.TotalOverheadGrpc,
-        Jitter: fullData.JitterGrpc,
         Throughput: fullData.ThroughputGrpc,
     }, nil
 }

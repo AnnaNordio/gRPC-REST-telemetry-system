@@ -6,33 +6,35 @@ import { getLatencyComparison } from '../../utils/benchmarkUtils';
 
 export const LatencyView = ({ restData, grpcData, history }) => {
   const comparison = getLatencyComparison(restData.avg, grpcData.avg);
+  console.log("LatencyView - Rest Data:", restData);
+  console.log("LatencyView - gRPC Data:", grpcData);
+  console.log("LatencyView - History Data:", history);
+  const formatVal = (val) => (val > 1000 ? (val / 1000).toFixed(2) : val.toFixed(2));
+  const getUnit = (val) => (val > 1000 ? "ms" : "μs");
+
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* REST CARD */}
         <StatCard 
-          title="REST Average Aggregate Latency" 
-          value={restData.avg > 1000  ?(restData.avg / 1000).toFixed(2) :restData.avg.toFixed(2)} 
-          subtitle="99th Percentile (Tail Latency)" 
-          subValue={restData.p99 > 1000  ?(restData.p99 / 1000).toFixed(2) :restData.p99.toFixed(2)} 
-          unit={restData.avg > 1000  ? "ms" : "μs"} 
-          subunit={restData.p99 > 1000  ? "ms" : "μs"} 
-          addedTitle="Jitter"
-          addedValue={restData.jitter > 1000  ?(restData.jitter / 1000) :restData.jitter} 
-          addedUnit={restData.jitter > 1000  ? "ms" : "μs"} 
-
+          title="REST Latency (Avg)" 
+          value={formatVal(restData.avg)} 
+          unit={getUnit(restData.avg)}
+          subtitle="99th Percentile (Tail)" 
+          subValue={formatVal(restData.p99)} 
+          subunit={getUnit(restData.p99)} 
           borderClass="border-violet-600" 
           textColor="text-violet-700" 
         />
+
+        {/* GRPC CARD */}
         <StatCard 
-          title="gRPC Average Aggregate Latency" 
-          value={grpcData.avg > 1000  ?(grpcData.avg / 1000).toFixed(2) :grpcData.avg.toFixed(2)} 
-          subtitle="99th Percentile (Tail Latency)" 
-          subValue={grpcData.p99 > 1000  ?(grpcData.p99 / 1000).toFixed(2) :grpcData.p99.toFixed(2)} 
-          unit={grpcData.avg > 1000  ? "ms" : "μs"} 
-          subunit={grpcData.p99 > 1000  ? "ms" : "μs"} 
-          addedTitle="Jitter"
-          addedValue={grpcData.jitter > 1000  ?(grpcData.jitter / 1000):grpcData.jitter} 
-          addedUnit={grpcData.jitter > 1000  ? "ms" : "μs"} 
+          title="gRPC Latency (Avg)" 
+          value={formatVal(grpcData.avg)} 
+          unit={getUnit(grpcData.avg)}
+          subtitle="99th Percentile (Tail)" 
+          subValue={formatVal(grpcData.p99)} 
+          subunit={getUnit(grpcData.p99)} 
           borderClass="border-orange-500" 
           textColor="text-orange-600" 
         />
@@ -46,12 +48,12 @@ export const LatencyView = ({ restData, grpcData, history }) => {
         <div className="flex items-center gap-2 mb-6">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-            Instantaneous Latency Timeline (All Sensors)
+            Latency & Reliability Timeline (Avg vs P99)
           </h3>
         </div>
         
-        <div>
-          <LineChart history={history} measure="Microseconds" unit="μs" />
+        <div className="h-[400px]">
+          <LineChart history={history} unit={'μs'} />
         </div>
       </div>
     </div>
