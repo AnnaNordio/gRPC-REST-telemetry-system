@@ -4,7 +4,7 @@ import { ComparisonBadge } from '../ComparisonBadge';
 import { getMarshalComparison } from '../../utils/benchmarkUtils';
 import { StackedBarChart } from '../charts/StackedBarChart';
 
-export const MarshalView = ({ restData, grpcData }) => {
+export const MarshalView = ({ restData, grpcData, protocol }) => {
   // Calcolo della comparazione CPU
   const marshalComp = getMarshalComparison(restData.marshalTime, grpcData.marshalTime);
 
@@ -43,7 +43,7 @@ export const MarshalView = ({ restData, grpcData }) => {
       <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative">
           
         <div className="absolute top-6 right-6 z-10">
-          <ComparisonBadge data={marshalComp} />
+          <ComparisonBadge data={marshalComp} protocol={protocol} />
         </div>
         <div className="flex items-center gap-2 mb-6">
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>

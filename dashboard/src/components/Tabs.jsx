@@ -9,7 +9,7 @@ const Tabs = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <div className="w-full mb-4"> 
+    <div className="w-full"> 
       <div className="flex w-full bg-slate-200/50 rounded-xl backdrop-blur-sm shadow-sm">
         {tabs.map((tab) => (
           <button

@@ -4,7 +4,7 @@ import { LineChart } from '../charts/LineChart';
 import { ComparisonBadge } from '../ComparisonBadge';
 import { getLatencyComparison } from '../../utils/benchmarkUtils';
 
-export const LatencyView = ({ restData, grpcData, history }) => {
+export const LatencyView = ({ restData, grpcData, history, protocol }) => {
   const comparison = getLatencyComparison(restData.avg, grpcData.avg);
   const formatVal = (val) => (val > 1000 ? (val / 1000).toFixed(2) : val.toFixed(2));
   const getUnit = (val) => (val > 1000 ? "ms" : "μs");
@@ -39,7 +39,7 @@ export const LatencyView = ({ restData, grpcData, history }) => {
       
       <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative">
         <div className="absolute top-6 right-6 z-10">
-          <ComparisonBadge data={comparison} />
+          <ComparisonBadge data={comparison} protocol={protocol} />
         </div>
         
         <div className="flex items-center gap-2 mb-6">

@@ -3,7 +3,7 @@ import { StackedBarChart } from '../charts/StackedBarChartPayload';
 import { ComparisonBadge } from '../ComparisonBadge';
 import { getPayloadComparison } from '../../utils/benchmarkUtils';
 
-export const PayloadView = ({ restData, grpcData }) => {
+export const PayloadView = ({ restData, grpcData, protocol }) => {
   // 1. Calcoliamo tutto in KB una volta sola all'inizio
   const restKB = {
     payload: restData.payloadSize / 1024,
@@ -60,7 +60,7 @@ const comparison = getPayloadComparison(restKB.total, grpcKB.total);  return (
 
       <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative">
         <div className="absolute top-6 right-6 z-10">
-          <ComparisonBadge data={comparison} />
+          <ComparisonBadge data={comparison} protocol={protocol} />
         </div>
         
         <div className="flex items-center gap-2 mb-6">

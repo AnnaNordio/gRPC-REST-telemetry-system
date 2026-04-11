@@ -4,7 +4,7 @@ import { BarChart } from '../charts/BarChart';
 import { ComparisonBadge } from '../ComparisonBadge';
 import { getThroughputComparison } from '../../utils/benchmarkUtils';
 
-export const ThroughputView = ({ restData, grpcData, history }) => {
+export const ThroughputView = ({ restData, grpcData, protocol }) => {
   const comparison = getThroughputComparison(restData.throughput, grpcData.throughput);
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -27,7 +27,7 @@ export const ThroughputView = ({ restData, grpcData, history }) => {
       
       <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative">
         <div className="absolute top-6 right-6 z-10">
-          <ComparisonBadge data={comparison} />
+          <ComparisonBadge data={comparison} protocol={protocol} />
         </div>
         
         <div className="flex items-center gap-2 mb-6">

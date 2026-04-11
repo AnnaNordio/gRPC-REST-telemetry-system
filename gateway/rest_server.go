@@ -58,6 +58,34 @@ func handleResults(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+var upgrader = websocket.Upgrader{
+    CheckOrigin: func(r *http.Request) bool { return true }, 
+}
+
+func handleWS(w http.ResponseWriter, r *http.Request) {
+    conn, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        return
+    }
+    defer conn.Close()
+
+    for {
+        if _, _, err := conn.ReadMessage(); err != nil {
+            break 
+        }
+    }
+}
+
+func handleReset(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Metodo non consentito", http.StatusMethodNotAllowed)
+        return
+    }
+    
+    resetStats() 
+    w.WriteHeader(http.StatusOK)
+}
+
 // Riceve i dati dai sensori via REST
 func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 	var data pb.SensorData
@@ -128,24 +156,6 @@ func handleGetSensors(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, currentSensors)
 }
 
-var upgrader = websocket.Upgrader{
-    CheckOrigin: func(r *http.Request) bool { return true }, 
-}
-
-func handleWS(w http.ResponseWriter, r *http.Request) {
-    conn, err := upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        return
-    }
-    defer conn.Close()
-
-    for {
-        if _, _, err := conn.ReadMessage(); err != nil {
-            break 
-        }
-    }
-}
-
 func handleSetProtocol(w http.ResponseWriter, r *http.Request) {
     p := r.URL.Query().Get("p")
 	if p != "" {
@@ -162,14 +172,4 @@ func handleSetProtocol(w http.ResponseWriter, r *http.Request) {
 func handleGetProtocol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, currentProtocol)
-}
-
-func handleReset(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        http.Error(w, "Metodo non consentito", http.StatusMethodNotAllowed)
-        return
-    }
-    
-    resetStats() 
-    w.WriteHeader(http.StatusOK)
 }

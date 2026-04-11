@@ -87,13 +87,13 @@ const Dashboard = () => {
   const renderActiveView = () => {
     switch (activeTab) {
       case 'latency':
-        return <LatencyView restData={restData} grpcData={grpcData} history={history} />;
+        return <LatencyView restData={restData} grpcData={grpcData} history={history} protocol={activeFilter}/>;
       case 'payload':
-        return <PayloadView restData={restData} grpcData={grpcData} />;
+        return <PayloadView restData={restData} grpcData={grpcData} protocol={activeFilter} />;
       case 'scalability':
-        return <ThroughputView restData={restData} grpcData={grpcData} />;
+        return <ThroughputView restData={restData} grpcData={grpcData} protocol={activeFilter} />;
       case 'marshalling':
-        return <MarshalView restData={restData} grpcData={grpcData} history={history} />;
+        return <MarshalView restData={restData} grpcData={grpcData} protocol={activeFilter} />;
       default:
         return null;
     }
@@ -104,10 +104,14 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100">
       <div className="max-w-[1400px] mx-auto p-4 md:p-8">
         
-        <header className="mb-10">
+        <header className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
             IoT Telemetry <span className="text-blue-600">Benchmark</span>
           </h1>
+          
+          <div className="w-full sm:w-auto">
+            <ConnectionCard isConnected={isConnected} />
+          </div>
         </header>
         <div className="flex flex-col lg:flex-row gap-8 items-stretch">
           
@@ -123,8 +127,6 @@ const Dashboard = () => {
                 activeFilter={activeFilter}
                 onProtocolChange={handleProtocolChange}
               />
-              
-              <ConnectionCard isConnected={isConnected} />
             </div>
           </aside>
 
