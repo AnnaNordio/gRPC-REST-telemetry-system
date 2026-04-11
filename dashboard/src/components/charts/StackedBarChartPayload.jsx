@@ -18,8 +18,7 @@ export const StackedBarChart = ({ restData, grpcData }) => {
     datasets: [
       {
         label: 'Payload Size',
-        data: [restData.payloadSize, grpcData.payloadSize],
-        // Viola per REST, Arancio per gRPC (Pieni)
+        data: [restData.payloadSize / 1024, grpcData.payloadSize / 1024],       
         backgroundColor: ['#7c3aed', '#ea580c'], 
         borderRadius: 4,
         stack: 'Stack 0',
@@ -27,9 +26,8 @@ export const StackedBarChart = ({ restData, grpcData }) => {
       {
         label: 'Overhead Size',
         data: [
-          restData.overheadSize, grpcData.overheadSize
+          restData.overheadSize / 1024, grpcData.overheadSize / 1024
         ],
-        // Viola sbiadito per REST, Arancio sbiadito per gRPC
         backgroundColor: ['#ddd6fe', '#ffedd5'], 
         borderRadius: 4,
         stack: 'Stack 0',
