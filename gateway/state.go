@@ -20,6 +20,7 @@ var (
     currentMode = "polling"
     currentSize = "small"
     currentSensors = "1"
+    currentProtocol = "both"
 
     msgCountRest uint64
     msgCountGrpc uint64

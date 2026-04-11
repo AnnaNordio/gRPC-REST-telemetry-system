@@ -24,7 +24,9 @@ const Dashboard = () => {
     sensorNumber,
     setSensorNumber,
     setHistory, 
-    isConnected 
+    isConnected,
+    activeFilter,
+    setActiveFilter,
   } = useTelemetry();
 
   // --- HANDLERS ---
@@ -68,6 +70,20 @@ const Dashboard = () => {
     }
   }, [setSensorNumber, setHistory]);
 
+  const handleProtocolChange = async (mode) => {
+    try {
+      const resp = await fetch(`http://localhost:8080/set-protocol?p=${mode}`, { 
+        method: 'POST' 
+      });
+      if (resp.ok) {
+        setActiveFilter(mode); 
+        setHistory([]);
+      }
+    } catch (err) {
+      console.error("Errore aggiornamento protocollo attivo:", err);
+    }
+  };
+
   const renderActiveView = () => {
     switch (activeTab) {
       case 'latency':
@@ -104,6 +120,8 @@ const Dashboard = () => {
                 onModeToggle={handleModeToggle}
                 onSensorChange={handleSensorChange}
                 isConnected={isConnected}
+                activeFilter={activeFilter}
+                onProtocolChange={handleProtocolChange}
               />
               
               <ConnectionCard isConnected={isConnected} />

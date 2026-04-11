@@ -2,10 +2,16 @@ import { SensorScaleConfig } from './controlPanelItems/SensorScaleConfig';
 import { PayloadSelector } from './controlPanelItems/PayloadSelector';
 import { TransmissionToggle } from './controlPanelItems/TransmitionToggle';
 import { ControlSection } from './controlPanelItems/ControlSection';
-export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeToggle, onSensorChange }) => {
+import { ProtocolFilter } from './controlPanelItems/ProtocolFilter';
+export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeToggle, onSensorChange, activeFilter, onProtocolChange }) => {
   return (
     <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 flex flex-col gap-8 h-full">
-      
+      <ControlSection title="Active Protocols">
+        <ProtocolFilter 
+          activeFilter={activeFilter} 
+          onFilterChange={onProtocolChange} 
+        />
+      </ControlSection>
       <ControlSection title="Scale Test">
         <SensorScaleConfig onSensorChange={onSensorChange} />
       </ControlSection>

@@ -146,6 +146,24 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func handleSetProtocol(w http.ResponseWriter, r *http.Request) {
+    p := r.URL.Query().Get("p")
+	if p != "" {
+		if p != currentProtocol {
+			currentProtocol = p
+			resetStats() 
+		}
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Error(w, "Protocollo non valido", http.StatusBadRequest)
+	}
+}
+
+func handleGetProtocol(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, currentProtocol)
+}
+
 func handleReset(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodPost {
         http.Error(w, "Metodo non consentito", http.StatusMethodNotAllowed)

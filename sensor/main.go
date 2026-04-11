@@ -17,6 +17,7 @@ var (
 	configMu sync.RWMutex
 	globalMode string
 	globalSize string
+    globalProtocol string
 
 	sensorMu       sync.Mutex
 	stopChannels   = make(map[int]chan struct{})
@@ -54,6 +55,7 @@ func main() {
         configMu.Lock()
         globalMode = config.Mode
         globalSize = config.Size
+        globalProtocol = config.Protocol
         configMu.Unlock()
 
         // 3. Sincronizza il numero di goroutine usando config.Sensors
@@ -130,7 +132,7 @@ func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServi
             if mode == "polling" {
                 // Esecuzione Unary (REQ-RES) a 10Hz
                 // Rimosso il filtro %1000 per uniformare la frequenza
-                executePolling(httpClient, grpcClient, data)
+                executePolling(httpClient, grpcClient, data, globalProtocol)
             } else {
                 // Esecuzione STREAMING a 10Hz
                 // Inizializzazione stream se necessario
@@ -143,7 +145,7 @@ func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServi
                     }
                 }
 
-                executeStreaming(httpClient, stream, data)
+                executeStreaming(httpClient, stream, data, globalProtocol)
             }
         }
     }

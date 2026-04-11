@@ -7,7 +7,6 @@ import (
     "io"
     "net/http"
     "time"
-    "log"
 
     pb "telemetry-bench/proto"
 )
@@ -23,28 +22,31 @@ func sendRest(client *http.Client, data *pb.SensorData) {
     }
 }
 
-func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamDataClient, data *pb.SensorData) {
+func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamDataClient, data *pb.SensorData, protocol string) {
     data.Timestamp = time.Now().UnixMicro()
     
     // Invio gRPC Stream
-    _ = stream.Send(data)
+    if protocol == "grpc" || protocol == "both" {
+        _ = stream.Send(data)
+    }
     
     // Invio REST asincrono
-    go sendRest(client, data)
+    if protocol == "rest" || protocol == "both" {
+        go sendRest(client, data)
+    }
 }
 
-// executePolling modificata per essere più robusta
-func executePolling(client *http.Client, grpcClient pb.TelemetryServiceClient, data *pb.SensorData) {
-	data.Timestamp = time.Now().UnixMicro()
-	
-	// REST asincrono
-	go sendRest(client, data)
-	
-	// gRPC Unary
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	_, err := grpcClient.SendData(ctx, data)
-	if err != nil {
-		log.Printf("Errore gRPC Polling: %v", err)
-	}
+
+func executePolling(client *http.Client, grpcClient pb.TelemetryServiceClient, data *pb.SensorData, protocol string) {
+    data.Timestamp = time.Now().UnixMicro()
+    
+    if protocol == "rest" || protocol == "both" {
+        go sendRest(client, data)
+    }
+    
+    if protocol == "grpc" || protocol == "both" {
+        ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+        defer cancel()
+        _, _ = grpcClient.SendData(ctx, data)
+    }
 }
