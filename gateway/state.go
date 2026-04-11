@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+    "sync"
+    "time"   
+)
 
 var (
     metricsMu sync.Mutex
@@ -27,4 +30,7 @@ var (
     
     throughputRest float64
     throughputGrpc float64
+
+    warmupUntil time.Time
+    warmupDuration = 5 * time.Second
 )

@@ -9,6 +9,9 @@ import (
 )
 
 func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
+    if time.Now().Before(warmupUntil) {
+        return
+    }
     pSize, mTime := getJsonMetrics(data)
     hSize := calculateHTTPOverhead(r)
     
@@ -16,6 +19,9 @@ func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
 }
 
 func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
+    if time.Now().Before(warmupUntil) {
+        return
+    }
     pSize, mTime := getProtoMetrics(data)
     hSize := 5 + calculateGRPCOverhead(md) 
     
@@ -63,6 +69,8 @@ func resetStats() {
     metricsMu.Lock()
     defer metricsMu.Unlock()
     
+    warmupUntil = time.Now().Add(warmupDuration)
+
     history = []Metric{}
     countSizeRest = 0
     countSizeGrpc = 0
@@ -74,4 +82,5 @@ func resetStats() {
     atomic.StoreUint64(&msgCountGrpc, 0)
     throughputRest = 0
     throughputGrpc = 0
+   
 }
