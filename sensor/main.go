@@ -26,74 +26,85 @@ var (
 )
 
 func main() {
-	log.Println("Avvio Sensore High-Precision Multi-Node...")
+    log.Println("Avvio Sensore High-Precision Multi-Node...")
 
-	// 1. Setup gRPC Connection (Condivisa tra tutti i sensori)
-	conn, err := grpc.Dial(gatewayGrpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("Errore connessione gRPC: %v", err)
-	}
-	defer conn.Close()
-	grpcClient := pb.NewTelemetryServiceClient(conn)
+    // 1. Setup gRPC Connection Pool (8 connessioni TCP separate)
+    const poolSize = 8
+    var grpcClients []pb.TelemetryServiceClient
+    
+    for i := 0; i < poolSize; i++ {
+        conn, err := grpc.Dial(
+            gatewayGrpcAddr, 
+            grpc.WithTransportCredentials(insecure.NewCredentials()),
+            // Aumentiamo i buffer per gestire i dati "large" senza strozzature
+            grpc.WithInitialWindowSize(1 << 20),     
+            grpc.WithInitialConnWindowSize(1 << 20), 
+        )
+        if err != nil {
+            log.Fatalf("Errore connessione gRPC pool: %v", err)
+        }
+        // NOTA: In un'app reale dovresti gestire la chiusura di tutte le conn nel pool
+        grpcClients = append(grpcClients, pb.NewTelemetryServiceClient(conn))
+    }
 
-	// 2. HTTP Client Ottimizzato (Condiviso)
-	httpClient := &http.Client{
-		Timeout: 2 * time.Second,
-		Transport: &http.Transport{
-			MaxIdleConns:        500,
-			MaxIdleConnsPerHost: 100,
-		},
-	}
+    // 2. HTTP Client Ottimizzato (Condiviso)
+    httpClient := &http.Client{
+        Timeout: 2 * time.Second,
+        Transport: &http.Transport{
+            MaxIdleConns:        500,
+            MaxIdleConnsPerHost: 100, // REST usa fino a 100 socket paralleli
+        },
+    }
 
-	// Loop di controllo configurazione (Polling ogni secondo)
     for {
-        // 1. Recupera l'oggetto configurazione intero
         config := fetchFullConfig(httpClient)
 
-        // 2. AGGIORNAMENTO ATOMICO della configurazione globale
-        // Usiamo i campi della struct (config.Mode e config.Size)
         configMu.Lock()
         globalMode = config.Mode
         globalSize = config.Size
         globalProtocol = config.Protocol
         configMu.Unlock()
 
-        // 3. Sincronizza il numero di goroutine usando config.Sensors
-        // Nota: Sensors è già un int, non serve più strconv.Atoi qui!
-        syncSensors(config.Sensors, grpcClient, httpClient)
+        // Passiamo l'intero POOL di client a syncSensors
+        syncSensors(config.Sensors, grpcClients, httpClient)
 
         time.Sleep(1 * time.Second)
     }
 }
 
-func syncSensors(target int, client pb.TelemetryServiceClient, http *http.Client) {
-	sensorMu.Lock()
-	defer sensorMu.Unlock()
+// Aggiornata la firma per accettare la slice di client
+func syncSensors(target int, clients []pb.TelemetryServiceClient, httpClient *http.Client) {
+    sensorMu.Lock()
+    defer sensorMu.Unlock()
 
-	if target == currentSensors {
-		return
-	}
+    if target == currentSensors {
+        return
+    }
 
-	if target > currentSensors {
-		diff := target - currentSensors
-		for i := 0; i < diff; i++ {
-			sensorID++
-			stopCh := make(chan struct{})
-			stopChannels[sensorID] = stopCh
-			// Ora passiamo solo i client, mode e size verranno letti dinamicamente
-			go runVirtualSensor(sensorID, stopCh, client, http)
-		}
-	} else {
-		diff := currentSensors - target
-		for i := 0; i < diff; i++ {
-			for id, ch := range stopChannels {
-				close(ch)
-				delete(stopChannels, id)
-				break
-			}
-		}
-	}
-	currentSensors = target
+    if target > currentSensors {
+        diff := target - currentSensors
+        for i := 0; i < diff; i++ {
+            sensorID++
+            stopCh := make(chan struct{})
+            stopChannels[sensorID] = stopCh
+            
+            // ASSEGNAZIONE ROUND-ROBIN: 
+            // Distribuiamo i 100 sensori sulle 8 connessioni gRPC
+            selectedClient := clients[sensorID % len(clients)]
+            
+            go runVirtualSensor(sensorID, stopCh, selectedClient, httpClient)
+        }
+    } else {
+        diff := currentSensors - target
+        for i := 0; i < diff; i++ {
+            for id, ch := range stopChannels {
+                close(ch)
+                delete(stopChannels, id)
+                break
+            }
+        }
+    }
+    currentSensors = target
 }
 
 func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServiceClient, httpClient *http.Client) {

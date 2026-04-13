@@ -7,6 +7,7 @@ import (
     "io"
     "net/http"
     "time"
+    "log"
 
     pb "telemetry-bench/proto"
 )
@@ -25,14 +26,18 @@ func sendRest(client *http.Client, data *pb.SensorData) {
 func executeStreaming(client *http.Client, stream pb.TelemetryService_StreamDataClient, data *pb.SensorData, protocol string) {
     data.Timestamp = time.Now().UnixMicro()
     
-    // Invio gRPC Stream
+    // 1. Invio gRPC Stream (Sincrono)
     if protocol == "grpc" || protocol == "both" {
-        _ = stream.Send(data)
+        err := stream.Send(data)
+        if err != nil {
+            log.Printf("Errore invio stream: %v", err)
+        }
     }
     
-    // Invio REST asincrono
+    // 2. Invio REST (Sincrono per equità)
     if protocol == "rest" || protocol == "both" {
-        go sendRest(client, data)
+        // RIMOSSO "go": ora aspettiamo che la richiesta venga inviata
+        sendRest(client, data) 
     }
 }
 
