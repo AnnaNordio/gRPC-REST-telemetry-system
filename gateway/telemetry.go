@@ -9,9 +9,6 @@ import (
 )
 
 func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
-    if time.Now().Before(warmupUntil) {
-        return
-    }
     pSize, mTime := getJsonMetrics(data)
     hSize := calculateHTTPOverhead(r)
     
@@ -19,9 +16,6 @@ func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
 }
 
 func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
-    if time.Now().Before(warmupUntil) {
-        return
-    }
     pSize, mTime := getProtoMetrics(data)
     hSize := 5 + calculateGRPCOverhead(md) 
     
@@ -29,6 +23,10 @@ func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
 }
 
 func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize int64, mTime float64) {
+    if time.Now().Before(warmupUntil) {
+        return
+    }
+
     if data.Timestamp <= 0 {
         return
     }
@@ -60,7 +58,7 @@ func processAndStoreMetrics(protocol string, data *pb.SensorData, pSize, hSize i
     }
 
     history = append(history, newMetric)
-    if len(history) > 200 {
+    if len(history) > 1000 {
         history = history[1:]
     }
 }

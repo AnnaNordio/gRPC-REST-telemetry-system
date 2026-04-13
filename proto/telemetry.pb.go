@@ -173,6 +173,74 @@ func (x *SensorData) GetReadingsHistory() map[string]float32 {
 	return nil
 }
 
+type MetricPoint struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Protocol      string                 `protobuf:"bytes,1,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	LatencyMs     float64                `protobuf:"fixed64,2,opt,name=latencyMs,proto3" json:"latencyMs,omitempty"`
+	Timestamp     string                 `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	P99           float64                `protobuf:"fixed64,4,opt,name=p99,proto3" json:"p99,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MetricPoint) Reset() {
+	*x = MetricPoint{}
+	mi := &file_proto_telemetry_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MetricPoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MetricPoint) ProtoMessage() {}
+
+func (x *MetricPoint) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_telemetry_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MetricPoint.ProtoReflect.Descriptor instead.
+func (*MetricPoint) Descriptor() ([]byte, []int) {
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *MetricPoint) GetProtocol() string {
+	if x != nil {
+		return x.Protocol
+	}
+	return ""
+}
+
+func (x *MetricPoint) GetLatencyMs() float64 {
+	if x != nil {
+		return x.LatencyMs
+	}
+	return 0
+}
+
+func (x *MetricPoint) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+func (x *MetricPoint) GetP99() float64 {
+	if x != nil {
+		return x.P99
+	}
+	return 0
+}
+
 type GrpcStats struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AvgLatency    float64                `protobuf:"fixed64,1,opt,name=avg_latency,json=avgLatency,proto3" json:"avg_latency,omitempty"`
@@ -182,13 +250,14 @@ type GrpcStats struct {
 	Overhead      int64                  `protobuf:"varint,5,opt,name=overhead,proto3" json:"overhead,omitempty"`
 	Throughput    float64                `protobuf:"fixed64,6,opt,name=throughput,proto3" json:"throughput,omitempty"`
 	MarshalTime   float64                `protobuf:"fixed64,7,opt,name=marshalTime,proto3" json:"marshalTime,omitempty"`
+	History       []*MetricPoint         `protobuf:"bytes,8,rep,name=history,proto3" json:"history,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GrpcStats) Reset() {
 	*x = GrpcStats{}
-	mi := &file_proto_telemetry_proto_msgTypes[2]
+	mi := &file_proto_telemetry_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -200,7 +269,7 @@ func (x *GrpcStats) String() string {
 func (*GrpcStats) ProtoMessage() {}
 
 func (x *GrpcStats) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_telemetry_proto_msgTypes[2]
+	mi := &file_proto_telemetry_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -213,7 +282,7 @@ func (x *GrpcStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrpcStats.ProtoReflect.Descriptor instead.
 func (*GrpcStats) Descriptor() ([]byte, []int) {
-	return file_proto_telemetry_proto_rawDescGZIP(), []int{2}
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GrpcStats) GetAvgLatency() float64 {
@@ -265,6 +334,13 @@ func (x *GrpcStats) GetMarshalTime() float64 {
 	return 0
 }
 
+func (x *GrpcStats) GetHistory() []*MetricPoint {
+	if x != nil {
+		return x.History
+	}
+	return nil
+}
+
 type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -273,7 +349,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_proto_telemetry_proto_msgTypes[3]
+	mi := &file_proto_telemetry_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -285,7 +361,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_telemetry_proto_msgTypes[3]
+	mi := &file_proto_telemetry_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -298,7 +374,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_proto_telemetry_proto_rawDescGZIP(), []int{3}
+	return file_proto_telemetry_proto_rawDescGZIP(), []int{4}
 }
 
 var File_proto_telemetry_proto protoreflect.FileDescriptor
@@ -324,7 +400,12 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\x10readings_history\x18\a \x03(\v2*.telemetry.SensorData.ReadingsHistoryEntryR\x0freadingsHistory\x1aB\n" +
 	"\x14ReadingsHistoryEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01\"\xec\x01\n" +
+	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01\"w\n" +
+	"\vMetricPoint\x12\x1a\n" +
+	"\bprotocol\x18\x01 \x01(\tR\bprotocol\x12\x1c\n" +
+	"\tlatencyMs\x18\x02 \x01(\x01R\tlatencyMs\x12\x1c\n" +
+	"\ttimestamp\x18\x03 \x01(\tR\ttimestamp\x12\x10\n" +
+	"\x03p99\x18\x04 \x01(\x01R\x03p99\"\x9e\x02\n" +
 	"\tGrpcStats\x12\x1f\n" +
 	"\vavg_latency\x18\x01 \x01(\x01R\n" +
 	"avgLatency\x12\x1f\n" +
@@ -336,7 +417,8 @@ const file_proto_telemetry_proto_rawDesc = "" +
 	"\n" +
 	"throughput\x18\x06 \x01(\x01R\n" +
 	"throughput\x12 \n" +
-	"\vmarshalTime\x18\a \x01(\x01R\vmarshalTime\"\a\n" +
+	"\vmarshalTime\x18\a \x01(\x01R\vmarshalTime\x120\n" +
+	"\ahistory\x18\b \x03(\v2\x16.telemetry.MetricPointR\ahistory\"\a\n" +
 	"\x05Empty2\xf3\x01\n" +
 	"\x10TelemetryService\x125\n" +
 	"\bSendData\x12\x15.telemetry.SensorData\x1a\x10.telemetry.Empty\"\x00\x129\n" +
@@ -357,32 +439,34 @@ func file_proto_telemetry_proto_rawDescGZIP() []byte {
 	return file_proto_telemetry_proto_rawDescData
 }
 
-var file_proto_telemetry_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proto_telemetry_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_telemetry_proto_goTypes = []any{
 	(*NestedDetail)(nil), // 0: telemetry.NestedDetail
 	(*SensorData)(nil),   // 1: telemetry.SensorData
-	(*GrpcStats)(nil),    // 2: telemetry.GrpcStats
-	(*Empty)(nil),        // 3: telemetry.Empty
-	nil,                  // 4: telemetry.NestedDetail.MetadataEntry
-	nil,                  // 5: telemetry.SensorData.ReadingsHistoryEntry
+	(*MetricPoint)(nil),  // 2: telemetry.MetricPoint
+	(*GrpcStats)(nil),    // 3: telemetry.GrpcStats
+	(*Empty)(nil),        // 4: telemetry.Empty
+	nil,                  // 5: telemetry.NestedDetail.MetadataEntry
+	nil,                  // 6: telemetry.SensorData.ReadingsHistoryEntry
 }
 var file_proto_telemetry_proto_depIdxs = []int32{
-	4, // 0: telemetry.NestedDetail.metadata:type_name -> telemetry.NestedDetail.MetadataEntry
+	5, // 0: telemetry.NestedDetail.metadata:type_name -> telemetry.NestedDetail.MetadataEntry
 	0, // 1: telemetry.SensorData.details:type_name -> telemetry.NestedDetail
-	5, // 2: telemetry.SensorData.readings_history:type_name -> telemetry.SensorData.ReadingsHistoryEntry
-	1, // 3: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
-	1, // 4: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
-	3, // 5: telemetry.TelemetryService.GetGrpcStream:input_type -> telemetry.Empty
-	3, // 6: telemetry.TelemetryService.GetStats:input_type -> telemetry.Empty
-	3, // 7: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
-	3, // 8: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
-	2, // 9: telemetry.TelemetryService.GetGrpcStream:output_type -> telemetry.GrpcStats
-	2, // 10: telemetry.TelemetryService.GetStats:output_type -> telemetry.GrpcStats
-	7, // [7:11] is the sub-list for method output_type
-	3, // [3:7] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	6, // 2: telemetry.SensorData.readings_history:type_name -> telemetry.SensorData.ReadingsHistoryEntry
+	2, // 3: telemetry.GrpcStats.history:type_name -> telemetry.MetricPoint
+	1, // 4: telemetry.TelemetryService.SendData:input_type -> telemetry.SensorData
+	1, // 5: telemetry.TelemetryService.StreamData:input_type -> telemetry.SensorData
+	4, // 6: telemetry.TelemetryService.GetGrpcStream:input_type -> telemetry.Empty
+	4, // 7: telemetry.TelemetryService.GetStats:input_type -> telemetry.Empty
+	4, // 8: telemetry.TelemetryService.SendData:output_type -> telemetry.Empty
+	4, // 9: telemetry.TelemetryService.StreamData:output_type -> telemetry.Empty
+	3, // 10: telemetry.TelemetryService.GetGrpcStream:output_type -> telemetry.GrpcStats
+	3, // 11: telemetry.TelemetryService.GetStats:output_type -> telemetry.GrpcStats
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_telemetry_proto_init() }
@@ -396,7 +480,7 @@ func file_proto_telemetry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_telemetry_proto_rawDesc), len(file_proto_telemetry_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -17,14 +17,22 @@ message SensorData {
     map<string, float> readings_history = 7;
 }
 
+message MetricPoint {
+    string protocol = 1;
+    double latencyMs = 2;
+    string timestamp = 3;
+    double p99 = 4;
+}
+
 message GrpcStats {
     double avg_latency = 1;
     double p99_latency = 2;
     int64 timestamp = 3;
-    int64 payload_size = 4; 
-    int64 overhead = 5;    
+    int64 payload_size = 4;
+    int64 overhead = 5;
     double throughput = 6;
-    double marshalTime = 7; 
+    double marshalTime = 7;
+    repeated MetricPoint history = 8;
 }
 
 message Empty {}

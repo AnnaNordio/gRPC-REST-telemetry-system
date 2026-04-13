@@ -26,7 +26,7 @@ ChartJS.register(
 export const LineChart = ({ history, unit }) => {
   const recentHistory = history?.slice(-50) || [];
   const chartLabels = recentHistory.map(d => d.timestamp);
-
+  console.log("LineChart History:", recentHistory); // Debug: Verifica i dati in ingresso
   const COLORS = {
     rest: '#6d28d9',
     grpc: '#ea580c',
@@ -62,7 +62,7 @@ export const LineChart = ({ history, unit }) => {
         label: `gRPC Avg`,
         borderColor: COLORS.grpc,
         backgroundColor: COLORS.grpc,
-        data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.latency_ms : null),
+        data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.latencyms : null),
         borderWidth: 2.5,
         pointRadius: 0,
         tension: 0.3,
@@ -107,7 +107,6 @@ export const LineChart = ({ history, unit }) => {
     scales: {
       x: { 
         grid: { display: false }, 
-        ticks: { display: false } // Nascondiamo i timestamp fitti per pulizia
       },
       y: { 
         beginAtZero: false,

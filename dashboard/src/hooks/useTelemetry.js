@@ -42,10 +42,32 @@ export const useTelemetry = () => {
       grpcClient.current.getStats(new protos.Empty(), {}, (err, response) => {
         if (!err && response) {
           const g = response.toObject();
-          const ts = g.timestamp || g.Timestamp || 0;
-          const syncTime = formatTimestamp(ts);
-          setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead, throughput: g.throughput, marshalTime: g.marshaltime });
-          if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency, p99: g.p99Latency, marshal: g.marshaltime});
+          // 1. Aggiorna i widget (Avg, P99, etc.)
+          setGrpcData({ 
+            avg: g.avgLatency, 
+            p99: g.p99Latency, 
+            payloadSize: g.payloadSize, 
+            overheadSize: g.overhead, 
+            throughput: g.throughput, 
+            marshalTime: g.marshaltime 
+          });
+
+          // 2. AGGIORNAMENTO STORICO (Dati densi)
+          // Invece di creare un singolo punto manuale, usiamo la lista dal server
+          if (g.historyList && g.historyList.length > 0) {
+            updateHistory(g.historyList);
+          } else {
+            // Fallback solo se la history è vuota (per non perdere il punto corrente)
+            const ts = g.timestamp || 0;
+            const syncTime = formatTimestamp(ts);
+            if (syncTime) {
+              updateHistory({ 
+                timestamp: syncTime, 
+                protocol: 'gRPC', 
+                latency_ms: g.avgLatency 
+              });
+            }
+          }
         }
       });
     }
@@ -57,9 +79,22 @@ export const useTelemetry = () => {
       stream = grpcClient.current.getGrpcStream(new protos.Empty(), {});
       stream.on('data', (response) => {
         const g = response.toObject();
-        const syncTime = formatTimestamp(g.timestamp);
-        setGrpcData({ avg: g.avgLatency, p99: g.p99Latency, payloadSize: g.payloadSize, overheadSize: g.overhead, throughput: g.throughput, marshalTime: g.marshaltime });
-        if (syncTime) updateHistory({ timestamp: syncTime, protocol: 'gRPC', latency_ms: g.avgLatency, p99: g.p99Latency, marshal: g.marshaltime});
+        // Aggiorna i widget (Avg, P99, etc.)
+        setGrpcData({ 
+          avg: g.avgLatency, 
+          p99: g.p99Latency, 
+          payloadSize: g.payloadSize, 
+          overheadSize: g.overhead, 
+          throughput: g.throughput, 
+          marshalTime: g.marshaltime 
+        });
+
+        // AGGIORNAMENTO STORICO:
+        // grpc-web trasforma il campo "history" in "historyList"
+        if (g.historyList && g.historyList.length > 0) {
+          // Passiamo l'intera lista al grafico
+          updateHistory(g.historyList);
+        }
       });
     }
     const interval = setInterval(fetchData, 500);
