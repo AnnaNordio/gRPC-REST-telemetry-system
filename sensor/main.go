@@ -56,34 +56,6 @@ func main() {
         },
     }
 
-    go func() {
-        for {
-            time.Sleep(5 * time.Second)
-
-            sensorMu.Lock()
-            totalSensors := currentSensors
-            sensorMu.Unlock()
-
-            log.Printf("--- STATS CONNESSIONI ---")
-            log.Printf("Sensori Attivi: %d", totalSensors)
-            
-            // Per gRPC, dato il tuo round-robin:
-            usedGrpc := totalSensors
-            if usedGrpc > poolSize {
-                usedGrpc = poolSize
-            }
-            log.Printf("[gRPC] Connessioni nel pool utilizzate: %d/%d", usedGrpc, poolSize)
-
-            // Per REST, leggiamo le idle connections dal transport
-            if transport, ok := httpClient.Transport.(*http.Transport); ok {
-                // Nota: Go non espone facilmente le connessioni "attive", 
-                // ma quelle "Idle" (aperte e pronte al riuso) sono un ottimo indicatore.
-                log.Printf("[REST] Connessioni in stato Idle (pronte): %d", transport.MaxIdleConnsPerHost)
-            }
-            log.Printf("--------------------------")
-        }
-    }()
-
     for {
         config := fetchFullConfig(httpClient)
 

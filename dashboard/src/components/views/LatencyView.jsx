@@ -50,7 +50,7 @@ export const LatencyView = ({ restData, grpcData, history, protocol }) => {
         </div>
         
         <div className="h-[400px]">
-          <LineChart history={history} unit={'μs'} />
+          <LineChart history={history} />
         </div>
       </div>
     </div>

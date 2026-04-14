@@ -33,6 +33,7 @@ export const useTelemetry = () => {
     try {
       const response = await fetch('http://localhost:8080/results');
       const data = await response.json();
+      console.log("REST Data:", data); // Debug: Verifica i dati in ingresso
       setRestData({ avg: data.avg_rest, p99: data.p99_rest, payloadSize: data.payload_size, overheadSize: data.overhead_size, throughput: data.throughput_rest, marshalTime: data.marshal_time_rest }); 
       if (data.history) updateHistory(data.history);
     } catch (err) { console.error("REST Error:", err); }
@@ -42,6 +43,7 @@ export const useTelemetry = () => {
       grpcClient.current.getStats(new protos.Empty(), {}, (err, response) => {
         if (!err && response) {
           const g = response.toObject();
+          console.log("gRPC Unary Data:", g); // Debug: Verifica i dati in ingresso
           // 1. Aggiorna i widget (Avg, P99, etc.)
           setGrpcData({ 
             avg: g.avgLatency, 

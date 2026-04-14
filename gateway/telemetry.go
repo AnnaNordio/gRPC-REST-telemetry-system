@@ -27,7 +27,6 @@ func metricsWorker() {
         
         if m.Protocol == "gRPC" {
             atomic.AddUint64(&msgCountGrpc, 1)
-            // Usiamo il valore grezzo del timestamp se necessario per throughput
             totalPayloadGrpc += m.PayloadByte
             totalOverheadGrpc += m.OverheadByte
         } else {
@@ -37,7 +36,8 @@ func metricsWorker() {
         }
 
         history = append(history, m)
-        if len(history) > 1000 {
+        cutoff := time.Now().Add(-30 * time.Second).Format("15:04:05.000")
+        if len(history) > 0 && history[0].Timestamp < cutoff {
             history = history[1:]
         }
         
