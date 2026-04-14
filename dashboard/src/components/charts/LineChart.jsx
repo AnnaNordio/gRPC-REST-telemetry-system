@@ -24,7 +24,45 @@ ChartJS.register(
 );
 
 export const LineChart = ({ history, unit }) => {
-  const recentHistory = history?.slice(-50) || [];
+
+  const getSampledData = (data) => {
+    if (!data || data.length === 0) return [];
+
+    const SAMPLE_INTERVAL_MS = 100;
+    // Usiamo un oggetto per raggruppare i dati per "slot"
+    const slots = {};
+
+    data.forEach(d => {
+      const [hours, minutes, secondsWithMs] = d.timestamp.split(':');
+      const totalMs = 
+        (parseInt(hours) * 3600000) + 
+        (parseInt(minutes) * 60000) + 
+        (parseFloat(secondsWithMs) * 1000);
+
+      // Calcoliamo lo slot univoco
+      const currentSlot = Math.floor(totalMs / SAMPLE_INTERVAL_MS);
+
+      // Se lo slot non esiste ancora, lo creiamo
+      if (!slots[currentSlot]) {
+        slots[currentSlot] = {
+          timestamp: d.timestamp, // Usiamo il timestamp del primo che arriva
+          rest: null,
+          grpc: null
+        };
+      }
+
+      // Inseriamo i dati nel protocollo corretto all'interno dello stesso slot
+      if (d.protocol.includes('REST')) {
+        slots[currentSlot].rest = d;
+      } else if (d.protocol.includes('gRPC')) {
+        slots[currentSlot].grpc = d;
+      }
+    });
+
+    // Convertiamo l'oggetto in un array ordinato e prendiamo gli ultimi 50
+    return Object.values(slots).slice(-50);
+  };
+  const recentHistory = getSampledData(history);
   const chartLabels = recentHistory.map(d => d.timestamp);
   console.log("LineChart History:", recentHistory); // Debug: Verifica i dati in ingresso
   const COLORS = {
@@ -41,7 +79,7 @@ export const LineChart = ({ history, unit }) => {
         label: `REST Avg`,
         borderColor: COLORS.rest,
         backgroundColor: COLORS.rest,
-        data: recentHistory.map(d => d.protocol.includes('REST') ? d.latency_ms : null),
+        data: recentHistory.map(d => d.rest ? d.rest.latency_ms : null),        
         borderWidth: 2.5,
         pointRadius: 0,
         tension: 0.3,
@@ -51,7 +89,7 @@ export const LineChart = ({ history, unit }) => {
         label: `REST P99 (Tail)`,
         borderColor: COLORS.rest,
         borderDash: [5, 5], // Linea tratteggiata
-        data: recentHistory.map(d => d.protocol.includes('REST') ? d.p99_ms : null),
+        data: recentHistory.map(d => d.rest ? d.rest.p99_ms : null),        
         borderWidth: 1,
         pointRadius: 0,
         fill: false,
@@ -62,7 +100,7 @@ export const LineChart = ({ history, unit }) => {
         label: `gRPC Avg`,
         borderColor: COLORS.grpc,
         backgroundColor: COLORS.grpc,
-        data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.latencyms : null),
+        data: recentHistory.map(d => d.grpc ? d.grpc.latencyms : null),        
         borderWidth: 2.5,
         pointRadius: 0,
         tension: 0.3,
@@ -72,7 +110,7 @@ export const LineChart = ({ history, unit }) => {
         label: `gRPC P99 (Tail)`,
         borderColor: COLORS.grpc,
         borderDash: [5, 5],
-        data: recentHistory.map(d => d.protocol.includes('gRPC') ? d.p99 : null),
+        data: recentHistory.map(d => d.grpc ? d.grpc.p99 : null),        
         borderWidth: 1,
         pointRadius: 0,
         fill: false,
