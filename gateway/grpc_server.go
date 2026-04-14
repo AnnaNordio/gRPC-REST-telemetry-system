@@ -13,10 +13,7 @@ type telemetryServer struct {
 
 func (s *telemetryServer) StreamData(stream pb.TelemetryService_StreamDataServer) error {
     md, _ := metadata.FromIncomingContext(stream.Context())
-    
-    // Calcoliamo l'overhead iniziale (Headers/Metadata)
     initialHeaderSize := calculateGRPCOverhead(md)
-    
     isFirstMessage := true
 
     for {
@@ -25,20 +22,30 @@ func (s *telemetryServer) StreamData(stream pb.TelemetryService_StreamDataServer
             return err
         }
 
+        // 1. Calcolo latenza IMMEDIATO per massima precisione
+        lat := calculateLatency(in.Timestamp)
+
+        // 2. Calcolo overhead
         var currentOverhead int64
         if isFirstMessage {
-            // Primo messaggio: Headers + Frame gRPC (14)
             currentOverhead = initialHeaderSize + 14
             isFirstMessage = false
         } else {
-            // Messaggi successivi: SOLO il frame gRPC (14)
             currentOverhead = 14
         }
 
+        // 3. Marshalling
         pSize, mTime := getProtoMetrics(in)
         
-        // Invia il peso del SINGOLO evento
-        processAndStoreMetrics("gRPC", in, pSize, currentOverhead, mTime)
+        // 4. Invio al Worker (Operazione non bloccante)
+        metricsChan <- Metric{
+            Protocol:     "gRPC",
+            LatencyMs:    lat,
+            PayloadByte:  pSize,
+            OverheadByte: currentOverhead,
+            MarshalTime:  mTime,
+            Timestamp:    time.Now().Format("15:04:05.000"),
+        }
     }
 }
 

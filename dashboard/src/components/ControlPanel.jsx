@@ -12,7 +12,7 @@ export const ControlPanel = ({ payloadSize, onSizeChange, isStreaming, onModeTog
           onFilterChange={onProtocolChange} 
         />
       </ControlSection>
-      <ControlSection title="Scale Test">
+      <ControlSection title="Sensors Number">
         <SensorScaleConfig onSensorChange={onSensorChange} />
       </ControlSection>
 
