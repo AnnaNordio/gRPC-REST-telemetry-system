@@ -1,5 +1,10 @@
 package main
 
+import (
+    "os"
+    "encoding/csv"
+)
+
 type Metric struct {
     Protocol     string  `json:"protocol"`
     LatencyMs    float64 `json:"latency_ms"`
@@ -25,4 +30,10 @@ type DashboardResponse struct {
     TotalPayloadGrpc  int64 `json:"total_payload_grpc"`
     TotalOverheadGrpc int64 `json:"total_overhead_grpc"`
     LastGrpcTSRaw int64    `json:"last_grpc_ts_raw"`
+}
+
+type MetricsWriter struct {
+    file       *os.File
+    csvWriter  *csv.Writer
+    lastConfig string
 }

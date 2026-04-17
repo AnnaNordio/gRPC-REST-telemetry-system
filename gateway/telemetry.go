@@ -5,10 +5,7 @@ import (
     "net/http"
     "google.golang.org/grpc/metadata"  
     "sync/atomic"
-    "encoding/csv"
     "os"
-    "log"
-    "strconv"
     pb "telemetry-bench/proto"
 )
 
@@ -16,64 +13,66 @@ import (
 // Capacità 10.000 per gestire picchi di 100 sensori a 10Hz
 var metricsChan = make(chan Metric, 10000)
 
-// Il Worker: l'unico punto che scrive nella history, eliminando la contesa del Mutex
 func metricsWorker() {
-    // 1. APRI IL FILE (Fuori dal loop)
     os.MkdirAll("results", 0755)
-    log.Println("Worker delle metriche avviato, pronto a ricevere dati...")
-    file, err := os.OpenFile("results/bench_results.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     
-    if err != nil {
-        return 
-    }
-    defer file.Close()
+    writer := &MetricsWriter{}
 
-    writer := csv.NewWriter(file)
-    defer writer.Flush()
+    flushTicker := time.NewTicker(1 * time.Second)
 
-    // 2. SCRIVI L'HEADER SOLO SE IL FILE È VUOTO (Fuori dal loop)
-    info, _ := file.Stat()
-    if info.Size() == 0 {
-        writer.Write([]string{"Timestamp", "Protocol", "LatencyMs", "PayloadBytes", "OverheadBytes", "MarshalTimeMs"})
-        writer.Flush() // Scrive l'intestazione su disco immediatamente
-    }
+    for {
+        select {
+        case m, ok := <-metricsChan:
+            if !ok { return }
+            
+            // --- 1. Lettura Stato (dal tuo file state) ---
+            metricsMu.Lock()
+            isWarmup := time.Now().Before(warmupUntil)
+            mMode := currentMode
+            mSize := currentSize
+            mProto := currentProtocol
+            mSensors := currentSensors
+            metricsMu.Unlock()
 
-    // 3. IL LOOP CHE GESTISCE I DATI
-    for m := range metricsChan {
-        if time.Now().Before(warmupUntil) {
-            continue 
-        }
+            if isWarmup {
+                continue
+            }
 
-        // --- Logica statistiche (Invariata) ---
-        metricsMu.Lock()
-        if m.Protocol == "gRPC" {
-            atomic.AddUint64(&msgCountGrpc, 1)
-            totalPayloadGrpc += m.PayloadByte
-            totalOverheadGrpc += m.OverheadByte
-        } else {
-            atomic.AddUint64(&msgCountRest, 1)
-            totalPayloadRest += m.PayloadByte
-            totalOverheadRest += m.OverheadByte
-        }
-        history = append(history, m)
-        cutoff := time.Now().Add(-30 * time.Second).Format("15:04:05.000")
-        if len(history) > 0 && history[0].Timestamp < cutoff {
-            history = history[1:]
-        }
-        metricsMu.Unlock()
+            // --- 2. Aggiornamento Statistiche (Usa le tue variabili di state) ---
+            updateStats(m)
 
-        // --- SCRITTURA DATI (Dentro il loop, scrive solo i valori) ---
-        record := []string{
-            m.Timestamp,
-            m.Protocol,
-            strconv.FormatFloat(m.LatencyMs, 'f', 4, 64),
-            strconv.FormatInt(m.PayloadByte, 10),
-            strconv.FormatInt(m.OverheadByte, 10),
-            strconv.FormatFloat(m.MarshalTime, 'f', 6, 64),
+            // --- 3. Scrittura su File ---
+            writer.Write(m, mMode, mSize, mProto, mSensors)
+
+        case <-flushTicker.C:
+            if writer.csvWriter != nil {
+                writer.csvWriter.Flush() // Scrive tutto il blocco accumulato in una volta sola
+            }
         }
         
-        writer.Write(record)
-        writer.Flush() // Ora scrive solo la riga dei dati
+    }
+}
+
+func updateStats(m Metric) {
+    metricsMu.Lock()
+    defer metricsMu.Unlock()
+
+    if m.Protocol == "gRPC" {
+        atomic.AddUint64(&msgCountGrpc, 1)
+        totalPayloadGrpc += m.PayloadByte
+        totalOverheadGrpc += m.OverheadByte
+    } else {
+        atomic.AddUint64(&msgCountRest, 1)
+        totalPayloadRest += m.PayloadByte
+        totalOverheadRest += m.OverheadByte
+    }
+
+    // Aggiunta alla history per i grafici live
+    history = append(history, m)
+    
+    // Cleanup history vecchia (es. mantieni ultimi 1000 punti)
+    if len(history) > 1000 {
+        history = history[len(history)-1000:]
     }
 }
 
