@@ -9,6 +9,8 @@ services:
       - "50051:50051"
       - "8080:8080"
       - "3000:3000" 
+    volumes:
+      - ./results:/app/results
     networks:
       - telemetry-net
 

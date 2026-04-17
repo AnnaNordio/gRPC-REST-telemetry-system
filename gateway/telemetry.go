@@ -5,6 +5,10 @@ import (
     "net/http"
     "google.golang.org/grpc/metadata"  
     "sync/atomic"
+    "encoding/csv"
+    "os"
+    "log"
+    "strconv"
     pb "telemetry-bench/proto"
 )
 
@@ -12,19 +16,36 @@ import (
 // Capacità 10.000 per gestire picchi di 100 sensori a 10Hz
 var metricsChan = make(chan Metric, 10000)
 
-// Inizializza il worker all'avvio
-func init() {
-    go metricsWorker()
-}
-
 // Il Worker: l'unico punto che scrive nella history, eliminando la contesa del Mutex
 func metricsWorker() {
+    // 1. APRI IL FILE (Fuori dal loop)
+    os.MkdirAll("results", 0755)
+    log.Println("Worker delle metriche avviato, pronto a ricevere dati...")
+    file, err := os.OpenFile("results/bench_results.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    
+    if err != nil {
+        return 
+    }
+    defer file.Close()
+
+    writer := csv.NewWriter(file)
+    defer writer.Flush()
+
+    // 2. SCRIVI L'HEADER SOLO SE IL FILE È VUOTO (Fuori dal loop)
+    info, _ := file.Stat()
+    if info.Size() == 0 {
+        writer.Write([]string{"Timestamp", "Protocol", "LatencyMs", "PayloadBytes", "OverheadBytes", "MarshalTimeMs"})
+        writer.Flush() // Scrive l'intestazione su disco immediatamente
+    }
+
+    // 3. IL LOOP CHE GESTISCE I DATI
     for m := range metricsChan {
         if time.Now().Before(warmupUntil) {
             continue 
         }
+
+        // --- Logica statistiche (Invariata) ---
         metricsMu.Lock()
-        
         if m.Protocol == "gRPC" {
             atomic.AddUint64(&msgCountGrpc, 1)
             totalPayloadGrpc += m.PayloadByte
@@ -34,14 +55,25 @@ func metricsWorker() {
             totalPayloadRest += m.PayloadByte
             totalOverheadRest += m.OverheadByte
         }
-
         history = append(history, m)
         cutoff := time.Now().Add(-30 * time.Second).Format("15:04:05.000")
         if len(history) > 0 && history[0].Timestamp < cutoff {
             history = history[1:]
         }
-        
         metricsMu.Unlock()
+
+        // --- SCRITTURA DATI (Dentro il loop, scrive solo i valori) ---
+        record := []string{
+            m.Timestamp,
+            m.Protocol,
+            strconv.FormatFloat(m.LatencyMs, 'f', 4, 64),
+            strconv.FormatInt(m.PayloadByte, 10),
+            strconv.FormatInt(m.OverheadByte, 10),
+            strconv.FormatFloat(m.MarshalTime, 'f', 6, 64),
+        }
+        
+        writer.Write(record)
+        writer.Flush() // Ora scrive solo la riga dei dati
     }
 }
 

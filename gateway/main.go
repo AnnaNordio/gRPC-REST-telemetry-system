@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+    go metricsWorker()
     startThroughputTicker()
     // 1. Avvio gRPC Server
     go func() {
