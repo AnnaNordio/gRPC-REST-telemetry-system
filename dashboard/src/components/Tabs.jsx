@@ -5,7 +5,7 @@ const Tabs = ({ activeTab, setActiveTab }) => {
     { id: 'latency', label: 'Latency & Reliability' },
     { id: 'marshalling', label: 'Computational Cost' },
     { id: 'payload', label: 'Payload & Efficiency' },
-    { id: 'scalability', label: 'Scalability & Stress Test' },
+    { id: 'scalability', label: 'Scalability & Throughput' },
   ];
 
   return (

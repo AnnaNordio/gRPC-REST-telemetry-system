@@ -54,22 +54,23 @@ export const getLatencyComparison = (restAvg, grpcAvg) => {
 };
 
 export const getThroughputComparison = (restThroughput, grpcThroughput) => {
-  if (!restThroughput || !grpcThroughput) return { ...DRAW_STYLE, text: "Monitoring..." };
-
-  if (restThroughput === grpcThroughput) {
-    return { ...DRAW_STYLE, text: "Stable Throughput (Equal)" };
-  }
+  if (!restThroughput || !grpcThroughput) return { text: "Benchmarking...", color: "text-slate-400" };
 
   const isGrpcHigher = grpcThroughput > restThroughput;
-  const diff = Math.abs(grpcThroughput - restThroughput);
-  const percentage = ((diff / Math.min(restThroughput, grpcThroughput)) * 100).toFixed(2);
+
+  const factor = isGrpcHigher 
+    ? (grpcThroughput / restThroughput).toFixed(2) 
+    : (restThroughput / grpcThroughput).toFixed(2);
 
   return {
-    winner: isGrpcHigher ? COMPARISON_WINNER.GRPC : COMPARISON_WINNER.REST,
-    text: `Higher Throughput: ${isGrpcHigher ? 'gRPC' : 'REST'} (+${percentage}%)`,
+    winner: isGrpcHigher ? 'gRPC' : 'REST',
+    // Il testo ora è molto più "da competizione"
+    text: isGrpcHigher 
+      ? `gRPC is ${factor}x more scalable` 
+      : `REST is ${factor}x more scalable`,
     color: isGrpcHigher ? "text-orange-600" : "text-violet-600",
     bg: isGrpcHigher ? "bg-orange-50" : "bg-violet-50",
-    border: isGrpcHigher ? "border-orange-200" : "border-violet-200"
+    border: isGrpcHigher ? "border-orange-200" : "border-violet-200",
   };
 };
 

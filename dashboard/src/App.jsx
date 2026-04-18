@@ -91,7 +91,7 @@ const Dashboard = () => {
       case 'payload':
         return <PayloadView restData={restData} grpcData={grpcData} protocol={activeFilter} />;
       case 'scalability':
-        return <ThroughputView restData={restData} grpcData={grpcData} protocol={activeFilter} />;
+        return <ThroughputView restData={restData} grpcData={grpcData} protocol={activeFilter} sensorNumber={sensorNumber} />;
       case 'marshalling':
         return <MarshalView restData={restData} grpcData={grpcData} protocol={activeFilter} />;
       default:
