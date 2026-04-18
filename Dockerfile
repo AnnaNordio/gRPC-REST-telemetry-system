@@ -13,7 +13,7 @@ FROM alpine:latest AS gateway
 RUN apk add --no-cache nodejs npm
 RUN npm install -g serve
 
-WORKDIR /app
+WORKDIR /root/
 COPY --from=builder /bin/gateway .
 
 # Copiamo i sorgenti della dashboard ed eseguiamo il build
