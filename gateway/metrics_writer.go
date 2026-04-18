@@ -43,7 +43,7 @@ func (mw *MetricsWriter) rotateFile(mode, size, sensors string) {
 
     // Nome file dinamico basato sui parametri del benchmark
     fileName := fmt.Sprintf("results/bench_results-%s_%s_%s.csv", mode, size, sensors)
-    f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    f, err := os.OpenFile(fileName, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
     if err != nil {
         log.Printf("Errore rotazione file: %v", err)
         return
