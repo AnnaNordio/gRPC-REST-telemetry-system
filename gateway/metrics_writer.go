@@ -11,7 +11,7 @@ import (
 func (mw *MetricsWriter) Write(m Metric, mode, size, protocol, sensors string) {
 
     // 2. Controllo rotazione (Usa i parametri correnti)
-    configKey := fmt.Sprintf("%s_%s_%s", mode, size, sensors)
+    configKey := fmt.Sprintf("%s_%s_%s_%s", protocol, mode, size, sensors)
     if configKey != mw.lastConfig {
         mw.rotateFile(mode, size, sensors, protocol)
         mw.lastConfig = configKey
