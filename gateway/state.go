@@ -3,6 +3,7 @@ package main
 import (
     "sync"
     "time"   
+    "telemetry-bench/pkg/config"
 )
 
 
@@ -21,10 +22,12 @@ var (
     totalPayloadGrpc  int64
     totalOverheadGrpc int64
 
-    currentMode = "polling"
-    currentSize = "small"
-    currentSensors = "1"
-    currentProtocol = "both"
+    activeConfig = config.TelemetryConfig{
+        Mode:     "polling",
+        Size:     "small",
+        Sensors:  1,
+        Protocol: "both",
+    }
 
     msgCountRest uint64
     msgCountGrpc uint64
@@ -33,5 +36,5 @@ var (
     throughputGrpc float64
 
     warmupUntil time.Time
-    warmupDuration = 5 * time.Second
+    warmupDuration = 30 * time.Second
 )

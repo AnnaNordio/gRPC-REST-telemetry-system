@@ -4,7 +4,10 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"bytes"
+	"encoding/json"
 	pb "telemetry-bench/proto"
+	"telemetry-bench/pkg/config"
 )
 
 type TestCase struct {
@@ -17,86 +20,86 @@ type TestCase struct {
 func runBenchmarkSuite(clients []pb.TelemetryServiceClient, httpClient *http.Client) {
 	// Qui configuri la tua "tabella di marcia"
 	suite := []TestCase{
-		{Sensors: 1, Mode: "polling", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "polling", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "polling", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "polling", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "polling", Payload: "small", Protocol: "REST"},
-		{Sensors: 1, Mode: "polling", Payload: "medium", Protocol: "REST"},
-		{Sensors: 1, Mode: "polling", Payload: "large", Protocol: "REST"},
-		{Sensors: 1, Mode: "polling", Payload: "nested", Protocol: "REST"},
+		{Sensors: 1, Mode: "polling", Payload: "small", Protocol: "grpc"},
+		{Sensors: 1, Mode: "polling", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 1, Mode: "polling", Payload: "large", Protocol: "grpc"},
+		{Sensors: 1, Mode: "polling", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 1, Mode: "polling", Payload: "small", Protocol: "rest"},
+		{Sensors: 1, Mode: "polling", Payload: "medium", Protocol: "rest"},
+		{Sensors: 1, Mode: "polling", Payload: "large", Protocol: "rest"},
+		{Sensors: 1, Mode: "polling", Payload: "nested", Protocol: "rest"},
 
-		{Sensors: 10, Mode: "polling", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "polling", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "polling", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "polling", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "polling", Payload: "small", Protocol: "REST"},
-		{Sensors: 10, Mode: "polling", Payload: "medium", Protocol: "REST"},
-		{Sensors: 10, Mode: "polling", Payload: "large", Protocol: "REST"},
-		{Sensors: 10, Mode: "polling", Payload: "nested", Protocol: "REST"},
+		{Sensors: 10, Mode: "polling", Payload: "small", Protocol: "grpc"},
+		{Sensors: 10, Mode: "polling", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 10, Mode: "polling", Payload: "large", Protocol: "grpc"},
+		{Sensors: 10, Mode: "polling", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 10, Mode: "polling", Payload: "small", Protocol: "rest"},
+		{Sensors: 10, Mode: "polling", Payload: "medium", Protocol: "rest"},
+		{Sensors: 10, Mode: "polling", Payload: "large", Protocol: "rest"},
+		{Sensors: 10, Mode: "polling", Payload: "nested", Protocol: "rest"},
 
-		{Sensors: 50, Mode: "polling", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "polling", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "polling", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "polling", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "polling", Payload: "small", Protocol: "REST"},
-		{Sensors: 50, Mode: "polling", Payload: "medium", Protocol: "REST"},
-		{Sensors: 50, Mode: "polling", Payload: "large", Protocol: "REST"},
-		{Sensors: 50, Mode: "polling", Payload: "nested", Protocol: "REST"},
+		{Sensors: 50, Mode: "polling", Payload: "small", Protocol: "grpc"},
+		{Sensors: 50, Mode: "polling", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 50, Mode: "polling", Payload: "large", Protocol: "grpc"},
+		{Sensors: 50, Mode: "polling", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 50, Mode: "polling", Payload: "small", Protocol: "rest"},
+		{Sensors: 50, Mode: "polling", Payload: "medium", Protocol: "rest"},
+		{Sensors: 50, Mode: "polling", Payload: "large", Protocol: "rest"},
+		{Sensors: 50, Mode: "polling", Payload: "nested", Protocol: "rest"},
 
-		{Sensors: 100, Mode: "polling", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "polling", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "polling", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "polling", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "polling", Payload: "small", Protocol: "REST"},
-		{Sensors: 100, Mode: "polling", Payload: "medium", Protocol: "REST"},
-		{Sensors: 100, Mode: "polling", Payload: "large", Protocol: "REST"},
-		{Sensors: 100, Mode: "polling", Payload: "nested", Protocol: "REST"},
+		{Sensors: 100, Mode: "polling", Payload: "small", Protocol: "grpc"},
+		{Sensors: 100, Mode: "polling", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 100, Mode: "polling", Payload: "large", Protocol: "grpc"},
+		{Sensors: 100, Mode: "polling", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 100, Mode: "polling", Payload: "small", Protocol: "rest"},
+		{Sensors: 100, Mode: "polling", Payload: "medium", Protocol: "rest"},
+		{Sensors: 100, Mode: "polling", Payload: "large", Protocol: "rest"},
+		{Sensors: 100, Mode: "polling", Payload: "nested", Protocol: "rest"},
 
 
-		{Sensors: 1, Mode: "streaming", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "streaming", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "streaming", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "streaming", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 1, Mode: "streaming", Payload: "small", Protocol: "REST"},
-		{Sensors: 1, Mode: "streaming", Payload: "medium", Protocol: "REST"},
-		{Sensors: 1, Mode: "streaming", Payload: "large", Protocol: "REST"},
-		{Sensors: 1, Mode: "streaming", Payload: "nested", Protocol: "REST"},
+		{Sensors: 1, Mode: "streaming", Payload: "small", Protocol: "grpc"},
+		{Sensors: 1, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 1, Mode: "streaming", Payload: "large", Protocol: "grpc"},
+		{Sensors: 1, Mode: "streaming", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 1, Mode: "streaming", Payload: "small", Protocol: "rest"},
+		{Sensors: 1, Mode: "streaming", Payload: "medium", Protocol: "rest"},
+		{Sensors: 1, Mode: "streaming", Payload: "large", Protocol: "rest"},
+		{Sensors: 1, Mode: "streaming", Payload: "nested", Protocol: "rest"},
 
-		{Sensors: 10, Mode: "streaming", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "streaming", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "streaming", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "streaming", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 10, Mode: "streaming", Payload: "small", Protocol: "REST"},
-		{Sensors: 10, Mode: "streaming", Payload: "medium", Protocol: "REST"},
-		{Sensors: 10, Mode: "streaming", Payload: "large", Protocol: "REST"},
-		{Sensors: 10, Mode: "streaming", Payload: "nested", Protocol: "REST"},
+		{Sensors: 10, Mode: "streaming", Payload: "small", Protocol: "grpc"},
+		{Sensors: 10, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 10, Mode: "streaming", Payload: "large", Protocol: "grpc"},
+		{Sensors: 10, Mode: "streaming", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 10, Mode: "streaming", Payload: "small", Protocol: "rest"},
+		{Sensors: 10, Mode: "streaming", Payload: "medium", Protocol: "rest"},
+		{Sensors: 10, Mode: "streaming", Payload: "large", Protocol: "rest"},
+		{Sensors: 10, Mode: "streaming", Payload: "nested", Protocol: "rest"},
 
-		{Sensors: 50, Mode: "streaming", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "streaming", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "streaming", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "streaming", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 50, Mode: "streaming", Payload: "small", Protocol: "REST"},
-		{Sensors: 50, Mode: "streaming", Payload: "medium", Protocol: "REST"},
-		{Sensors: 50, Mode: "streaming", Payload: "large", Protocol: "REST"},
-		{Sensors: 50, Mode: "streaming", Payload: "nested", Protocol: "REST"},
+		{Sensors: 50, Mode: "streaming", Payload: "small", Protocol: "grpc"},
+		{Sensors: 50, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 50, Mode: "streaming", Payload: "large", Protocol: "grpc"},
+		{Sensors: 50, Mode: "streaming", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 50, Mode: "streaming", Payload: "small", Protocol: "rest"},
+		{Sensors: 50, Mode: "streaming", Payload: "medium", Protocol: "rest"},
+		{Sensors: 50, Mode: "streaming", Payload: "large", Protocol: "rest"},
+		{Sensors: 50, Mode: "streaming", Payload: "nested", Protocol: "rest"},
 
-		{Sensors: 100, Mode: "streaming", Payload: "small", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "streaming", Payload: "medium", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "streaming", Payload: "large", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "streaming", Payload: "nested", Protocol: "gRPC"},
-		{Sensors: 100, Mode: "streaming", Payload: "small", Protocol: "REST"},
-		{Sensors: 100, Mode: "streaming", Payload: "medium", Protocol: "REST"},
-		{Sensors: 100, Mode: "streaming", Payload: "large", Protocol: "REST"},
-		{Sensors: 100, Mode: "streaming", Payload: "nested", Protocol: "REST"},
+		{Sensors: 100, Mode: "streaming", Payload: "small", Protocol: "grpc"},
+		{Sensors: 100, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
+		{Sensors: 100, Mode: "streaming", Payload: "large", Protocol: "grpc"},
+		{Sensors: 100, Mode: "streaming", Payload: "nested", Protocol: "grpc"},
+		{Sensors: 100, Mode: "streaming", Payload: "small", Protocol: "rest"},
+		{Sensors: 100, Mode: "streaming", Payload: "medium", Protocol: "rest"},
+		{Sensors: 100, Mode: "streaming", Payload: "large", Protocol: "rest"},
+		{Sensors: 100, Mode: "streaming", Payload: "nested", Protocol: "rest"},
 	}
 
 	for _, tc := range suite {
 		log.Printf("\n>>> AVVIO TEST CASE: Sensori:%d | Mode:%s | Size:%s | Protocol:%s <<<", 
             tc.Sensors, tc.Mode, tc.Payload, tc.Protocol)
-
+		updateGatewayConfig(httpClient, tc)
 		// 1. Applica la configurazione in modo atomico
-		globalConfig.Store(RemoteConfig{
+		globalConfig.Store(config.TelemetryConfig{
 			Mode: tc.Mode, Size: tc.Payload, Protocol: tc.Protocol, Sensors: tc.Sensors,
 		})
 		
@@ -121,4 +124,25 @@ func runBenchmarkSuite(clients []pb.TelemetryServiceClient, httpClient *http.Cli
 	log.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	log.Println("!!! BENCHMARK SUITE TERMINATA !!!")
 	log.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+}
+
+func updateGatewayConfig(client *http.Client, tc TestCase) {
+    // Creiamo l'oggetto config da inviare
+    cfg := config.TelemetryConfig{
+        Mode:     tc.Mode,
+        Size:     tc.Payload,
+        Sensors:  tc.Sensors,
+        Protocol: tc.Protocol,
+    }
+
+    // Trasformiamo in JSON
+    jsonData, _ := json.Marshal(cfg)
+    
+    // Inviamo al Gateway (endpoint che abbiamo creato prima: /set-config)
+    resp, err := client.Post(setConfigEndpoint, "application/json", bytes.NewBuffer(jsonData))
+    if err != nil {
+        log.Printf("Errore notifica benchmark al gateway: %v", err)
+        return
+    }
+    defer resp.Body.Close()
 }

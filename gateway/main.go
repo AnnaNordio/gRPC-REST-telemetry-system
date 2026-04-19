@@ -37,6 +37,8 @@ func main() {
 	mux.HandleFunc("/get-sensors", handleGetSensors)
     mux.HandleFunc("/set-protocol", handleSetProtocol)
 	mux.HandleFunc("/get-protocol", handleGetProtocol)
+    mux.HandleFunc("/set-config", handleSetConfig)
+	mux.HandleFunc("/get-config", handleGetConfig)
     mux.HandleFunc("/reset", handleReset)
 	mux.HandleFunc("/ws", handleWS)    
 	

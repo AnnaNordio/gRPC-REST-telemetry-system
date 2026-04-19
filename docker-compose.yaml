@@ -9,6 +9,8 @@ services:
       - "50051:50051"
       - "8080:8080"
       - "3000:3000" 
+    volumes:
+      - ./results:/root/results
     networks:
       - telemetry-net
 
@@ -35,8 +37,6 @@ services:
     environment:
       - APP_MODE=benchmark
       - GATEWAY_ADDR=gateway:50051
-    volumes:
-      - ./results:/app/results  # Mappa una cartella locale per salvare i report finali
     restart: "no"              
     networks:
       - telemetry-net

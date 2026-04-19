@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"github.com/gorilla/websocket"	
 	pb "telemetry-bench/proto"
+	"telemetry-bench/pkg/config"
 )
 
 // Middleware per gestire le richieste Cross-Origin
@@ -97,79 +99,129 @@ func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+
 // Cambia la modalità (polling vs streaming)
 func handleSetMode(w http.ResponseWriter, r *http.Request) {
-	newMode := r.URL.Query().Get("mode")
-	if newMode != "" && (newMode == "polling" || newMode == "streaming") {
-		if newMode != currentMode {
-			currentMode = newMode
-			resetStats() // Resetta le metriche quando cambia il paradigma
-		}
-		w.WriteHeader(http.StatusOK)
-	} else {
-		http.Error(w, "Modalità non valida", http.StatusBadRequest)
-	}
+    newMode := r.URL.Query().Get("mode")
+    if newMode == "polling" || newMode == "streaming" {
+        metricsMu.Lock()
+        if activeConfig.Mode != newMode {
+            activeConfig.Mode = newMode
+            metricsMu.Unlock() // Sblocca prima di resettare per evitare deadlock
+            resetStats()
+        } else {
+            metricsMu.Unlock()
+        }
+        w.WriteHeader(http.StatusOK)
+    } else {
+        http.Error(w, "Modalità non valida", http.StatusBadRequest)
+    }
 }
 
-// Restituisce la modalità attuale
-func handleGetMode(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprint(w, currentMode)
-}
-
-// Cambia la dimensione del payload simulato
+// Cambia la dimensione del payload
 func handleSetSize(w http.ResponseWriter, r *http.Request) {
-	newSize := r.URL.Query().Get("size")
-	if newSize != "" {
-		if newSize != currentSize {
-			currentSize = newSize
-			resetStats() 
-		}
-		w.WriteHeader(http.StatusOK)
-	} else {
-		http.Error(w, "Dimensione non valida", http.StatusBadRequest)
-	}
-}
-
-// Restituisce la dimensione del payload attuale
-func handleGetSize(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprint(w, currentSize)
+    newSize := r.URL.Query().Get("size")
+    if newSize != "" {
+        metricsMu.Lock()
+        if activeConfig.Size != newSize {
+            activeConfig.Size = newSize
+            metricsMu.Unlock()
+            resetStats()
+        } else {
+            metricsMu.Unlock()
+        }
+        w.WriteHeader(http.StatusOK)
+    }
 }
 
 func handleSetSensors(w http.ResponseWriter, r *http.Request) {
-	newCount := r.URL.Query().Get("count")
-	if newCount != "" {
-		if newCount != currentSensors {
-			currentSensors = newCount
-			resetStats()
-		}
-		w.WriteHeader(http.StatusOK)
-	} else {
-		http.Error(w, "Numero sensori non valido", http.StatusBadRequest)
-	}
-}
-
-// Restituisce il numero di sensori attuale
-func handleGetSensors(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprint(w, currentSensors)
+    newCountStr := r.URL.Query().Get("count")
+    newCount, err := strconv.Atoi(newCountStr) // Converti in int se la struct vuole int
+    if err == nil {
+        metricsMu.Lock()
+        if activeConfig.Sensors != newCount {
+            activeConfig.Sensors = newCount
+            metricsMu.Unlock()
+            resetStats()
+        } else {
+            metricsMu.Unlock()
+        }
+        w.WriteHeader(http.StatusOK)
+    }
 }
 
 func handleSetProtocol(w http.ResponseWriter, r *http.Request) {
     p := r.URL.Query().Get("p")
 	if p != "" {
-		if p != currentProtocol {
-			currentProtocol = p
-			resetStats() 
-		}
-		w.WriteHeader(http.StatusOK)
-	} else {
-		http.Error(w, "Protocollo non valido", http.StatusBadRequest)
-	}
+        metricsMu.Lock()
+        if activeConfig.Protocol != p {
+            activeConfig.Protocol = p
+            metricsMu.Unlock()
+            resetStats()
+        } else {
+            metricsMu.Unlock()
+        }
+        w.WriteHeader(http.StatusOK)
+    }
+}
+
+func handleGetMode(w http.ResponseWriter, r *http.Request) {
+    metricsMu.Lock()
+    mode := activeConfig.Mode
+    metricsMu.Unlock()
+    fmt.Fprint(w, mode)
+}
+
+func handleGetSensors(w http.ResponseWriter, r *http.Request) {
+    metricsMu.Lock()
+    s := activeConfig.Sensors
+    metricsMu.Unlock()
+    fmt.Fprint(w, s) // Se sensors è int, usa fmt.Fprint per la conversione automatica
+}
+
+// Restituisce la dimensione del payload attuale
+func handleGetSize(w http.ResponseWriter, r *http.Request) {
+	metricsMu.Lock()
+    size := activeConfig.Size
+    metricsMu.Unlock()
+    fmt.Fprint(w, size)
 }
 
 func handleGetProtocol(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprint(w, currentProtocol)
+	metricsMu.Lock()
+    protocol := activeConfig.Protocol
+    metricsMu.Unlock()
+    fmt.Fprint(w, protocol)
+}
+
+func handleSetConfig(w http.ResponseWriter, r *http.Request) {
+    var newCfg config.TelemetryConfig
+    if err := json.NewDecoder(r.Body).Decode(&newCfg); err != nil {
+        http.Error(w, "JSON non valido", http.StatusBadRequest)
+        return
+    }
+
+    metricsMu.Lock()
+    activeConfig = newCfg
+    metricsMu.Unlock()
+    
+    resetStats() // Resetta tutto per il nuovo test case
+    w.WriteHeader(http.StatusOK)
+}
+
+func handleGetConfig(w http.ResponseWriter, r *http.Request) {
+    // 1. Impostiamo l'header per dire al client che mandiamo JSON
+    w.Header().Set("Content-Type", "application/json")
+
+    // 2. Blocchiamo il mutex per leggere la configurazione in sicurezza
+    metricsMu.Lock()
+    configToSend := activeConfig 
+    metricsMu.Unlock()
+
+    // 3. Trasformiamo la struct in JSON e la inviamo nella risposta
+    err := json.NewEncoder(w).Encode(configToSend)
+    if err != nil {
+        http.Error(w, "Errore durante la codifica del JSON", http.StatusInternalServerError)
+        return
+    }
 }

@@ -1,54 +1,34 @@
 package main
 
 import (
-	"io"
 	"net/http"
-	"strconv"
+	"log"
+	"encoding/json"
+	"telemetry-bench/pkg/config"
 )
 
-// RemoteConfig definisce i parametri operativi del benchmark
-type RemoteConfig struct {
-	Mode     string
-	Size     string
-	Sensors  int
-	Protocol string
-}
+func fetchFullConfig(client *http.Client) config.TelemetryConfig {
+    // Recuperiamo lo stato attuale per il fallback in caso di errore
+    current := globalConfig.Load().(config.TelemetryConfig)
 
-// fetchFullConfig interroga gli endpoint e restituisce la nuova configurazione.
-// Se un valore non è disponibile, usa quello attuale per evitare reset improvvisi.
-func fetchFullConfig(client *http.Client) RemoteConfig {
-	// Recuperiamo lo stato attuale per i fallback
-	current := globalConfig.Load().(RemoteConfig)
+    // Chiamiamo l'endpoint unificato del Gateway (es: /get-config o /results)
+    // Assicurati che l'URL corrisponda a quello che hai registrato nel Gateway
+    resp, err := client.Get(configEndpoint) 
+    if err != nil {
+        log.Printf("Errore fetch config: %v", err)
+        return current
+    }
+    defer resp.Body.Close()
 
-	m := fetchValue(client, modeEndpoint, current.Mode)
-	sz := fetchValue(client, sizeEndpoint, current.Size)
-	p := fetchValue(client, protocolEndpoint, current.Protocol)
-	
-	// Gestione sicura per il numero di sensori
-	sStr := fetchValue(client, sensorsEndpoint, strconv.Itoa(current.Sensors))
-	sInt, err := strconv.Atoi(sStr)
-	if err != nil {
-		sInt = current.Sensors
-	}
+    if resp.StatusCode != http.StatusOK {
+        return current
+    }
 
-	return RemoteConfig{
-		Mode:     m,
-		Size:     sz,
-		Sensors:  sInt,
-		Protocol: p,
-	}
-}
+    var newConfig config.TelemetryConfig
+    if err := json.NewDecoder(resp.Body).Decode(&newConfig); err != nil {
+        log.Printf("Errore decode config: %v", err)
+        return current
+    }
 
-func fetchValue(client *http.Client, url string, defaultValue string) string {
-	resp, err := client.Get(url)
-	if err != nil {
-		return defaultValue
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil || len(body) == 0 {
-		return defaultValue
-	}
-	return string(body)
+    return newConfig
 }

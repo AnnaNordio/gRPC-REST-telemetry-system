@@ -12,11 +12,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	pb "telemetry-bench/proto"
+	"telemetry-bench/pkg/config"
+
 )
 
 // Variabili globali per il coordinamento
 var (
-	globalConfig atomic.Value // Contiene l'ultima RemoteConfig caricata
+	globalConfig atomic.Value // Contiene l'ultima TelemetryConfig caricata
 
 	sensorMu       sync.Mutex
 	stopChannels   = make(map[int]chan struct{})
@@ -27,7 +29,7 @@ var (
 func main() {
 	log.Println("Avvio Sensore High-Precision Multi-Node...")
 
-	globalConfig.Store(RemoteConfig{
+	globalConfig.Store(config.TelemetryConfig{
 		Mode:     "polling",
 		Size:     "small",
 		Sensors:  0,
@@ -134,8 +136,7 @@ func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServi
 			return
 		case <-ticker.C:
 			// Lettura lock-free della configurazione globale
-			conf := globalConfig.Load().(RemoteConfig)
-
+			conf := globalConfig.Load().(config.TelemetryConfig)
 			// Se la modalità cambia, dobbiamo resettare lo stream gRPC
 			if conf.Mode != lastMode && stream != nil {
 				stream.CloseSend()

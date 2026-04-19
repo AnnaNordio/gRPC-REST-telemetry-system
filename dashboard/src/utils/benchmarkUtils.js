@@ -13,7 +13,7 @@ const DRAW_STYLE = {
 };
 
 export const getPayloadComparison = (restTotalKB, grpcTotalKB) => {
-  if (!restTotalKB || !grpcTotalKB) return { ...DRAW_STYLE, text: "Calculating..." };
+  if (!restTotalKB || !grpcTotalKB) return { ...DRAW_STYLE, text: "Warming up..." };
   
   // Caso Pareggio
   if (restTotalKB === grpcTotalKB) {
@@ -34,7 +34,7 @@ export const getPayloadComparison = (restTotalKB, grpcTotalKB) => {
 };
 
 export const getLatencyComparison = (restAvg, grpcAvg) => {
-  if (!restAvg || !grpcAvg) return { ...DRAW_STYLE, text: "Analyzing..." };
+  if (!restAvg || !grpcAvg) return { ...DRAW_STYLE, text: "Warming up..." };
 
   if (restAvg === grpcAvg) {
     return { ...DRAW_STYLE, text: "Identical Latency" };
@@ -54,7 +54,7 @@ export const getLatencyComparison = (restAvg, grpcAvg) => {
 };
 
 export const getThroughputComparison = (restThroughput, grpcThroughput) => {
-  if (!restThroughput || !grpcThroughput) return { text: "Benchmarking...", color: "text-slate-400" };
+  if (!restThroughput || !grpcThroughput) return { ...DRAW_STYLE, text: "Warming up..." };
 
   const isGrpcHigher = grpcThroughput > restThroughput;
 
@@ -75,7 +75,7 @@ export const getThroughputComparison = (restThroughput, grpcThroughput) => {
 };
 
 export const getMarshalComparison = (restMarshalUs, grpcMarshalUs) => {
-  if (!restMarshalUs || !grpcMarshalUs) return { ...DRAW_STYLE, text: "Measuring CPU..." };
+  if (!restMarshalUs || !grpcMarshalUs) return { ...DRAW_STYLE, text: "Warming up..." };
 
   if (Math.abs(restMarshalUs - grpcMarshalUs) < 0.1) {
     return { ...DRAW_STYLE, text: "Similar CPU Usage" };

@@ -6,6 +6,7 @@ import (
     "google.golang.org/grpc/metadata"  
     "sync/atomic"
     "os"
+    "strconv"
     pb "telemetry-bench/proto"
 )
 
@@ -28,10 +29,7 @@ func metricsWorker() {
             // --- 1. Lettura Stato (dal tuo file state) ---
             metricsMu.Lock()
             isWarmup := time.Now().Before(warmupUntil)
-            mMode := currentMode
-            mSize := currentSize
-            mProto := currentProtocol
-            mSensors := currentSensors
+            cfg := activeConfig
             metricsMu.Unlock()
 
             if isWarmup {
@@ -42,7 +40,8 @@ func metricsWorker() {
             updateStats(m)
 
             // --- 3. Scrittura su File ---
-            writer.Write(m, mMode, mSize, mProto, mSensors)
+            sSensors := strconv.Itoa(cfg.Sensors)
+            writer.Write(m, cfg.Mode, cfg.Size, cfg.Protocol, sSensors)
 
         case <-flushTicker.C:
             if writer.csvWriter != nil {
