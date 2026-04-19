@@ -9,15 +9,11 @@ import (
 )
 
 func (mw *MetricsWriter) Write(m Metric, mode, size, protocol, sensors string) {
-    // 1. Scriviamo su file solo se il protocollo è "both"
-    if protocol != "both" {
-        return
-    }
 
     // 2. Controllo rotazione (Usa i parametri correnti)
     configKey := fmt.Sprintf("%s_%s_%s", mode, size, sensors)
     if configKey != mw.lastConfig {
-        mw.rotateFile(mode, size, sensors)
+        mw.rotateFile(mode, size, sensors, protocol)
         mw.lastConfig = configKey
     }
 
@@ -36,14 +32,14 @@ func (mw *MetricsWriter) Write(m Metric, mode, size, protocol, sensors string) {
     }
 }
 
-func (mw *MetricsWriter) rotateFile(mode, size, sensors string) {
+func (mw *MetricsWriter) rotateFile(mode, size, sensors, protocol string) {
     if mw.file != nil {
         mw.file.Close()
     }
 
     // Nome file dinamico basato sui parametri del benchmark
-    fileName := fmt.Sprintf("results/bench_results-%s_%s_%s.csv", mode, size, sensors)
-    f, err := os.OpenFile(fileName, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+    fileName := fmt.Sprintf("results/bench_results_%s_%s_%s_%s.csv", protocol, mode, size, sensors)
+    f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     if err != nil {
         log.Printf("Errore rotazione file: %v", err)
         return

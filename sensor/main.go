@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+    "os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -58,6 +59,16 @@ func main() {
 			MaxIdleConnsPerHost: 100,
 		},
 	}
+
+    appMode := os.Getenv("APP_MODE")
+
+    if appMode == "benchmark" {
+        log.Println(">>> MODALITÀ BENCHMARK RILEVATA <<<")
+        runBenchmarkSuite(grpcClients, httpClient)
+        log.Println("Benchmark completato. Spegnimento in corso...")
+        time.Sleep(2 * time.Second)
+        return // Esci dal programma, Docker fermerà il container
+    }
 
 	// 3. Loop di monitoraggio configurazione
 	for {

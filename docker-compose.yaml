@@ -12,12 +12,32 @@ services:
     networks:
       - telemetry-net
 
+  # Servizio Sensore Standard: segue la configurazione remota all'infinito
   sensor:
     build:
       context: .
       target: sensor
     depends_on:
       - gateway
+    environment:
+      - APP_MODE=normal
+      - GATEWAY_ADDR=gateway:50051
+    networks:
+      - telemetry-net
+
+  # Servizio Benchmark: esegue la suite (Warm-up, Steady, Cool-down) e poi si arresta
+  benchmark:
+    build:
+      context: .
+      target: sensor
+    depends_on:
+      - gateway
+    environment:
+      - APP_MODE=benchmark
+      - GATEWAY_ADDR=gateway:50051
+    volumes:
+      - ./results:/app/results  # Mappa una cartella locale per salvare i report finali
+    restart: "no"              
     networks:
       - telemetry-net
 
