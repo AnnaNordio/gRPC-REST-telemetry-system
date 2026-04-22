@@ -1,3 +1,14 @@
+PROTO_IMAGE = telemetry-proto-builder
+
+# Comando per generare i file usando Docker
+docker-gen:
+	# Build dell'immagine di generazione (solo la prima volta o se cambia il Dockerfile.proto)
+	docker build -f Dockerfile.proto -t $(PROTO_IMAGE) .
+	# Esecuzione del container:
+	# --rm: elimina il container dopo l'esecuzione
+	# -v: monta la cartella corrente dentro il container così i file generati appaiono sul tuo PC
+	docker run --rm -v $(shell pwd):/app $(PROTO_IMAGE)
+
 gen:
 	# 1. Parte Go (Assicurati che la cartella proto esista)
 	protoc --go_out=. --go_opt=paths=source_relative \

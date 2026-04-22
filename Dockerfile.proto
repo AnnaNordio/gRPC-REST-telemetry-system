@@ -1,0 +1,29 @@
+# Usa Go come base per avere già il compilatore Go
+FROM golang:1.24-alpine
+
+# 1. Installiamo le dipendenze di sistema
+RUN apk add --no-cache \
+    protobuf \
+    protobuf-dev \
+    nodejs \
+    npm \
+    curl \
+    make \
+    git
+
+# 2. Installiamo i plugin per Go
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+# 3. Installiamo il plugin gRPC-Web (binario)
+RUN curl -L https://github.com/grpc/grpc-web/releases/download/1.5.0/protoc-gen-grpc-web-1.5.0-linux-x86_64 \
+    -o /usr/local/bin/protoc-gen-grpc-web && \
+    chmod +x /usr/local/bin/protoc-gen-grpc-web
+
+# 4. Installiamo protoc-gen-js (necessario per le nuove versioni di protoc)
+RUN npm install -g protoc-gen-js
+
+WORKDIR /app
+
+# Di default, quando avviamo il container, esegue il comando make gen
+CMD ["make", "gen"]
