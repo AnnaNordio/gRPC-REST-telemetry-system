@@ -16,7 +16,8 @@ var metricsChan = make(chan Metric, 10000)
 
 func metricsWorker() {
     os.MkdirAll("results", 0755)
-    
+
+    isBenchMode := os.Getenv("BENCH_MODE") == "true"
     writer := &MetricsWriter{}
 
     flushTicker := time.NewTicker(1 * time.Second)
@@ -40,8 +41,10 @@ func metricsWorker() {
             updateStats(m)
 
             // --- 3. Scrittura su File ---
-            sSensors := strconv.Itoa(cfg.Sensors)
-            writer.Write(m, cfg.Mode, cfg.Size, cfg.Protocol, sSensors)
+            if isBenchMode {
+                sSensors := strconv.Itoa(cfg.Sensors)
+                writer.Write(m, cfg.Mode, cfg.Size, cfg.Protocol, sSensors)
+            }
 
         case <-flushTicker.C:
             if writer.csvWriter != nil {
