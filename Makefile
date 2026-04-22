@@ -32,7 +32,6 @@ run-dashboard:
 down:
 	docker-compose -f docker-compose.yaml down -v
 	docker-compose -f docker-compose.benchmark.yaml down -v
-	sudo chown -R $$USER:$$USER results/
 
 clean:
 	docker-compose down -v --rmi all
