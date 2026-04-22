@@ -1,29 +1,36 @@
-# Usa Go come base per avere già il compilatore Go
-FROM golang:1.24-alpine
+FROM golang:1.24-bullseye
 
-# 1. Installiamo le dipendenze di sistema
-RUN apk add --no-cache \
-    protobuf \
-    protobuf-dev \
+# 1. Installiamo le dipendenze di sistema (senza protobuf-compiler che scarichiamo dopo)
+RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     curl \
     make \
-    git
+    git \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Installiamo i plugin per Go
+# 2. Scarica ed installa protoc v21.12 (ovvero 3.21.12)
+RUN curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-x86_64.zip && \
+    unzip protoc-21.12-linux-x86_64.zip -d /usr/local && \
+    chmod +x /usr/local/bin/protoc && \
+    rm protoc-21.12-linux-x86_64.zip
+
+# 3. Installiamo i plugin per Go
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-# 3. Installiamo il plugin gRPC-Web (binario)
+# 4. Installiamo il plugin gRPC-Web
 RUN curl -L https://github.com/grpc/grpc-web/releases/download/1.5.0/protoc-gen-grpc-web-1.5.0-linux-x86_64 \
     -o /usr/local/bin/protoc-gen-grpc-web && \
     chmod +x /usr/local/bin/protoc-gen-grpc-web
 
-# 4. Installiamo protoc-gen-js (necessario per le nuove versioni di protoc)
+# 5. Installiamo protoc-gen-js
 RUN npm install -g protoc-gen-js
 
 WORKDIR /app
 
-# Di default, quando avviamo il container, esegue il comando make gen
+# Impostiamo il PATH per includere i binari di Go
+ENV PATH="$PATH:/go/bin"
+
 CMD ["make", "gen"]
