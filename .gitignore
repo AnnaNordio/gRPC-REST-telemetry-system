@@ -21,8 +21,6 @@ bin/
 .DS_Store
 *.swp
 
-*.json
-
 # Logs
 logs
 *.log
