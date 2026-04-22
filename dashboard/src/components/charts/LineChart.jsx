@@ -134,16 +134,23 @@ export const LineChart = ({ history }) => {
         }
       },
       tooltip: {
+        filter: (tooltipItem) => {
+          return tooltipItem.dataset.label.includes('Avg');
+        },
         callbacks: {
           label: (ctx) => {
             const entry = recentHistory[ctx.dataIndex];
             const p = ctx.dataset.label.includes('REST') ? entry.rest : entry.grpc;
-            return p ? [`Avg: ${p.avg.toFixed(2)}ms`, `Range: [${p.min.toFixed(1)}-${p.max.toFixed(1)}]ms`] : '';
+            return p ? [`Avg: ${p.avg.toFixed(2)}μs`, `Range: [${p.min.toFixed(1)}-${p.max.toFixed(1)}]μs`] : '';
           }
         }
       }
     }
   };
 
-  return <Line data={chartData} options={chartOptions} />;
+  return (
+    <div className="h-[400px] w-full">
+      <Line data={chartData} options={chartOptions} />
+    </div>
+  );
 };

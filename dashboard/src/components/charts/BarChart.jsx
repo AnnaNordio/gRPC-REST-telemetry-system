@@ -43,13 +43,11 @@ export const BarChart = ({ restValue, grpcValue, measure, unit = 'KB' }) => {
       }
     },
     scales: {
-      y: {
+      y: { 
+        stacked: true, 
         beginAtZero: true,
-        title: { 
-          display: true, 
-          text: `${measure} (${unit})`,
-          font: { weight: 'bold' }
-        },
+        title: { display: true, text: `${measure} (${unit})` },
+        grid: { color: '#f1f5f9' }
       },
       x: {
         grid: { display: false } // Pulizia visiva

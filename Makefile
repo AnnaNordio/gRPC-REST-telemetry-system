@@ -13,3 +13,26 @@ gen:
 	# 3. Build del bundle per Vite
 	# Usiamo && per assicurarci che se npm install fallisce, il build non parta
 	cd dashboard/proto-pkg && npm install && npm run build
+
+# --- BENCHMARK ---
+build-bench:
+	docker-compose -f docker-compose.benchmark.yaml build
+
+run-bench:
+	docker-compose -f docker-compose.benchmark.yaml up --build --abort-on-container-exit
+
+# --- DASHBOARD ---
+build-dashboard:
+	docker-compose -f docker-compose.yaml build
+
+run-dashboard:
+	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit
+
+# --- CLEANUP ---
+down:
+	docker-compose -f docker-compose.yaml down -v
+	docker-compose -f docker-compose.benchmark.yaml down -v
+	sudo chown -R $$USER:$$USER results/
+
+clean:
+	docker-compose down -v --rmi all

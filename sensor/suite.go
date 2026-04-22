@@ -1,11 +1,13 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"time"
 	"bytes"
 	"encoding/json"
+	"log"
+	"math/rand"
+	"net/http"
+	"time"
+
 	pb "telemetry-bench/proto"
 	"telemetry-bench/pkg/config"
 )
@@ -13,112 +15,122 @@ import (
 type TestCase struct {
 	Sensors  int
 	Mode     string
-	Payload  string 
+	Payload  string
 	Protocol string
 }
 
-func runBenchmarkSuite(clients []pb.TelemetryServiceClient, httpClient *http.Client) {
-	// Qui configuri la tua "tabella di marcia"
-	suite := []TestCase{
-		{Sensors: 1, Mode: "polling", Payload: "small", Protocol: "grpc"},
-		{Sensors: 1, Mode: "polling", Payload: "small", Protocol: "rest"},
-		{Sensors: 1, Mode: "polling", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 1, Mode: "polling", Payload: "medium", Protocol: "rest"},
-		{Sensors: 1, Mode: "polling", Payload: "large", Protocol: "grpc"},
-		{Sensors: 1, Mode: "polling", Payload: "large", Protocol: "rest"},
-		{Sensors: 1, Mode: "polling", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 1, Mode: "polling", Payload: "nested", Protocol: "rest"},
+// ----------------------------
+// BUILD GROUPED SUITE
+// ----------------------------
+func buildGroupedSuite() [][]TestCase {
+	sensors := []int{1, 10, 50, 100}
+	modes := []string{"polling", "streaming"}
+	payloads := []string{"small", "medium", "large", "nested"}
+	protocols := []string{"grpc", "rest"}
 
-		{Sensors: 10, Mode: "polling", Payload: "small", Protocol: "grpc"},
-		{Sensors: 10, Mode: "polling", Payload: "small", Protocol: "rest"},
-		{Sensors: 10, Mode: "polling", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 10, Mode: "polling", Payload: "medium", Protocol: "rest"},
-		{Sensors: 10, Mode: "polling", Payload: "large", Protocol: "grpc"},
-		{Sensors: 10, Mode: "polling", Payload: "large", Protocol: "rest"},
-		{Sensors: 10, Mode: "polling", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 10, Mode: "polling", Payload: "nested", Protocol: "rest"},
+	groups := make([][]TestCase, len(sensors))
 
-		{Sensors: 50, Mode: "polling", Payload: "small", Protocol: "grpc"},
-		{Sensors: 50, Mode: "polling", Payload: "small", Protocol: "rest"},
-		{Sensors: 50, Mode: "polling", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 50, Mode: "polling", Payload: "medium", Protocol: "rest"},
-		{Sensors: 50, Mode: "polling", Payload: "large", Protocol: "grpc"},
-		{Sensors: 50, Mode: "polling", Payload: "large", Protocol: "rest"},
-		{Sensors: 50, Mode: "polling", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 50, Mode: "polling", Payload: "nested", Protocol: "rest"},
+	for i, s := range sensors {
+		var group []TestCase
 
-		{Sensors: 100, Mode: "polling", Payload: "small", Protocol: "grpc"},
-		{Sensors: 100, Mode: "polling", Payload: "small", Protocol: "rest"},
-		{Sensors: 100, Mode: "polling", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 100, Mode: "polling", Payload: "medium", Protocol: "rest"},
-		{Sensors: 100, Mode: "polling", Payload: "large", Protocol: "grpc"},
-		{Sensors: 100, Mode: "polling", Payload: "large", Protocol: "rest"},
-		{Sensors: 100, Mode: "polling", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 100, Mode: "polling", Payload: "nested", Protocol: "rest"},
+		for _, m := range modes {
+			for _, p := range payloads {
+				for _, proto := range protocols {
+					group = append(group, TestCase{
+						Sensors:  s,
+						Mode:     m,
+						Payload:  p,
+						Protocol: proto,
+					})
+				}
+			}
+		}
 
-
-		{Sensors: 1, Mode: "streaming", Payload: "small", Protocol: "grpc"},
-		{Sensors: 1, Mode: "streaming", Payload: "small", Protocol: "rest"},
-		{Sensors: 1, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 1, Mode: "streaming", Payload: "medium", Protocol: "rest"},
-		{Sensors: 1, Mode: "streaming", Payload: "large", Protocol: "grpc"},
-		{Sensors: 1, Mode: "streaming", Payload: "large", Protocol: "rest"},
-		{Sensors: 1, Mode: "streaming", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 1, Mode: "streaming", Payload: "nested", Protocol: "rest"},
-
-		{Sensors: 10, Mode: "streaming", Payload: "small", Protocol: "grpc"},
-		{Sensors: 10, Mode: "streaming", Payload: "small", Protocol: "rest"},
-		{Sensors: 10, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 10, Mode: "streaming", Payload: "medium", Protocol: "rest"},
-		{Sensors: 10, Mode: "streaming", Payload: "large", Protocol: "grpc"},
-		{Sensors: 10, Mode: "streaming", Payload: "large", Protocol: "rest"},
-		{Sensors: 10, Mode: "streaming", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 10, Mode: "streaming", Payload: "nested", Protocol: "rest"},
-
-		{Sensors: 50, Mode: "streaming", Payload: "small", Protocol: "grpc"},
-		{Sensors: 50, Mode: "streaming", Payload: "small", Protocol: "rest"},
-		{Sensors: 50, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 50, Mode: "streaming", Payload: "medium", Protocol: "rest"},
-		{Sensors: 50, Mode: "streaming", Payload: "large", Protocol: "grpc"},
-		{Sensors: 50, Mode: "streaming", Payload: "large", Protocol: "rest"},
-		{Sensors: 50, Mode: "streaming", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 50, Mode: "streaming", Payload: "nested", Protocol: "rest"},
-
-		{Sensors: 100, Mode: "streaming", Payload: "small", Protocol: "grpc"},
-		{Sensors: 100, Mode: "streaming", Payload: "small", Protocol: "rest"},
-		{Sensors: 100, Mode: "streaming", Payload: "medium", Protocol: "grpc"},
-		{Sensors: 100, Mode: "streaming", Payload: "medium", Protocol: "rest"},
-		{Sensors: 100, Mode: "streaming", Payload: "large", Protocol: "grpc"},
-		{Sensors: 100, Mode: "streaming", Payload: "large", Protocol: "rest"},
-		{Sensors: 100, Mode: "streaming", Payload: "nested", Protocol: "grpc"},		
-		{Sensors: 100, Mode: "streaming", Payload: "nested", Protocol: "rest"},
+		groups[i] = group
 	}
 
-	for _, tc := range suite {
-		log.Printf("\n>>> AVVIO TEST CASE: Sensori:%d | Mode:%s | Size:%s | Protocol:%s <<<", 
-            tc.Sensors, tc.Mode, tc.Payload, tc.Protocol)
-		updateGatewayConfig(httpClient, tc)
-		// 1. Applica la configurazione in modo atomico
-		globalConfig.Store(config.TelemetryConfig{
-			Mode: tc.Mode, Size: tc.Payload, Protocol: tc.Protocol, Sensors: tc.Sensors,
+	return groups
+}
+
+// ----------------------------
+// SHUFFLE EACH GROUP
+// ----------------------------
+func shuffleGroups(groups [][]TestCase) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for i := range groups {
+		r.Shuffle(len(groups[i]), func(a, b int) {
+			groups[i][a], groups[i][b] = groups[i][b], groups[i][a]
 		})
-		
-		// 2. Sincronizza le goroutine (attiva i sensori necessari)
+	}
+}
+
+// ----------------------------
+// INTERLEAVE GROUPS
+// ----------------------------
+func interleave(groups [][]TestCase) []TestCase {
+	var result []TestCase
+
+	maxLen := 0
+	for _, g := range groups {
+		if len(g) > maxLen {
+			maxLen = len(g)
+		}
+	}
+
+	for i := 0; i < maxLen; i++ {
+		for _, g := range groups {
+			if i < len(g) {
+				result = append(result, g[i])
+			}
+		}
+	}
+
+	return result
+}
+
+// ----------------------------
+// MAIN BENCHMARK RUNNER
+// ----------------------------
+func runBenchmarkSuite(clients []pb.TelemetryServiceClient, httpClient *http.Client) {
+
+	groups := buildGroupedSuite()
+
+	// 🔀 shuffle interno per evitare pattern fissi
+	shuffleGroups(groups)
+
+	// 🔁 interleave tra livelli di carico
+	suite := interleave(groups)
+
+	for i, tc := range suite {
+
+		log.Printf("\n>>> [%d/%d] TEST CASE: Sensors:%d | Mode:%s | Size:%s | Protocol:%s <<<",
+			i+1, len(suite),
+			tc.Sensors, tc.Mode, tc.Payload, tc.Protocol,
+		)
+
+		updateGatewayConfig(httpClient, tc)
+
+		globalConfig.Store(config.TelemetryConfig{
+			Mode:     tc.Mode,
+			Size:     tc.Payload,
+			Protocol: tc.Protocol,
+			Sensors:  tc.Sensors,
+		})
+
 		syncSensors(tc.Sensors, clients, httpClient)
 
-		// 3. Esecuzione Fasi
-		log.Println("[1/3] Fase: Warm-up (30s)...")
+		log.Println("[1/3] Warm-up (30s)")
 		time.Sleep(30 * time.Second)
 
-		log.Println("[2/3] Fase: Steady State (180s) - RACCOLTA DATI...")
-		// NOTA: Se hai una funzione per resettare le metriche, chiamala qui
+		log.Println("[2/3] Steady state (180s)")
 		time.Sleep(180 * time.Second)
 
-		log.Println("[3/3] Fase: Cool-down (30s)...")
-		syncSensors(0, clients, httpClient) // Spegne tutto per pulire i buffer
+		log.Println("[3/3] Cool-down (30s)")
+		syncSensors(0, clients, httpClient)
 		time.Sleep(30 * time.Second)
-		
-		log.Printf(">>> TEST CASE COMPLETATO <<<\n")
+
+		log.Println(">>> TEST COMPLETATO <<<")
 	}
 
 	log.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -126,23 +138,29 @@ func runBenchmarkSuite(clients []pb.TelemetryServiceClient, httpClient *http.Cli
 	log.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 }
 
+// ----------------------------
+// UPDATE GATEWAY CONFIG
+// ----------------------------
 func updateGatewayConfig(client *http.Client, tc TestCase) {
-    // Creiamo l'oggetto config da inviare
-    cfg := config.TelemetryConfig{
-        Mode:     tc.Mode,
-        Size:     tc.Payload,
-        Sensors:  tc.Sensors,
-        Protocol: tc.Protocol,
-    }
 
-    // Trasformiamo in JSON
-    jsonData, _ := json.Marshal(cfg)
-    
-    // Inviamo al Gateway (endpoint che abbiamo creato prima: /set-config)
-    resp, err := client.Post(setConfigEndpoint, "application/json", bytes.NewBuffer(jsonData))
-    if err != nil {
-        log.Printf("Errore notifica benchmark al gateway: %v", err)
-        return
-    }
-    defer resp.Body.Close()
+	cfg := config.TelemetryConfig{
+		Mode:     tc.Mode,
+		Size:     tc.Payload,
+		Sensors:  tc.Sensors,
+		Protocol: tc.Protocol,
+	}
+
+	jsonData, _ := json.Marshal(cfg)
+
+	resp, err := client.Post(
+		setConfigEndpoint,
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+
+	if err != nil {
+		log.Printf("Errore notifica benchmark al gateway: %v", err)
+		return
+	}
+	defer resp.Body.Close()
 }

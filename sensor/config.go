@@ -11,8 +11,6 @@ func fetchFullConfig(client *http.Client) config.TelemetryConfig {
     // Recuperiamo lo stato attuale per il fallback in caso di errore
     current := globalConfig.Load().(config.TelemetryConfig)
 
-    // Chiamiamo l'endpoint unificato del Gateway (es: /get-config o /results)
-    // Assicurati che l'URL corrisponda a quello che hai registrato nel Gateway
     resp, err := client.Get(configEndpoint) 
     if err != nil {
         log.Printf("Errore fetch config: %v", err)

@@ -1,32 +1,51 @@
-# --- Stage 1: Base Builder (Dipendenze comuni) ---
-FROM golang:1.24-alpine AS base-builder
+# --- STAGE 1: Builder (Go + Node.js per il build) ---
+FROM golang:1.24-alpine AS builder
+
+# Installiamo nodejs e npm solo qui per buildare la dashboard
+RUN apk add --no-cache nodejs npm
+
 WORKDIR /app
+
+# 1. Gestione dipendenze Go
 COPY go.mod go.sum ./
 RUN go mod download
+
+# 2. Copia tutto il codice sorgente
 COPY . .
 
-# --- Stage 2: Compilazione specifica Gateway ---
-FROM base-builder AS gateway-builder
-RUN go build -o /bin/gateway ./gateway/*.go
+# 3. Build della Dashboard (Frontend)
+# Questo genera la cartella /app/dashboard/dist
+RUN cd dashboard && npm install && npm run build
 
-# --- Stage 3: Compilazione specifica Sensor ---
-FROM base-builder AS sensor-builder
+# 4. Compilazione dei binari Go
+RUN go build -o /bin/gateway ./gateway/*.go
 RUN go build -o /bin/sensor ./sensor/*.go
 
-# --- Stage 4: Gateway Runtime ---
-FROM alpine:latest AS gateway
-RUN apk add --no-cache nodejs npm && npm install -g serve
-WORKDIR /root/
-# Copia solo dal suo builder specifico
-COPY --from=gateway-builder /bin/gateway .
-COPY dashboard/ ./dashboard/
-RUN cd ./dashboard && npm install && npm run build
-EXPOSE 50051 8080 3000
-CMD ["sh", "-c", "serve -s dashboard/dist -l 3000 & ./gateway"]
 
-# --- Stage 5: Sensor Runtime ---
+# --- STAGE 2: Gateway Runtime (Immagine Leggera) ---
+FROM alpine:latest AS gateway
+WORKDIR /root/
+
+# Copiamo il binario dal builder
+COPY --from=builder /bin/gateway .
+
+# Copiamo solo i file statici compilati della dashboard
+# NOTA: Go dovrà puntare a questa cartella (es: http.Dir("dashboard"))
+COPY --from=builder /app/dashboard/dist ./dashboard
+
+# Espone le porte necessarie
+EXPOSE 50051 8080
+
+# Avviamo solo Go. Niente Node.js o 'serve' a runtime.
+CMD ["./gateway"]
+
+
+# --- STAGE 3: Sensor Runtime ---
 FROM alpine:latest AS sensor
 WORKDIR /root/
-# Copia solo dal suo builder specifico
-COPY --from=sensor-builder /bin/sensor .
+
+# Copiamo il binario dal builder
+COPY --from=builder /bin/sensor .
+
+# Il sensore non ha bisogno di porte o dashboard
 CMD ["./sensor"]

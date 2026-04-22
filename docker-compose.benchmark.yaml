@@ -10,28 +10,23 @@ services:
       - "8080:8080"
     volumes:
       - ./results:/root/results
+    environment:
+      - BENCH_MODE=true
     networks:
       - telemetry-net
 
-  sensor:
+  benchmark:
     build:
       context: .
       target: sensor
     depends_on:
       - gateway
     environment:
-      - APP_MODE=normal
+      - APP_MODE=benchmark
+    restart: "no"
     networks:
       - telemetry-net
 
-  envoy:
-    image: envoyproxy/envoy:v1.22.0
-    volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml
-    ports:
-      - "8081:8081"
-    networks:
-      - telemetry-net
 
 networks:
   telemetry-net:

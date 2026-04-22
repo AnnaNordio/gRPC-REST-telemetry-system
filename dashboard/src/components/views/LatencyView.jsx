@@ -12,7 +12,6 @@ export const LatencyView = ({ restData, grpcData, history, protocol }) => {
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* REST CARD */}
         <StatCard 
           title="REST Latency (Avg)" 
           value={formatVal(restData.avg)} 
@@ -24,7 +23,6 @@ export const LatencyView = ({ restData, grpcData, history, protocol }) => {
           textColor="text-violet-700" 
         />
 
-        {/* GRPC CARD */}
         <StatCard 
           title="gRPC Latency (Avg)" 
           value={formatVal(grpcData.avg)} 
