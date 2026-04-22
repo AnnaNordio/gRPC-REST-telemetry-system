@@ -8,8 +8,6 @@ services:
     ports:
       - "50051:50051"
       - "8080:8080"
-    volumes:
-      - ./results:/root/results
     networks:
       - telemetry-net
 

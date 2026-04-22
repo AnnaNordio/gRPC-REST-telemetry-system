@@ -15,9 +15,11 @@ import (
 var metricsChan = make(chan Metric, 10000)
 
 func metricsWorker() {
-    os.MkdirAll("results", 0755)
-
     isBenchMode := os.Getenv("BENCH_MODE") == "true"
+    if isBenchMode {
+        os.MkdirAll("results", 0755)
+    }
+    
     writer := &MetricsWriter{}
 
     flushTicker := time.NewTicker(1 * time.Second)

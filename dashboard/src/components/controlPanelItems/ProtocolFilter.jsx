@@ -3,7 +3,7 @@ import React from 'react';
 export const ProtocolFilter = ({ activeFilter, onFilterChange }) => {
   const options = [
     { id: 'rest', label: 'Rest Only'},
-    { id: 'both', label: 'Dual Stream'},
+    { id: 'both', label: 'Dual Stack'},
     { id: 'grpc', label: 'gRPC Only'}
   ];
 
