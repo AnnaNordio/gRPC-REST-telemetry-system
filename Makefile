@@ -5,9 +5,6 @@ PROTO_IMAGE = telemetry-proto-builder
 docker-gen:
 	# Build dell'immagine di generazione (solo la prima volta o se cambia il Dockerfile.proto)
 	docker build -f Dockerfile.proto -t $(PROTO_IMAGE) .
-	# Esecuzione del container:
-	# --rm: elimina il container dopo l'esecuzione
-	# -v: monta la cartella corrente dentro il container così i file generati appaiono sul tuo PC
 	docker run --rm -v $(shell pwd):/app $(PROTO_IMAGE)
 
 gen:
@@ -48,4 +45,4 @@ down:
 	$(COMPOSE_CMD) -f docker-compose.benchmark.yaml down -v
 
 clean:
-    $(COMPOSE_CMD) -f docker-compose.yaml -f docker-compose.benchmark.yaml down -v --rmi all
+	$(COMPOSE_CMD) -f docker-compose.yaml -f docker-compose.benchmark.yaml down -v --rmi all
