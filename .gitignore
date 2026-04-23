@@ -10,6 +10,7 @@ results
 plots
 
 *.exe
+*.csv
 *.exe~
 *.dll
 *.so
