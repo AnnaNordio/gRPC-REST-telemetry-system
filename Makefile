@@ -1,3 +1,4 @@
+.PHONY: docker-gen gen build-bench run-bench build-dashboard run-dashboard down clean
 PROTO_IMAGE = telemetry-proto-builder
 
 # Comando per generare i file usando Docker
@@ -47,4 +48,4 @@ down:
 	$(COMPOSE_CMD) -f docker-compose.benchmark.yaml down -v
 
 clean:
-	$(COMPOSE_CMD) down -v --rmi all
+    $(COMPOSE_CMD) -f docker-compose.yaml -f docker-compose.benchmark.yaml down -v --rmi all
