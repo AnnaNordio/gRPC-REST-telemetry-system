@@ -15,6 +15,8 @@ func getDashboardData() DashboardResponse {
     metricsMu.Lock()
     defer metricsMu.Unlock()
 
+    history := historyBuffer.GetAll()
+
     // 1. Prendiamo gli ultimi 200 campioni per protocollo (Indipendentemente dal sensore)
     restLats, restMarshals := getLastMetrics(history, "REST", aggregateWindow)
     grpcLats, grpcMarshals := getLastMetrics(history, "gRPC", aggregateWindow)

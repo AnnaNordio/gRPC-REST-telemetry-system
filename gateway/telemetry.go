@@ -13,6 +13,7 @@ import (
 // Canale per trasportare le metriche dai server al worker
 // Capacità 10.000 per gestire picchi di 100 sensori a 10Hz
 var metricsChan = make(chan Metric, 10000)
+var historyBuffer = NewRingBuffer(1000)
 
 func metricsWorker() {
     isBenchMode := os.Getenv("BENCH_MODE") == "true"
@@ -71,13 +72,7 @@ func updateStats(m Metric) {
         totalOverheadRest += m.OverheadByte
     }
 
-    // Aggiunta alla history per i grafici live
-    history = append(history, m)
-    
-    // Cleanup history vecchia (es. mantieni ultimi 1000 punti)
-    if len(history) > 1000 {
-        history = history[len(history)-1000:]
-    }
+    historyBuffer.Add(m)
 }
 
 func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
@@ -114,22 +109,35 @@ func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
 }
 
 func resetStats() {
-    // Svuota il canale
-    for len(metricsChan) > 0 {
-        <-metricsChan
+    // 1. Svuota il canale delle metriche in sospeso
+    // Usiamo un ciclo non bloccante per essere sicuri
+    for {
+        select {
+        case <-metricsChan:
+        default:
+            goto channelEmptied
+        }
     }
+channelEmptied:
 
     metricsMu.Lock()
     defer metricsMu.Unlock()
     
+    // 2. Reset del periodo di Warmup
     warmupUntil = time.Now().Add(warmupDuration)
-    history = []Metric{}
+
+    // 3. Reset del Ring Buffer (La tua nuova history)
+    historyBuffer.Reset()
+
+    // 4. Azzeramento contatori cumulativi
     totalPayloadRest = 0
     totalOverheadRest = 0
     totalPayloadGrpc = 0
     totalOverheadGrpc = 0
+    
     atomic.StoreUint64(&msgCountRest, 0)
     atomic.StoreUint64(&msgCountGrpc, 0)
+    
     throughputRest = 0
     throughputGrpc = 0
 }
