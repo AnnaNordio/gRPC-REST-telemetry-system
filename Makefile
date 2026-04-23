@@ -25,24 +25,26 @@ gen:
 	# Usiamo && per assicurarci che se npm install fallisce, il build non parta
 	cd dashboard/proto-pkg && npm install && npm run build
 
+COMPOSE_CMD := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+
 # --- BENCHMARK ---
 build-bench:
-	docker-compose -f docker-compose.benchmark.yaml build
+	$(COMPOSE_CMD)-f docker-compose.benchmark.yaml build
 
 run-bench:
-	docker-compose -f docker-compose.benchmark.yaml up --build --abort-on-container-exit
+	$(COMPOSE_CMD) -f docker-compose.benchmark.yaml up --build --abort-on-container-exit
 
 # --- DASHBOARD ---
 build-dashboard:
-	docker-compose -f docker-compose.yaml build
+	$(COMPOSE_CMD) -f docker-compose.yaml build
 
 run-dashboard:
-	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit
+	$(COMPOSE_CMD) -f docker-compose.yaml up --build --abort-on-container-exit
 
 # --- CLEANUP ---
 down:
-	docker-compose -f docker-compose.yaml down -v
-	docker-compose -f docker-compose.benchmark.yaml down -v
+	$(COMPOSE_CMD) -f docker-compose.yaml down -v
+	$(COMPOSE_CMD) -f docker-compose.benchmark.yaml down -v
 
 clean:
-	docker-compose down -v --rmi all
+	$(COMPOSE_CMD) down -v --rmi all

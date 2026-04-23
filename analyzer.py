@@ -14,7 +14,7 @@ def analyze_benchmarks():
     all_files = glob.glob(search_pattern)
     
     if not all_files:
-        print(f"❌ Nessun file trovato in: {RESULTS_PATH}")
+        print(f"Nessun file trovato in: {RESULTS_PATH}")
         return pd.DataFrame()
 
     raw_results = []
@@ -54,7 +54,7 @@ def analyze_benchmarks():
                 "Overhead_B": df['OverheadBytes'].mean()
             })
         except Exception as e:
-            print(f"⚠️ Errore nel file {fname}: {e}")
+            print(f"Errore nel file {fname}: {e}")
 
     df_res = pd.DataFrame(raw_results)
     if df_res.empty: return df_res
