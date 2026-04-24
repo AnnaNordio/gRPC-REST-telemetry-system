@@ -4,7 +4,6 @@ import { ComparisonBadge } from '../ComparisonBadge';
 import { getPayloadComparison } from '../../utils/benchmarkUtils';
 
 export const PayloadView = ({ restData, grpcData, protocol }) => {
-  // 1. Calcoliamo tutto in KB una volta sola all'inizio
   const restKB = {
     payload: restData.payloadSize / 1024,
     overhead: restData.overheadSize / 1024,

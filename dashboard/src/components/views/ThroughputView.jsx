@@ -7,8 +7,6 @@ import { getThroughputComparison } from '../../utils/benchmarkUtils';
 export const ThroughputView = ({ restData, grpcData, protocol, sensorNumber }) => {
   const comparison = getThroughputComparison(restData.throughput, grpcData.throughput);
   
-  // Calcolo dell'efficienza: quanti msg/s reali produce ogni singolo sensore
-  // Se l'efficienza cala all'aumentare dei sensori, il protocollo non scala bene.
   const n = sensorNumber || 1;
   const restEff = (restData.throughput / n).toFixed(1);
   const grpcEff = (grpcData.throughput / n).toFixed(1);
