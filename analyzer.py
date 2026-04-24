@@ -76,6 +76,23 @@ def generate_plots(df_comp, df_raw):
             plt.title(f"Bandwidth Savings: gRPC vs REST ({mode.upper()})")
             plt.savefig(os.path.join(PLOT_DIR, f"4_heatmap_bw_{mode}.png"))
             plt.close()
+        # --- 5. MARSHALLING EFFICIENCY (Usa una palette diversa perché qui hue sono i sensori) ---
+        if not df_comp_mode.empty:
+            plt.figure(figsize=(10, 6))
+            sns.barplot(
+                data=df_comp_mode, 
+                x="Size", 
+                y="Lat_Improvement_%", 
+                hue="Sensors",
+                palette="viridis" # Qui va bene viridis perché confrontiamo i sensori, non i protocolli
+            )
+            plt.title(f"Processing & Marshalling Gain: gRPC vs REST ({mode.upper()})", fontsize=14)
+            plt.ylabel("Execution Time Improvement (%)")
+            plt.xlabel("Payload Size")
+            plt.axhline(0, color='black', linestyle='--', linewidth=1)
+            plt.tight_layout()
+            plt.savefig(os.path.join(PLOT_DIR, f"5_marshalling_efficiency_{mode}.png"))
+            plt.close()
 
 def analyze_benchmarks():
     search_pattern = os.path.join(RESULTS_PATH, "bench_results_*.csv")
