@@ -11,51 +11,94 @@ PLOT_DIR = os.path.join(BASE_DIR, "plots")
 os.makedirs(PLOT_DIR, exist_ok=True)
 
 def generate_plots(df_comp, df_raw):
-    """Genera grafici basati sui parametri reali: Modalità, Dimensione, Sensori."""
+    """Generates plots with consistent coloring for Protocols."""
     sns.set_theme(style="whitegrid")
     
-    # Ordiniamo i dati per evitare linee "a zig-zag" nei grafici
-    df_raw = df_raw.sort_values(by="Sensori")
-    
-    # 1. SCALABILITÀ: Latenza vs Numero Sensori (Diviso per Modalità e Dimensione)
-    plt.figure(figsize=(12, 7))
-    sns.lineplot(
-        data=df_raw, 
-        x="Sensors", 
-        y="Lat_ms", 
-        hue="Protocol", 
-        style="Size", 
-        markers=True
-    )
-    plt.title("Scalabilità Latenza: REST vs gRPC", fontsize=15)
-    plt.ylabel("Latenza Media (ms)")
-    plt.xlabel("Numero di Sensori")
-    plt.yscale("log")
-    plt.legend(title="Legenda", bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.tight_layout()
-    plt.savefig(os.path.join(PLOT_DIR, "latency_scalability.png"))
-    plt.close()
+    # DEFINIAMO LA PALETTE FISSA: gRPC = Blu, REST = Arancione
+    # Puoi cambiare i colori qui (es. 'royalblue' e 'darkorange')
+    custom_palette = {
+        "REST": "#7C3AED", 
+        "GRPC": "#EA580C"
+    }    
+    modalities = df_raw['Mode'].unique()
 
-    # 2. OVERHEAD: Confronto per Dimensione Payload
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=df_raw, x="Size", y="Overhead_B", hue="Protocol")
-    plt.title("Overhead medio per Dimensione Messaggio", fontsize=15)
-    plt.ylabel("Bytes di Overhead")
-    plt.savefig(os.path.join(PLOT_DIR, "overhead_comparison.png"))
-    plt.close()
+    for mode in modalities:
+        df_mode = df_raw[df_raw['Mode'] == mode].sort_values(by="Sensors")
+        df_comp_mode = df_comp[df_comp['Mode_REST'] == mode].sort_values(by="Sensors")
 
-    # 3. HEATMAP: Risparmio Banda (%) gRPC vs REST
-    if not df_comp.empty:
-        try:
-            plt.figure(figsize=(10, 8))
-            # Creiamo una heatmap: Sensori vs Dimensione (per una specifica modalità, es. polling)
-            pivot_bw = df_comp.pivot_table(index="Size", columns="Sensors", values="BW_Saved_%")
-            sns.heatmap(pivot_bw, annot=True, fmt=".1f", cmap="YlGnBu")
-            plt.title("Risparmio Banda (%) gRPC vs REST\n(Valori positivi = gRPC più efficiente)")
-            plt.savefig(os.path.join(PLOT_DIR, "heatmap_bw_saved.png"))
+        # --- 1. LATENCY SCALABILITY ---
+        plt.figure(figsize=(12, 7))
+        sns.lineplot(
+            data=df_mode, 
+            x="Sensors", 
+            y="Lat_ms", 
+            hue="Protocol", 
+            palette=custom_palette, # Colori fissi
+            style="Size", 
+            markers=True
+        )
+        plt.title(f"Latency Scalability ({mode.upper()} Mode)", fontsize=15)
+        plt.ylabel("Mean Latency (ms) - Log Scale")
+        plt.xlabel("Number of Sensors")
+        plt.yscale("log")
+        plt.legend(title="Legend", bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        plt.savefig(os.path.join(PLOT_DIR, f"latency_scalability_{mode}.png"))
+        plt.close()
+
+        # --- 2. MARSHALLING EFFICIENCY (Usa una palette diversa perché qui hue sono i sensori) ---
+        if not df_comp_mode.empty:
+            plt.figure(figsize=(10, 6))
+            sns.barplot(
+                data=df_comp_mode, 
+                x="Size", 
+                y="Lat_Improvement_%", 
+                hue="Sensors",
+                palette="viridis" # Qui va bene viridis perché confrontiamo i sensori, non i protocolli
+            )
+            plt.title(f"Processing & Marshalling Gain: gRPC vs REST ({mode.upper()})", fontsize=14)
+            plt.ylabel("Execution Time Improvement (%)")
+            plt.xlabel("Payload Size")
+            plt.axhline(0, color='black', linestyle='--', linewidth=1)
+            plt.tight_layout()
+            plt.savefig(os.path.join(PLOT_DIR, f"marshalling_efficiency_{mode}.png"))
             plt.close()
-        except Exception as e:
-            print(f"Heatmap non generata: {e}")
+
+        # --- 3. PAYLOAD SIZE COMPARISON (Colori fissi qui!) ---
+        plt.figure(figsize=(10, 6))
+        sns.barplot(
+            data=df_mode, 
+            x="Size", 
+            y="Payload_B", 
+            hue="Protocol", 
+            palette=custom_palette, # Colori fissi
+            hue_order=["REST", "GRPC"] # Forza l'ordine delle barre per sicurezza
+        )
+        plt.yscale("log") # Mettiamo la scala logaritmica così vedi lo "Small"
+        plt.title(f"Payload Size Comparison ({mode.upper()})", fontsize=15)
+        plt.ylabel("Payload (Bytes) - Log Scale")
+        plt.xlabel("Message Type")
+        plt.tight_layout()
+        plt.savefig(os.path.join(PLOT_DIR, f"payload_comparison_{mode}.png"))
+        plt.close()
+
+        # --- 4. HEATMAP (Resta uguale poiché non usa hue=Protocol) ---
+        if not df_comp_mode.empty:
+            try:
+                plt.figure(figsize=(10, 8))
+                pivot_bw = df_comp_mode.pivot_table(index="Size", columns="Sensors", values="BW_Saved_%")
+                # Sort Y axis logically
+                size_order = ['small', 'medium', 'large', 'nested']
+                pivot_bw = pivot_bw.reindex([s for s in size_order if s in pivot_bw.index])
+                
+                sns.heatmap(pivot_bw, annot=True, fmt=".1f", cmap="YlGnBu")
+                plt.title(f"Bandwidth Savings %: gRPC vs REST ({mode.upper()})\n(Positive = gRPC is more efficient)")
+                plt.ylabel("Payload Size")
+                plt.xlabel("Number of Sensors")
+                plt.savefig(os.path.join(PLOT_DIR, f"heatmap_bw_saved_{mode}.png"))
+                plt.close()
+            except Exception as e:
+                print(f"Heatmap error for {mode}: {e}")
 
 def analyze_benchmarks():
     search_pattern = os.path.join(RESULTS_PATH, "bench_results_*.csv")
