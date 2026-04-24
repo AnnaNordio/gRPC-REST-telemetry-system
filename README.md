@@ -65,9 +65,9 @@ To stop the system and remove temporary artifacts, use the following commands:
 
  * Stop and remove containers:
 ```bash
-make down```
+make down
 ```
  * Complete cleanup (containers, logs, and build artifacts):
 ```bash
-make clean```
+make clean
 ```
