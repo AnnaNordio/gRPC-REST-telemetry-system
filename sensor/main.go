@@ -4,16 +4,16 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
-    "os"
+
+	"telemetry-bench/pkg/config"
+	pb "telemetry-bench/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	pb "telemetry-bench/proto"
-	"telemetry-bench/pkg/config"
-
 )
 
 // Variabili globali per il coordinamento
@@ -41,7 +41,7 @@ func main() {
 	var grpcClients []pb.TelemetryServiceClient
 
 	for i := 0; i < poolSize; i++ {
-		conn, err := grpc.Dial(
+		conn, err := grpc.NewClient(
 			gatewayGrpcAddr,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithInitialWindowSize(1<<20),
@@ -62,15 +62,15 @@ func main() {
 		},
 	}
 
-    appMode := os.Getenv("APP_MODE")
+	appMode := os.Getenv("APP_MODE")
 
-    if appMode == "benchmark" {
-        log.Println(">>> MODALITÀ BENCHMARK RILEVATA <<<")
-        runBenchmarkSuite(grpcClients, httpClient)
-        log.Println("Benchmark completato. Spegnimento in corso...")
-        time.Sleep(2 * time.Second)
-        return // Esci dal programma, Docker fermerà il container
-    }
+	if appMode == "benchmark" {
+		log.Println(">>> MODALITÀ BENCHMARK RILEVATA <<<")
+		runBenchmarkSuite(grpcClients, httpClient)
+		log.Println("Benchmark completato. Spegnimento in corso...")
+		time.Sleep(2 * time.Second)
+		return // Esci dal programma, Docker fermerà il container
+	}
 
 	// 3. Loop di monitoraggio configurazione
 	for {
@@ -100,9 +100,9 @@ func syncSensors(target int, clients []pb.TelemetryServiceClient, httpClient *ht
 			sensorID++
 			stopCh := make(chan struct{})
 			stopChannels[sensorID] = stopCh
-			
+
 			// Distribuzione Round-Robin sul pool gRPC
-			selectedClient := clients[sensorID % len(clients)]
+			selectedClient := clients[sensorID%len(clients)]
 			go runVirtualSensor(sensorID, stopCh, selectedClient, httpClient)
 		}
 		log.Printf("[Sync] Attivati %d nuovi sensori. Totale: %d", diff, target)
