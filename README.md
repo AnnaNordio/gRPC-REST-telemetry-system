@@ -41,8 +41,7 @@ make run-dashboard
 
 ### 3. Automated Benchmark Mode
 
-To execute the predefined test suite (which automatically iterates through different configurations) and save raw data for offline analysis:
-Bash
+To execute the predefined test suite (which automatically iterates through all different configurations) and save raw data for offline analysis:
 
 ```bash
 make run-bench
