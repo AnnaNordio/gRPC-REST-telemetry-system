@@ -2,7 +2,7 @@
 
 This project was developed for the **Runtimes for Concurrency and Distribution** course at the **University of Padua**, Academic Year **2025/2026**.
 
-The suite is tool designed to evaluate and compare the performance characteristics of **REST (JSON over HTTP/1.1)** and **gRPC (Protobuf over HTTP/2)** in high-frequency telemetry scenarios. It allows for real-time monitoring of latency, throughput, and protocol overhead on a web dashboard.
+The suite is a tool designed to evaluate and compare the performance characteristics of **REST (JSON over HTTP/1.1)** and **gRPC (Protobuf over HTTP/2)** in high-frequency telemetry scenarios. It allows for real-time monitoring of latency, throughput, and protocol overhead on a web dashboard.
 
 ---
 
