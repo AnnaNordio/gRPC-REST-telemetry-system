@@ -15,9 +15,9 @@ Used to automate builds and environment management.
 * **Ubuntu/Debian:** `sudo apt update && sudo apt install build-essential`
 * **MacOS:** `brew install make`
 * **Windows:**
-        * Using **Chocolatey**: `choco install make`
-        * Using **Winget**: `winget install GnuWin32.Make`
-        * Alternatively: make is often included in Git BASH (MinGW). However, using WSL (Windows Subsystem for Linux)           is highly recommended for this project to ensure full compatibility with the shell scripts.
+       * Using **Chocolatey**: `choco install make`
+       * Using **Winget**: `winget install GnuWin32.Make`
+       * Alternatively: make is often included in Git BASH (MinGW). However, using WSL (Windows Subsystem for Linux)           is highly recommended for this project to ensure full compatibility with the shell scripts.
 
 ### 2. Docker & Docker Compose
 The system runs in a containerized environment to ensure network isolation and reproducibility.
