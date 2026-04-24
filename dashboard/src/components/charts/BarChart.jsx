@@ -14,18 +14,14 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export const BarChart = ({ restValue, grpcValue, measure, unit = 'KB' }) => {
   const chartData = {
-    // Le etichette sull'asse X: i due protocolli a confronto
     labels: ['REST (JSON)', 'gRPC (Protobuf)'],
     datasets: [
       {
         label: `${measure} (${unit})`,
-        // Colore differenziato per le due barre
         backgroundColor: ['#6d28d9', '#ea580c'], 
         borderColor: ['#5b21b6', '#c2410c'],
         borderWidth: 1,
-        // I due valori da confrontare
         data: [restValue || 0, grpcValue || 0],
-        // Opzionale: restringe un po' le barre per renderle più eleganti
         barThickness: 60, 
       }
     ]
@@ -35,7 +31,7 @@ export const BarChart = ({ restValue, grpcValue, measure, unit = 'KB' }) => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false }, // Nascondiamo la legenda perché i nomi sono già sulle X
+      legend: { display: false },
       tooltip: {
         callbacks: {
           label: (context) => ` ${context.raw} ${unit}`
@@ -50,7 +46,7 @@ export const BarChart = ({ restValue, grpcValue, measure, unit = 'KB' }) => {
         grid: { color: '#f1f5f9' }
       },
       x: {
-        grid: { display: false } // Pulizia visiva
+        grid: { display: false }
       }
     }
   };

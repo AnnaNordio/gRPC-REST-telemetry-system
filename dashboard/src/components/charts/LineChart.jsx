@@ -28,7 +28,7 @@ export const LineChart = ({ history }) => {
   const getSampledData = (data) => {
     if (!data || data.length === 0) return [];
 
-    const SAMPLE_INTERVAL_MS = 500; // Raggruppiamo i 100 sensori ogni 0.5s
+    const SAMPLE_INTERVAL_MS = 500;
     const slots = {};
 
     data.forEach(d => {
@@ -39,7 +39,6 @@ export const LineChart = ({ history }) => {
       const protoKey = d.protocol.includes('REST') ? 'rest' : 'grpc';
       if (!slots[currentSlot]) slots[currentSlot] = { timestamp: d.timestamp, rest: [], grpc: [] };
       
-      // Accumuliamo le latenze nello slot
       slots[currentSlot][protoKey].push(d.latency_ms || d.latencyMs || d.latencyms);
     });
 
@@ -67,7 +66,6 @@ export const LineChart = ({ history }) => {
   const chartData = {
     labels: chartLabels,
     datasets: [
-      // --- DATASET REST ---
       {
         label: 'REST Max',
         data: recentHistory.map(d => d.rest?.max),
@@ -80,7 +78,7 @@ export const LineChart = ({ history }) => {
         data: recentHistory.map(d => d.rest?.min),
         borderColor: 'transparent',
         backgroundColor: COLORS.rest.area,
-        fill: '-1', // Riempie l'area tra Max e Min
+        fill: '-1', 
         pointRadius: 0,
       },
       {
@@ -91,7 +89,6 @@ export const LineChart = ({ history }) => {
         pointRadius: 0,
         tension: 0.3,
       },
-      // --- DATASET gRPC ---
       {
         label: 'gRPC Max',
         data: recentHistory.map(d => d.grpc?.max),
@@ -121,7 +118,7 @@ export const LineChart = ({ history }) => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: false, // Disabilitato per performance con molti sensori
+    animation: false, 
     interaction: {
       mode: 'index',
       intersect: false,
@@ -130,7 +127,7 @@ export const LineChart = ({ history }) => {
       legend: {
         position: 'top',
         labels: { boxWidth: 15, usePointStyle: true, font: { size: 12, weight: 'bold' }, 
-          filter: (item) => item.text.includes('Avg') // Mostra solo la media in legenda
+          filter: (item) => item.text.includes('Avg') 
         }
       },
       tooltip: {

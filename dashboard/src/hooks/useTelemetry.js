@@ -36,7 +36,6 @@ export const useTelemetry = () => {
         handleRestFetch();
       }
       
-      // Polling gRPC Unary: attivo solo se NON siamo in streaming e filter è 'both' o 'grpc'
       if (!isStreaming && (activeFilter === 'both' || activeFilter === 'grpc')) {
         handleGrpcUnaryFetch(grpcClient.current, protos);
       }
@@ -49,7 +48,6 @@ export const useTelemetry = () => {
   useEffect(() => {
     let stream = null;
 
-    // Avviamo lo stream solo se isStreaming è true e il filtro include gRPC
     if (isStreaming && (activeFilter === 'both' || activeFilter === 'grpc')) {
       stream = grpcClient.current.getGrpcStream(new protos.Empty(), {});
       

@@ -19,19 +19,16 @@ export const StackedBarChart = ({ restData, grpcData }) => {
       {
         label: 'CPU Marshalling',
         data: [restData.marshalTime, grpcData.marshalTime],
-        // Viola per REST, Arancio per gRPC (Pieni)
         backgroundColor: ['#7c3aed', '#ea580c'], 
         borderRadius: 4,
         stack: 'Stack 0',
       },
       {
         label: 'Network & Logic',
-        // Convertiamo restData.avg (ms) in μs per il confronto
         data: [
           restData.avg - restData.marshalTime,
           grpcData.avg - grpcData.marshalTime
         ],
-        // Viola sbiadito per REST, Arancio sbiadito per gRPC
         backgroundColor: ['#ddd6fe', '#ffedd5'], 
         borderRadius: 4,
         stack: 'Stack 0',

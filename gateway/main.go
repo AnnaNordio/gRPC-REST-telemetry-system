@@ -63,7 +63,6 @@ func startThroughputTicker() {
 	go func() {
 		ticker := time.NewTicker(1 * time.Second)
 		for range ticker.C {
-			// Legge e resetta i contatori atomici definiti nelle variabili globali
 			currRest := atomic.SwapUint64(&msgCountRest, 0)
 			currGrpc := atomic.SwapUint64(&msgCountGrpc, 0)
 

@@ -1,13 +1,14 @@
 package main
 
 import (
-    "time"
-    "net/http"
-    "google.golang.org/grpc/metadata"  
-    "sync/atomic"
-    "os"
-    "strconv"
-    pb "telemetry-bench/proto"
+	"net/http"
+	"os"
+	"strconv"
+	"sync/atomic"
+	pb "telemetry-bench/proto"
+	"time"
+
+	"google.golang.org/grpc/metadata"
 )
 
 // Canale per trasportare le metriche dai server al worker
@@ -16,128 +17,124 @@ var metricsChan = make(chan Metric, 10000)
 var historyBuffer = NewRingBuffer(1000)
 
 func metricsWorker() {
-    isBenchMode := os.Getenv("BENCH_MODE") == "true"
-    if isBenchMode {
-        os.MkdirAll("results", 0755)
-    }
-    
-    writer := &MetricsWriter{}
+	isBenchMode := os.Getenv("BENCH_MODE") == "true"
+	if isBenchMode {
+		os.MkdirAll("results", 0755)
+	}
 
-    flushTicker := time.NewTicker(1 * time.Second)
+	writer := &MetricsWriter{}
 
-    for {
-        select {
-        case m, ok := <-metricsChan:
-            if !ok { return }
-            
-            // --- 1. Lettura Stato (dal tuo file state) ---
-            metricsMu.Lock()
-            isWarmup := time.Now().Before(warmupUntil)
-            cfg := activeConfig
-            metricsMu.Unlock()
+	flushTicker := time.NewTicker(1 * time.Second)
 
-            if isWarmup {
-                continue
-            }
+	for {
+		select {
+		case m, ok := <-metricsChan:
+			if !ok {
+				return
+			}
 
-            // --- 2. Aggiornamento Statistiche (Usa le tue variabili di state) ---
-            updateStats(m)
+			// --- 1. Lettura Stato ---
+			metricsMu.Lock()
+			isWarmup := time.Now().Before(warmupUntil)
+			cfg := activeConfig
+			metricsMu.Unlock()
 
-            // --- 3. Scrittura su File ---
-            if isBenchMode {
-                sSensors := strconv.Itoa(cfg.Sensors)
-                writer.Write(m, cfg.Mode, cfg.Size, cfg.Protocol, sSensors)
-            }
+			if isWarmup {
+				continue
+			}
 
-        case <-flushTicker.C:
-            if writer.csvWriter != nil {
-                writer.csvWriter.Flush() // Scrive tutto il blocco accumulato in una volta sola
-            }
-        }
-        
-    }
+			// --- 2. Aggiornamento Statistiche  ---
+			updateStats(m)
+
+			// --- 3. Scrittura su File ---
+			if isBenchMode {
+				sSensors := strconv.Itoa(cfg.Sensors)
+				writer.Write(m, cfg.Mode, cfg.Size, cfg.Protocol, sSensors)
+			}
+
+		case <-flushTicker.C:
+			if writer.csvWriter != nil {
+				writer.csvWriter.Flush()
+			}
+		}
+
+	}
 }
 
 func updateStats(m Metric) {
-    metricsMu.Lock()
-    defer metricsMu.Unlock()
+	metricsMu.Lock()
+	defer metricsMu.Unlock()
 
-    if m.Protocol == "gRPC" {
-        atomic.AddUint64(&msgCountGrpc, 1)
-        totalPayloadGrpc += m.PayloadByte
-        totalOverheadGrpc += m.OverheadByte
-    } else {
-        atomic.AddUint64(&msgCountRest, 1)
-        totalPayloadRest += m.PayloadByte
-        totalOverheadRest += m.OverheadByte
-    }
+	if m.Protocol == "gRPC" {
+		atomic.AddUint64(&msgCountGrpc, 1)
+		totalPayloadGrpc += m.PayloadByte
+		totalOverheadGrpc += m.OverheadByte
+	} else {
+		atomic.AddUint64(&msgCountRest, 1)
+		totalPayloadRest += m.PayloadByte
+		totalOverheadRest += m.OverheadByte
+	}
 
-    historyBuffer.Add(m)
+	historyBuffer.Add(m)
 }
 
 func SaveRestMetrics(data *pb.SensorData, r *http.Request) {
 
-    pSize, mTime := getJsonMetrics(data)
-    hSize := calculateHTTPOverhead(r)
-    lat := calculateLatency(data.Timestamp)
-    
-    // Invia al worker invece di bloccare qui
-    metricsChan <- Metric{
-        Protocol:     "REST",
-        LatencyMs:    lat,
-        PayloadByte:  pSize,
-        OverheadByte: hSize,
-        MarshalTime:  mTime,
-        Timestamp:    time.Now().Format("15:04:05.000"),
-    }
+	pSize, mTime := getJsonMetrics(data)
+	hSize := calculateHTTPOverhead(r)
+	lat := calculateLatency(data.Timestamp)
+
+	metricsChan <- Metric{
+		Protocol:     "REST",
+		LatencyMs:    lat,
+		PayloadByte:  pSize,
+		OverheadByte: hSize,
+		MarshalTime:  mTime,
+		Timestamp:    time.Now().Format("15:04:05.000"),
+	}
 }
 
 func SaveGrpcMetrics(data *pb.SensorData, md metadata.MD) {
 
-    pSize, mTime := getProtoMetrics(data)
-    hSize := 5 + calculateGRPCOverhead(md) 
-    lat := calculateLatency(data.Timestamp)
+	pSize, mTime := getProtoMetrics(data)
+	hSize := 5 + calculateGRPCOverhead(md)
+	lat := calculateLatency(data.Timestamp)
 
-    metricsChan <- Metric{
-        Protocol:     "gRPC",
-        LatencyMs:    lat,
-        PayloadByte:  pSize,
-        OverheadByte: hSize,
-        MarshalTime:  mTime,
-        Timestamp:    time.Now().Format("15:04:05.000"),
-    }
+	metricsChan <- Metric{
+		Protocol:     "gRPC",
+		LatencyMs:    lat,
+		PayloadByte:  pSize,
+		OverheadByte: hSize,
+		MarshalTime:  mTime,
+		Timestamp:    time.Now().Format("15:04:05.000"),
+	}
 }
 
 func resetStats() {
-    // 1. Svuota il canale delle metriche in sospeso
-    // Usiamo un ciclo non bloccante per essere sicuri
-    for {
-        select {
-        case <-metricsChan:
-        default:
-            goto channelEmptied
-        }
-    }
+	for {
+		select {
+		case <-metricsChan:
+		default:
+			goto channelEmptied
+		}
+	}
 channelEmptied:
 
-    metricsMu.Lock()
-    defer metricsMu.Unlock()
-    
-    // 2. Reset del periodo di Warmup
-    warmupUntil = time.Now().Add(warmupDuration)
+	metricsMu.Lock()
+	defer metricsMu.Unlock()
 
-    // 3. Reset del Ring Buffer (La tua nuova history)
-    historyBuffer.Reset()
+	warmupUntil = time.Now().Add(warmupDuration)
 
-    // 4. Azzeramento contatori cumulativi
-    totalPayloadRest = 0
-    totalOverheadRest = 0
-    totalPayloadGrpc = 0
-    totalOverheadGrpc = 0
-    
-    atomic.StoreUint64(&msgCountRest, 0)
-    atomic.StoreUint64(&msgCountGrpc, 0)
-    
-    throughputRest = 0
-    throughputGrpc = 0
+	historyBuffer.Reset()
+
+	totalPayloadRest = 0
+	totalOverheadRest = 0
+	totalPayloadGrpc = 0
+	totalOverheadGrpc = 0
+
+	atomic.StoreUint64(&msgCountRest, 0)
+	atomic.StoreUint64(&msgCountGrpc, 0)
+
+	throughputRest = 0
+	throughputGrpc = 0
 }

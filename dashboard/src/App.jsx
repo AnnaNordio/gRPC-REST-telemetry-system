@@ -3,7 +3,6 @@ import { useTelemetry } from './hooks/useTelemetry';
 import { ControlPanel } from './components/ControlPanel';
 import Tabs from './components/Tabs';
 
-// Import dei nuovi sottocomponenti
 import { LatencyView } from './components/views/LatencyView';
 import { PayloadView } from './components/views/PayloadView';
 import { ThroughputView } from './components/views/ThroughputView';
@@ -37,7 +36,7 @@ const Dashboard = () => {
       const resp = await fetch(`http://localhost:8080/set-mode?mode=${modeStr}`, { method: 'POST' });
       if (resp.ok) { 
         setIsStreaming(newMode); 
-        setHistory([]); // Reset grafico al cambio modalità
+        setHistory([]); 
       }
     } catch (err) {
       console.error("Errore cambio modalità:", err);
@@ -49,7 +48,7 @@ const Dashboard = () => {
       const resp = await fetch(`http://localhost:8080/set-size?size=${size}`, { method: 'POST' });
       if (resp.ok) { 
         setPayloadSize(size); 
-        setHistory([]); // Reset grafico al cambio dimensione
+        setHistory([]); 
       }
     } catch (err) {
       console.error("Errore cambio dimensione:", err);

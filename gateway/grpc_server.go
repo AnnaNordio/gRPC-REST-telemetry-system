@@ -23,7 +23,7 @@ func (s *telemetryServer) StreamData(stream pb.TelemetryService_StreamDataServer
 			return err
 		}
 
-		// 1. Calcolo latenza IMMEDIATO per massima precisione
+		// 1. Calcolo latenza
 		lat := calculateLatency(in.Timestamp)
 
 		// 2. Calcolo overhead
@@ -68,7 +68,7 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
 		case <-ticker.C:
 			fullData := getDashboardData()
 
-			// 1. Prepariamo la history filtrata per gRPC
+			// 1. History filtrata per gRPC
 			var grpcHistory []*pb.MetricPoint
 			metricsMu.Lock()
 			for _, m := range fullData.History {
@@ -82,7 +82,7 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
 			}
 			metricsMu.Unlock()
 
-			// 2. Inviamo l'oggetto completo di History
+			// 2. Invio oggetto completo di History
 			grpcStats := &pb.GrpcStats{
 				AvgLatency:  fullData.AvgGrpc,
 				P99Latency:  fullData.P99Grpc,
@@ -104,7 +104,6 @@ func (s *telemetryServer) GetGrpcStream(in *pb.Empty, stream pb.TelemetryService
 func (s *telemetryServer) GetStats(ctx context.Context, in *pb.Empty) (*pb.GrpcStats, error) {
 	fullData := getDashboardData()
 
-	// Filtriamo la history per gRPC
 	var grpcHistory []*pb.MetricPoint
 	metricsMu.Lock()
 	for _, m := range fullData.History {

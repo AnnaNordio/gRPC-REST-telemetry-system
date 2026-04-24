@@ -16,9 +16,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// Variabili globali per il coordinamento
 var (
-	globalConfig atomic.Value // Contiene l'ultima TelemetryConfig caricata
+	globalConfig atomic.Value
 
 	sensorMu       sync.Mutex
 	stopChannels   = make(map[int]chan struct{})
@@ -36,7 +35,7 @@ func main() {
 		Protocol: "both",
 	})
 
-	// 1. Setup gRPC Connection Pool (100 connessioni TCP separate)
+	//Setup gRPC Connection Pool
 	const poolSize = 100
 	var grpcClients []pb.TelemetryServiceClient
 
@@ -53,7 +52,7 @@ func main() {
 		grpcClients = append(grpcClients, pb.NewTelemetryServiceClient(conn))
 	}
 
-	// 2. HTTP Client Ottimizzato per polling e fetch
+	// HTTP
 	httpClient := &http.Client{
 		Timeout: 2 * time.Second,
 		Transport: &http.Transport{
@@ -69,20 +68,17 @@ func main() {
 		runBenchmarkSuite(grpcClients, httpClient)
 		log.Println("Benchmark completato. Spegnimento in corso...")
 		time.Sleep(2 * time.Second)
-		return // Esci dal programma, Docker fermerà il container
+		return
 	}
 
-	// 3. Loop di monitoraggio configurazione
 	for {
 		config := fetchFullConfig(httpClient)
 
-		// AGGIORNAMENTO ATOMICO: i sensori leggono questo valore senza lock
 		globalConfig.Store(config)
 
-		// Gestione del numero di goroutine attive
 		syncSensors(config.Sensors, grpcClients, httpClient)
 
-		time.Sleep(2 * time.Second) // Controlla la config ogni 2s per non sovraccaricare
+		time.Sleep(2 * time.Second)
 	}
 }
 
@@ -101,7 +97,6 @@ func syncSensors(target int, clients []pb.TelemetryServiceClient, httpClient *ht
 			stopCh := make(chan struct{})
 			stopChannels[sensorID] = stopCh
 
-			// Distribuzione Round-Robin sul pool gRPC
 			selectedClient := clients[sensorID%len(clients)]
 			go runVirtualSensor(sensorID, stopCh, selectedClient, httpClient)
 		}
@@ -135,9 +130,7 @@ func runVirtualSensor(id int, stopCh chan struct{}, grpcClient pb.TelemetryServi
 			}
 			return
 		case <-ticker.C:
-			// Lettura lock-free della configurazione globale
 			conf := globalConfig.Load().(config.TelemetryConfig)
-			// Se la modalità cambia, dobbiamo resettare lo stream gRPC
 			if conf.Mode != lastMode && stream != nil {
 				stream.CloseSend()
 				stream = nil

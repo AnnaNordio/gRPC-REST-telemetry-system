@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	pb "telemetry-bench/proto"
 	"telemetry-bench/pkg/config"
+	pb "telemetry-bench/proto"
 )
 
 type TestCase struct {
@@ -96,10 +96,8 @@ func runBenchmarkSuite(clients []pb.TelemetryServiceClient, httpClient *http.Cli
 
 	groups := buildGroupedSuite()
 
-	// 🔀 shuffle interno per evitare pattern fissi
 	shuffleGroups(groups)
 
-	// 🔁 interleave tra livelli di carico
 	suite := interleave(groups)
 
 	for i, tc := range suite {

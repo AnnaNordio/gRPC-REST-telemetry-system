@@ -64,7 +64,6 @@ export const getThroughputComparison = (restThroughput, grpcThroughput) => {
 
   return {
     winner: isGrpcHigher ? 'gRPC' : 'REST',
-    // Il testo ora è molto più "da competizione"
     text: isGrpcHigher 
       ? `gRPC is ${factor}x more scalable` 
       : `REST is ${factor}x more scalable`,

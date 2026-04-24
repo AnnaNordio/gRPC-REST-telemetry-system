@@ -7,12 +7,11 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
     library: {
-      type: 'umd', // Universal Module Definition: funziona ovunque
+      type: 'umd', 
       name: 'TelemetryProto',
     },
     globalObject: 'this',
   },
-  // gRPC-web ha bisogno di questi per non impazzire nel bundle
   resolve: {
     fallback: {
       "buffer": false,
